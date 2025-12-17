@@ -1,0 +1,60 @@
+{
+    "config_metas": {
+        "massa": {
+            "titulo": "Massa Magra",
+            "meta": 2,
+            "tipo": "manual",
+            "atual": 0,
+            "unidade": "kg",
+            "icon": "fa-dumbbell"
+        },
+        "barriga": {
+            "titulo": "Secar Barriga",
+            "meta": 100,
+            "tipo": "manual",
+            "atual": 0,
+            "unidade": "%",
+            "icon": "fa-ruler-horizontal"
+        },
+        "salario": {
+            "titulo": "Sal\u00e1rio",
+            "meta": 1500,
+            "tipo": "manual",
+            "atual": 0,
+            "unidade": "R$",
+            "icon": "fa-sack-dollar"
+        },
+        "vlogs": {
+            "titulo": "Vlogs Gravados",
+            "meta": 50,
+            "tipo": "contador",
+            "unidade": "v\u00eddeos",
+            "icon": "fa-video"
+        },
+        "treinos": {
+            "titulo": "Dias de Treino",
+            "meta": 130,
+            "tipo": "auto_calendario",
+            "campo_calendario": "treinou",
+            "unidade": "dias",
+            "icon": "fa-fire"
+        },
+        "acucar": {
+            "titulo": "Dias Zero A\u00e7\u00facar",
+            "meta": 150,
+            "tipo": "auto_calendario",
+            "campo_calendario": "zero_acucar",
+            "unidade": "dias",
+            "icon": "fa-ban"
+        },
+        "corrida": {
+            "titulo": "Corrida Recorde",
+            "meta": 6,
+            "tipo": "maximo",
+            "campo_calendario": "corrida_km",
+            "unidade": "km",
+            "icon": "fa-person-running"
+        }
+    },
+    "diario": []
+}
