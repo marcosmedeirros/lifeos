@@ -22,7 +22,8 @@ if (isset($_GET['api'])) {
 
 if ($action === 'get_goals') { 
 
-    echo json_encode($pdo->query("SELECT * FROM goals WHERE user_id = 1 ORDER BY status ASC, id DESC")->fetchAll()); 
+    $type = $_GET['type'] ?? 'geral';
+    echo json_encode($pdo->query("SELECT * FROM goals WHERE user_id = 1 AND goal_type = '$type' ORDER BY status ASC, id DESC")->fetchAll()); 
 
     exit; 
 
@@ -37,6 +38,8 @@ if ($action === 'save_goal') {
     $title = $data['title'];
 
     $difficulty = $data['difficulty'];
+    
+    $goal_type = $data['goal_type'] ?? 'geral';
 
     $id = $data['id'] ?? null;
 
@@ -48,17 +51,17 @@ if ($action === 'save_goal') {
 
         // EDIÇÃO
 
-        $stmt = $pdo->prepare("UPDATE goals SET title = ?, difficulty = ? WHERE id = ? AND user_id = ?");
+        $stmt = $pdo->prepare("UPDATE goals SET title = ?, difficulty = ?, goal_type = ? WHERE id = ? AND user_id = ?");
 
-        $stmt->execute([$title, $difficulty, $id, $user_id]);
+        $stmt->execute([$title, $difficulty, $goal_type, $id, $user_id]);
 
     } else {
 
         // CRIAÇÃO
 
-        $stmt = $pdo->prepare("INSERT INTO goals (user_id, title, difficulty) VALUES (?, ?, ?)");
+        $stmt = $pdo->prepare("INSERT INTO goals (user_id, title, difficulty, goal_type) VALUES (?, ?, ?, ?)");
 
-        $stmt->execute([$user_id, $title, $difficulty]);
+        $stmt->execute([$user_id, $title, $difficulty, $goal_type]);
 
     }
 
@@ -113,6 +116,16 @@ include __DIR__ . '/../includes/header.php';
                 </button>
             </div>
             
+            <!-- Abas de Navegação -->
+            <div class="flex gap-4 mb-8 border-b border-slate-700/50">
+                <button onclick="switchGoalType('geral')" id="tab-geral" class="px-6 py-3 font-bold text-white border-b-2 border-blue-500 transition">
+                    <i class="fas fa-target mr-2"></i>Metas Gerais
+                </button>
+                <button onclick="switchGoalType('anual')" id="tab-anual" class="px-6 py-3 font-bold text-slate-400 border-b-2 border-transparent hover:text-white transition">
+                    <i class="fas fa-calendar mr-2"></i>Metas 2026
+                </button>
+            </div>
+            
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6" id="goals-list"></div>
         </div>
     </div>
@@ -127,6 +140,7 @@ include __DIR__ . '/../includes/header.php';
         <form id="modal-goal" class="modal-form hidden" onsubmit="submitGoal(event)">
             <h3 class="text-2xl font-bold mb-6 text-white bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-cyan-400" id="goal-modal-title">Nova Meta</h3>
             <input type="hidden" name="id" id="goal-id">
+            <input type="hidden" name="goal_type" id="goal-type" value="geral">
             <div class="space-y-5">
                 <input type="text" name="title" id="goal-title" placeholder="Qual seu objetivo?" required class="text-lg">
                 <div>
@@ -150,12 +164,13 @@ include __DIR__ . '/../includes/header.php';
     </div>
 </div>
 
-<script src="/lifeos/assets/js/common.js"></script>
+<script src="<?php echo BASE_PATH; ?>/assets/js/common.js"></script>
 <script>
 window.goalsData = [];
+window.currentGoalType = 'geral';
 
 async function loadGoals() {
-    const goals = await api('get_goals');
+    const goals = await api('get_goals&type=' + window.currentGoalType);
     window.goalsData = goals;
     
     const goalsByDifficulty = { facil: [], media: [], dificil: [] };
@@ -200,6 +215,27 @@ async function loadGoals() {
     document.getElementById('goals-list').innerHTML = finalHtml || `<div class="col-span-3 text-center text-slate-500 py-10 italic">Você ainda não definiu nenhuma meta.</div>`;
 }
 
+function switchGoalType(type) {
+    window.currentGoalType = type;
+    document.getElementById('goal-type').value = type;
+    
+    // Atualizar abas
+    document.getElementById('tab-geral').classList.remove('border-blue-500', 'text-white');
+    document.getElementById('tab-anual').classList.remove('border-blue-500', 'text-white');
+    document.getElementById('tab-geral').classList.add('border-transparent', 'text-slate-400');
+    document.getElementById('tab-anual').classList.add('border-transparent', 'text-slate-400');
+    
+    if (type === 'geral') {
+        document.getElementById('tab-geral').classList.add('border-blue-500', 'text-white');
+        document.getElementById('tab-geral').classList.remove('border-transparent', 'text-slate-400');
+    } else {
+        document.getElementById('tab-anual').classList.add('border-blue-500', 'text-white');
+        document.getElementById('tab-anual').classList.remove('border-transparent', 'text-slate-400');
+    }
+    
+    loadGoals();
+}
+
 function editGoal(id) {
     const goal = window.goalsData.find(g => g.id == id);
     if (!goal) return;
@@ -208,6 +244,7 @@ function editGoal(id) {
     document.getElementById('goal-id').value = goal.id;
     document.getElementById('goal-title').value = goal.title;
     document.getElementById('goal-difficulty').value = goal.difficulty;
+    document.getElementById('goal-type').value = goal.goal_type;
     document.getElementById('btn-delete-goal').classList.remove('hidden');
     openModal('modal-goal', false);
 }

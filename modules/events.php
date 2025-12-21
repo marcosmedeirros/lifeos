@@ -135,6 +135,7 @@ require_once __DIR__ . '/../includes/header.php';
             <div class="space-y-5">
                 <input type="text" name="title" id="event-title" placeholder="Nome do Evento" required class="text-lg">
                 <input type="date" name="date" id="event-date" required>
+                <textarea name="desc" id="event-desc" placeholder="Descrição (opcional)" class="text-lg" rows="3"></textarea>
                 <div class="flex gap-3 pt-4">
                     <button type="submit" class="flex-1 bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-400 hover:to-orange-400 text-black font-bold py-3 rounded-xl shadow-lg transition">Salvar</button>
                     <button type="button" id="btn-delete-event" onclick="deleteEvent()" class="hidden bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 hover:text-rose-400 px-4 rounded-xl border border-rose-500/30 transition">
@@ -146,7 +147,7 @@ require_once __DIR__ . '/../includes/header.php';
     </div>
 </div>
 
-<script src="/lifeos/assets/js/common.js"></script>
+<script src="<?php echo BASE_PATH; ?>/assets/js/common.js"></script>
 <script>
 function openEventModal(formId, reset = true) {
     const overlay = document.getElementById('event-modal-overlay');
@@ -220,6 +221,7 @@ function editEventRow(id) {
     document.getElementById('event-id').value = ev.id; 
     document.getElementById('event-title').value = ev.title; 
     document.getElementById('event-date').value = ev.start_date.slice(0, 10); 
+    document.getElementById('event-desc').value = ev.description || ''; 
     document.getElementById('event-modal-title').innerText = 'Editar Evento'; 
     document.getElementById('btn-delete-event').classList.remove('hidden'); 
     openEventModal('modal-event', false); 

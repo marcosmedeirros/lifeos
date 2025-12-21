@@ -92,7 +92,7 @@ include __DIR__ . '/../includes/header.php';
     </div>
 </div>
 
-<script src="/lifeos/assets/js/common.js"></script>
+<script src="<?php echo BASE_PATH; ?>/assets/js/common.js"></script>
 <script>
 window.notesData = [];
 

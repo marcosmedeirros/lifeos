@@ -154,7 +154,7 @@ include 'includes/header.php';
     </div>
 </div>
 
-<script src="/lifeos/assets/js/common.js"></script>
+<script src="<?php echo BASE_PATH; ?>/assets/js/common.js"></script>
 <script>
 async function loadDashboard() { 
     const data = await api('dashboard_stats'); 

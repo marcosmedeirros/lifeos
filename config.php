@@ -1,11 +1,8 @@
 <?php
 // ARQUIVO: config.php
 
-// ===== CONFIGURAÇÃO LOCAL (XAMPP) =====
-//$db_host = 'localhost';
-//$db_name = 'bancolifestyle'; // Altere para o nome do seu banco local
-//$db_user = 'root';
-//$db_pass = ''; // XAMPP usa senha vazia por padrão
+// ===== DETECÇÃO DO BASE PATH =====
+require_once __DIR__ . '/includes/paths.php';
 
 
 $db_host = 'localhost';
@@ -51,7 +48,7 @@ try {
     CREATE TABLE IF NOT EXISTS finance_categories (id INT AUTO_INCREMENT PRIMARY KEY, user_id INT DEFAULT 1, name VARCHAR(100), color VARCHAR(20) DEFAULT '#3B82F6');
     CREATE TABLE IF NOT EXISTS habits (id INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(255), checked_dates TEXT);
     CREATE TABLE IF NOT EXISTS workouts (id INT AUTO_INCREMENT PRIMARY KEY, user_id INT DEFAULT 1, name VARCHAR(255), workout_date DATE, done TINYINT DEFAULT 0);
-    CREATE TABLE IF NOT EXISTS goals (id INT AUTO_INCREMENT PRIMARY KEY, user_id INT DEFAULT 1, title VARCHAR(255), difficulty ENUM('facil','media','dificil'), status TINYINT DEFAULT 0);
+    CREATE TABLE IF NOT EXISTS goals (id INT AUTO_INCREMENT PRIMARY KEY, user_id INT DEFAULT 1, title VARCHAR(255), difficulty ENUM('facil','media','dificil'), status TINYINT DEFAULT 0, goal_type ENUM('geral','anual') DEFAULT 'geral');
     CREATE TABLE IF NOT EXISTS notes (id INT AUTO_INCREMENT PRIMARY KEY, user_id INT DEFAULT 1, content TEXT, created_at DATETIME DEFAULT CURRENT_TIMESTAMP);
     CREATE TABLE IF NOT EXISTS routine_logs (id INT AUTO_INCREMENT PRIMARY KEY, user_id INT DEFAULT 1, log_date DATE UNIQUE, mood VARCHAR(20), sleep_hours DECIMAL(3,1), day_status ENUM('bom','ruim') DEFAULT NULL, content TEXT, photo_path VARCHAR(255), created_at DATETIME DEFAULT CURRENT_TIMESTAMP);
     
@@ -111,6 +108,9 @@ try {
     
     // REPARO DE METAS: Adiciona user_id à tabela goals
     try { $pdo->query("SELECT user_id FROM goals LIMIT 1"); } catch (Exception $e) { $pdo->exec("ALTER TABLE goals ADD COLUMN user_id INT DEFAULT 1"); }
+    
+    // REPARO DE METAS: Adiciona goal_type à tabela goals
+    try { $pdo->query("SELECT goal_type FROM goals LIMIT 1"); } catch (Exception $e) { $pdo->exec("ALTER TABLE goals ADD COLUMN goal_type ENUM('geral','anual') DEFAULT 'geral'"); }
     
     // REPARO DE ROTINA: Remove a coluna gratitude e Adiciona/Verifica day_status
     try { $pdo->query("SELECT gratitude FROM routine_logs LIMIT 1"); $pdo->exec("ALTER TABLE routine_logs DROP COLUMN gratitude"); } catch (Exception $e) { /* Coluna já deletada ou nunca existiu */ }
