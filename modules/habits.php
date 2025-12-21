@@ -3,6 +3,12 @@
 require_once __DIR__ . '/../includes/auth.php';
 // require_login();
 
+// Definir user_id padrão se não existir sessão
+if (!isset($_SESSION['user_id'])) {
+    $_SESSION['user_id'] = 1;
+    $_SESSION['user_name'] = 'Marcos Medeiros';
+}
+
 if (isset($_GET['api'])) {
     $action = $_GET['api'];
     header('Content-Type: application/json');
@@ -96,7 +102,7 @@ include __DIR__ . '/../includes/header.php';
     </div>
 </div>
 
-<script src="/assets/js/common.js"></script>
+<script src="/lifeos/assets/js/common.js"></script>
 <script>
 let currentHabitMonth = new Date();
 

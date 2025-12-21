@@ -1,6 +1,12 @@
 <?php
 require_once __DIR__ . '/../includes/auth.php';
-require_login();
+// require_login(); // Comentado - acesso direto
+
+// Definir user_id padrão se não existir sessão
+if (!isset($_SESSION['user_id'])) {
+    $_SESSION['user_id'] = 1; // ID do usuário padrão (Marcos Medeiros)
+    $_SESSION['user_name'] = 'Marcos Medeiros';
+}
 
 $page = 'activities';
 
@@ -9,6 +15,9 @@ if (isset($_GET['api'])) {
         require_once __DIR__ . '/../config.php';
         $action = $_GET['api'];
         $data = json_decode(file_get_contents('php://input'), true) ?? $_POST;
+        
+        // Log para debug
+        error_log("API Call: " . $action . " | Data: " . json_encode($data) . " | User ID: " . ($_SESSION['user_id'] ?? 'NOT SET'));
 
 if ($action === 'get_activities') { 
     $start = $_GET['start'] ?? date('Y-m-d');
@@ -70,9 +79,28 @@ if ($action === 'save_activity') {
 }
 
 if ($action === 'toggle_activity') { 
+    // Log para debug
+    error_log("Toggle Activity - ID: " . $data['id'] . " | User ID: " . $_SESSION['user_id']);
+    
+    // Verifica status atual
+    $checkBefore = $pdo->prepare("SELECT status FROM activities WHERE id=? AND user_id=?");
+    $checkBefore->execute([$data['id'], $_SESSION['user_id']]);
+    $before = $checkBefore->fetch();
+    error_log("Status ANTES: " . ($before ? $before['status'] : 'NOT FOUND'));
+    
     // Garante que só altera atividades do próprio usuário
-    $pdo->prepare("UPDATE activities SET status = 1 - status WHERE id=? AND user_id=?")->execute([$data['id'], $_SESSION['user_id']]); 
-    echo json_encode(['success'=>true]); 
+    $stmt = $pdo->prepare("UPDATE activities SET status = 1 - status WHERE id=? AND user_id=?");
+    $result = $stmt->execute([$data['id'], $_SESSION['user_id']]);
+    $rowsAffected = $stmt->rowCount();
+    error_log("UPDATE executado - Rows affected: " . $rowsAffected);
+    
+    // Retorna o novo status para confirmar
+    $check = $pdo->prepare("SELECT status FROM activities WHERE id=? AND user_id=?");
+    $check->execute([$data['id'], $_SESSION['user_id']]);
+    $resultData = $check->fetch();
+    error_log("Status DEPOIS: " . ($resultData ? $resultData['status'] : 'NOT FOUND'));
+    
+    echo json_encode(['success'=>true, 'new_status' => $resultData['status'], 'rows_affected' => $rowsAffected]); 
     exit; 
 }
 
@@ -229,7 +257,7 @@ require_once __DIR__ . '/../includes/header.php';
     </div>
 </div>
 
-<script src="../assets/js/common.js"></script>
+<script src="/lifeos/assets/js/common.js"></script>
 <script>
 function openActivityModal(formId, reset = true) {
     const overlay = document.getElementById('activity-modal-overlay');
@@ -382,14 +410,18 @@ async function submitActivity(e) {
 }
 
 async function toggleActivity(id,eid) { 
-    const el=document.getElementById(eid); 
-    if(el){
-        el.classList.toggle('opacity-50'); 
-        el.querySelector('.font-bold').classList.toggle('line-through'); 
-        el.querySelector('i').classList.toggle('fa-check-circle'); 
-        el.querySelector('i').classList.toggle('fa-circle');
-    } 
-    await api('toggle_activity',{id}); 
+    console.log('Toggle Activity ID:', id);
+    try {
+        const response = await api('toggle_activity',{id});
+        console.log('Toggle Response:', response);
+        
+        // Recarregar a lista completa para garantir sincronização
+        await loadActivities();
+        
+    } catch(error) {
+        console.error('Erro ao alternar atividade:', error);
+        alert('Erro ao salvar. Verifique o console.');
+    }
 }
 
 async function deleteActivity(id) { 

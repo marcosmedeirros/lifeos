@@ -1,6 +1,12 @@
 <?php
 require_once __DIR__ . '/../includes/auth.php';
 
+// Definir user_id padrão se não existir sessão
+if (!isset($_SESSION['user_id'])) {
+    $_SESSION['user_id'] = 1;
+    $_SESSION['user_name'] = 'Marcos Medeiros';
+}
+
 $page = 'routine';
 
 if (isset($_GET['api'])) {
@@ -165,7 +171,7 @@ require_once __DIR__ . '/../includes/header.php';
     </form>
 </div>
 
-<script src="../assets/js/common.js"></script>
+<script src="/lifeos/assets/js/common.js"></script>
 <script>
 let currentRoutineMonth = new Date();
 

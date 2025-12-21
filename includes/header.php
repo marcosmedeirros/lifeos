@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-BR" class="dark">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,6 +9,16 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script>tailwind.config={darkMode:'class',theme:{extend:{fontFamily:{sans:['Outfit','sans-serif']},colors:{darkbg:'#0f172a',cardbg:'#1e293b',primary:'#a855f7',secondary:'#14b8a6',strava:'#fc4c02',surface:'#334155'}}}};</script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="/assets/css/style.css?v=20251217-1">
+    <link rel="stylesheet" href="/lifeos/assets/css/style.css?v=20251220-1">
+    <style>
+        html, body {
+            background: radial-gradient(circle at top right, #1e1b4b, #0f172a, #020617) !important;
+            min-height: 100vh;
+        }
+        main {
+            position: relative;
+            z-index: 1;
+        }
+    </style>
 </head>
-<body class="min-h-screen flex flex-col md:flex-row">
+<body class="min-h-screen">

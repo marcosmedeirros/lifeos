@@ -1,6 +1,12 @@
 <?php
 require_once __DIR__ . '/../includes/auth.php';
-require_login();
+// require_login(); // Comentado - acesso direto
+
+// Definir user_id padrão se não existir sessão
+if (!isset($_SESSION['user_id'])) {
+    $_SESSION['user_id'] = 1;
+    $_SESSION['user_name'] = 'Marcos Medeiros';
+}
 
 $page = 'workouts';
 
@@ -110,7 +116,7 @@ require_once __DIR__ . '/../includes/header.php';
     </div>
 </div>
 
-<script src="../assets/js/common.js"></script>
+<script src="/lifeos/assets/js/common.js"></script>
 <script>
 let currentWorkoutMonth = new Date();
 window.workoutsData = [];

@@ -95,7 +95,8 @@ try {
         distance DECIMAL(10,2), -- metros
         moving_time INT, -- segundos
         start_date DATETIME,
-        kudos INT DEFAULT 0
+        kudos INT DEFAULT 0,
+        done BOOLEAN DEFAULT 0
     );
     ";
     $pdo->exec($sql_setup);
@@ -106,6 +107,7 @@ try {
     try { $pdo->query("SELECT repeat_group FROM activities LIMIT 1"); } catch (Exception $e) { $pdo->exec("ALTER TABLE activities ADD COLUMN repeat_group VARCHAR(50) DEFAULT NULL"); }
     try { $pdo->query("SELECT group_id FROM events LIMIT 1"); } catch (Exception $e) { $pdo->exec("ALTER TABLE events ADD COLUMN group_id VARCHAR(50) DEFAULT NULL"); }
     try { $pdo->query("SELECT user_id FROM finance_categories LIMIT 1"); } catch (Exception $e) { $pdo->exec("ALTER TABLE finance_categories ADD COLUMN user_id INT DEFAULT 1"); }
+    try { $pdo->query("SELECT done FROM strava_activities LIMIT 1"); } catch (Exception $e) { $pdo->exec("ALTER TABLE strava_activities ADD COLUMN done BOOLEAN DEFAULT 0"); }
     
     // REPARO DE METAS: Adiciona user_id à tabela goals
     try { $pdo->query("SELECT user_id FROM goals LIMIT 1"); } catch (Exception $e) { $pdo->exec("ALTER TABLE goals ADD COLUMN user_id INT DEFAULT 1"); }
