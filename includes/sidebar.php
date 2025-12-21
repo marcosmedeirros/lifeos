@@ -43,10 +43,4 @@
             </a>
         </div>
     </div>
-    
-    <div class="mt-auto pt-4 border-t border-slate-700/50">
-        <a href="?logout=1" class="text-slate-400 hover:text-rose-400 transition flex items-center gap-2 px-4 py-2 rounded-xl">
-            <i class="fas fa-sign-out-alt"></i> Sair (<?php echo $_SESSION['user_name'] ?? 'Marcos Medeiros'; ?>)
-        </a>
-    </div>
 </nav>
