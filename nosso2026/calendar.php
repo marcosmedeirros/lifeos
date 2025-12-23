@@ -192,35 +192,39 @@ $monthNames = ['', 'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', '
     </section>
 
     <!-- Modal de Evento (JavaScript) -->
-    <div id="eventModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:100; overflow-y:auto;" onclick="closeModal()">
-      <div class="glass rounded-2xl p-6 max-w-lg mx-auto mt-10 mb-10" onclick="event.stopPropagation()">
-        <h3 class="text-2xl font-bold mb-4" id="modalTitle">📝 Novo Evento</h3>
+    <div id="eventModal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:9999; overflow-y:auto; padding:20px;" onclick="closeModal()">
+      <div style="background:rgba(20,20,40,0.95); backdrop-filter:blur(10px); border:1px solid #333; border-radius:20px; padding:24px; max-width:600px; margin:40px auto; color:white;" onclick="event.stopPropagation()">
+        <h3 style="font-size:24px; font-weight:bold; margin-bottom:20px; color:white;" id="modalTitle">📝 Novo Evento</h3>
         <form method="post" id="eventForm">
           <input type="hidden" id="eventAction" name="add" value="1">
           <input type="hidden" name="id" id="eventId">
-          <div class="mb-4">
-            <label class="block text-sm font-bold mb-2">Título *</label>
-            <input name="title" id="eventTitle" class="w-full bg-black border border-[#222] rounded-xl p-3 text-white" placeholder="Nome do evento" required>
+          
+          <div style="margin-bottom:16px;">
+            <label style="display:block; font-size:14px; font-weight:bold; margin-bottom:8px; color:#ddd;">Título *</label>
+            <input name="title" id="eventTitle" style="width:100%; background:#000; border:1px solid #333; border-radius:12px; padding:12px; color:white; font-size:16px;" placeholder="Nome do evento" required>
           </div>
-          <div class="grid md:grid-cols-2 gap-3 mb-4">
+          
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:16px;">
             <div>
-              <label class="block text-sm font-bold mb-2">📅 Data *</label>
-              <input name="start_date" id="eventDateOnly" type="date" class="w-full bg-black border border-[#222] rounded-xl p-3 text-white" required>
+              <label style="display:block; font-size:14px; font-weight:bold; margin-bottom:8px; color:#ddd;">📅 Data *</label>
+              <input name="start_date" id="eventDateOnly" type="date" style="width:100%; background:#000; border:1px solid #333; border-radius:12px; padding:12px; color:white; font-size:16px;" required>
             </div>
             <div>
-              <label class="block text-sm font-bold mb-2">🕐 Hora</label>
-              <input name="start_time" id="eventTimeOnly" type="time" class="w-full bg-black border border-[#222] rounded-xl p-3 text-white">
-              <p class="text-xs text-gray-500 mt-1">Deixe vazio para dia inteiro</p>
+              <label style="display:block; font-size:14px; font-weight:bold; margin-bottom:8px; color:#ddd;">🕐 Hora</label>
+              <input name="start_time" id="eventTimeOnly" type="time" style="width:100%; background:#000; border:1px solid #333; border-radius:12px; padding:12px; color:white; font-size:16px;">
+              <p style="font-size:11px; color:#888; margin-top:4px;">Deixe vazio para dia inteiro</p>
             </div>
           </div>
-          <div class="mb-4">
-            <label class="block text-sm font-bold mb-2">📝 Descrição</label>
-            <textarea name="description" id="eventDesc" class="w-full bg-black border border-[#222] rounded-xl p-3 text-white" rows="3" placeholder="Detalhes adicionais (opcional)"></textarea>
+          
+          <div style="margin-bottom:16px;">
+            <label style="display:block; font-size:14px; font-weight:bold; margin-bottom:8px; color:#ddd;">📝 Descrição</label>
+            <textarea name="description" id="eventDesc" style="width:100%; background:#000; border:1px solid #333; border-radius:12px; padding:12px; color:white; font-size:16px; resize:vertical;" rows="3" placeholder="Detalhes adicionais (opcional)"></textarea>
           </div>
-          <div class="flex gap-3">
-            <button type="submit" class="btn flex-1 bg-white text-black hover:bg-gray-200">💾 Salvar</button>
-            <button type="button" id="deleteBtn" style="display:none" onclick="deleteEvent()" class="btn bg-red-600 text-white hover:bg-red-700">🗑️ Excluir</button>
-            <button type="button" onclick="closeModal()" class="btn bg-gray-800 text-white hover:bg-gray-700">❌ Fechar</button>
+          
+          <div style="display:flex; gap:12px; flex-wrap:wrap;">
+            <button type="submit" style="flex:1; min-width:120px; background:#fff; color:#000; padding:12px 20px; border-radius:12px; font-weight:bold; border:none; cursor:pointer; font-size:16px;">💾 Salvar</button>
+            <button type="button" id="deleteBtn" style="display:none; background:#dc2626; color:#fff; padding:12px 20px; border-radius:12px; font-weight:bold; border:none; cursor:pointer; font-size:16px;" onclick="deleteEvent()">🗑️ Excluir</button>
+            <button type="button" onclick="closeModal()" style="background:#444; color:#fff; padding:12px 20px; border-radius:12px; font-weight:bold; border:none; cursor:pointer; font-size:16px;">❌ Fechar</button>
           </div>
         </form>
       </div>
@@ -293,5 +297,33 @@ $monthNames = ['', 'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', '
       }
     }
   </script>
+  
+  <style>
+    @media (max-width: 640px) {
+      #eventModal > div {
+        margin: 20px auto !important;
+        max-width: 95% !important;
+        padding: 20px !important;
+      }
+      #eventModal > div > form > div[style*="grid-template-columns"] {
+        grid-template-columns: 1fr !important;
+      }
+    }
+    
+    /* Garantir que inputs de date e time sejam visíveis */
+    input[type="date"], input[type="time"] {
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      appearance: none;
+      color-scheme: dark;
+    }
+    
+    input[type="date"]::-webkit-calendar-picker-indicator,
+    input[type="time"]::-webkit-calendar-picker-indicator {
+      filter: invert(1);
+      cursor: pointer;
+    }
+  </style>
+
 </body>
 </html>
