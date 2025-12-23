@@ -33,13 +33,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['delete'])) {
         $pdo->prepare("DELETE FROM events WHERE id=? AND group_id='nosso2026'")->execute([intval($_POST['id'])]);
     } elseif (isset($_POST['update'])) {
+        // Combinar data e hora para update também
+        $startDate = $_POST['start_date'];
+        if (isset($_POST['start_time']) && !empty($_POST['start_time'])) {
+            $startDate .= ' ' . $_POST['start_time'] . ':00';
+        } else {
+            $startDate .= ' 00:00:00';
+        }
         $stmt = $pdo->prepare("UPDATE events SET title=?, start_date=?, description=? WHERE id=? AND group_id='nosso2026'");
-        $stmt->execute([trim($_POST['title']), $_POST['start_date'], trim($_POST['description']), intval($_POST['id'])]);
+        $stmt->execute([trim($_POST['title']), $startDate, trim($_POST['description']), intval($_POST['id'])]);
     } else {
         // Combinar data e hora se fornecidos separadamente
         $startDate = $_POST['start_date'];
-        if (isset($_POST['start_time'])) {
-            $startDate = convertDateBRtoSQL($_POST['start_date'], $_POST['start_time']);
+        if (isset($_POST['start_time']) && !empty($_POST['start_time'])) {
+            $startDate .= ' ' . $_POST['start_time'] . ':00';
+        } else {
+            $startDate .= ' 00:00:00';
         }
         $stmt = $pdo->prepare("INSERT INTO events (user_id, group_id, title, start_date, description) VALUES (1, 'nosso2026', ?, ?, ?)");
         $stmt->execute([trim($_POST['title']), $startDate, trim($_POST['description'])]);
@@ -153,43 +162,65 @@ $monthNames = ['', 'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', '
 
     <!-- Adicionar Evento -->
     <section class="glass rounded-2xl p-6">
-      <h2 class="text-xl font-bold mb-4">Adicionar Evento Rápido</h2>
-      <form method="post" class="grid md:grid-cols-6 gap-3">
-        <input name="title" class="md:col-span-2 bg-black border border-[#222] rounded-xl p-3 text-white" placeholder="Título do evento" required>
-        <input name="start_date" type="date" class="bg-black border border-[#222] rounded-xl p-3 text-white" value="<?= date('Y-m-d') ?>" required>
-        <input name="start_time" type="time" class="bg-black border border-[#222] rounded-xl p-3 text-white" value="09:00">
-        <input name="description" class="bg-black border border-[#222] rounded-xl p-3 text-white" placeholder="Descrição (opcional)">
-        <button class="btn">Adicionar</button>
+      <h2 class="text-xl font-bold mb-4">➕ Adicionar Evento Rápido</h2>
+      <form method="post" class="space-y-3">
+        <div class="grid md:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-sm font-semibold mb-1 text-gray-300">Título *</label>
+            <input name="title" class="w-full bg-black border border-[#222] rounded-xl p-3 text-white" placeholder="Ex: Aniversário, Dentista..." required>
+          </div>
+          <div>
+            <label class="block text-sm font-semibold mb-1 text-gray-300">Descrição</label>
+            <input name="description" class="w-full bg-black border border-[#222] rounded-xl p-3 text-white" placeholder="Opcional">
+          </div>
+        </div>
+        <div class="grid md:grid-cols-3 gap-3">
+          <div>
+            <label class="block text-sm font-semibold mb-1 text-gray-300">📅 Data *</label>
+            <input name="start_date" type="date" class="w-full bg-black border border-[#222] rounded-xl p-3 text-white" value="<?= date('Y-m-d') ?>" required>
+          </div>
+          <div>
+            <label class="block text-sm font-semibold mb-1 text-gray-300">🕐 Hora</label>
+            <input name="start_time" type="time" class="w-full bg-black border border-[#222] rounded-xl p-3 text-white" placeholder="Ex: 14:30">
+            <p class="text-xs text-gray-500 mt-1">Deixe vazio para evento de dia inteiro</p>
+          </div>
+          <div class="flex items-end">
+            <button class="btn w-full">Adicionar</button>
+          </div>
+        </div>
       </form>
-      <p class="text-xs text-gray-400 mt-2">💡 Deixe a hora vazia se o evento for o dia todo</p>
     </section>
 
     <!-- Modal de Evento (JavaScript) -->
-    <div id="eventModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:100;" onclick="closeModal()">
-      <div class="glass rounded-2xl p-6 max-w-lg mx-auto mt-20" onclick="event.stopPropagation()">
+    <div id="eventModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:100; overflow-y:auto;" onclick="closeModal()">
+      <div class="glass rounded-2xl p-6 max-w-lg mx-auto mt-10 mb-10" onclick="event.stopPropagation()">
+        <h3 class="text-2xl font-bold mb-4" id="modalTitle">📝 Novo Evento</h3>
         <form method="post" id="eventForm">
           <input type="hidden" id="eventAction" name="add" value="1">
           <input type="hidden" name="id" id="eventId">
           <div class="mb-4">
-            <label class="block text-sm font-bold mb-2">Título</label>
-            <input name="title" id="eventTitle" class="w-full bg-black border border-[#222] rounded-xl p-3 text-white" required>
+            <label class="block text-sm font-bold mb-2">Título *</label>
+            <input name="title" id="eventTitle" class="w-full bg-black border border-[#222] rounded-xl p-3 text-white" placeholder="Nome do evento" required>
+          </div>
+          <div class="grid md:grid-cols-2 gap-3 mb-4">
+            <div>
+              <label class="block text-sm font-bold mb-2">📅 Data *</label>
+              <input name="start_date" id="eventDateOnly" type="date" class="w-full bg-black border border-[#222] rounded-xl p-3 text-white" required>
+            </div>
+            <div>
+              <label class="block text-sm font-bold mb-2">🕐 Hora</label>
+              <input name="start_time" id="eventTimeOnly" type="time" class="w-full bg-black border border-[#222] rounded-xl p-3 text-white">
+              <p class="text-xs text-gray-500 mt-1">Deixe vazio para dia inteiro</p>
+            </div>
           </div>
           <div class="mb-4">
-            <label class="block text-sm font-bold mb-2">Data</label>
-            <input name="start_date" id="eventDateOnly" type="date" class="w-full bg-black border border-[#222] rounded-xl p-3 text-white" required>
-          </div>
-          <div class="mb-4">
-            <label class="block text-sm font-bold mb-2">Hora (opcional)</label>
-            <input name="start_time" id="eventTimeOnly" type="time" class="w-full bg-black border border-[#222] rounded-xl p-3 text-white" placeholder="Deixe vazio se for o dia todo">
-          </div>
-          <div class="mb-4">
-            <label class="block text-sm font-bold mb-2">Descrição</label>
-            <textarea name="description" id="eventDesc" class="w-full bg-black border border-[#222] rounded-xl p-3 text-white" rows="3"></textarea>
+            <label class="block text-sm font-bold mb-2">📝 Descrição</label>
+            <textarea name="description" id="eventDesc" class="w-full bg-black border border-[#222] rounded-xl p-3 text-white" rows="3" placeholder="Detalhes adicionais (opcional)"></textarea>
           </div>
           <div class="flex gap-3">
-            <button type="submit" class="btn flex-1">Salvar</button>
-            <button type="button" id="deleteBtn" style="display:none" onclick="deleteEvent()" class="btn" style="background:#dc2626">Excluir</button>
-            <button type="button" onclick="closeModal()" class="btn" style="background:#333">Fechar</button>
+            <button type="submit" class="btn flex-1 bg-white text-black hover:bg-gray-200">💾 Salvar</button>
+            <button type="button" id="deleteBtn" style="display:none" onclick="deleteEvent()" class="btn bg-red-600 text-white hover:bg-red-700">🗑️ Excluir</button>
+            <button type="button" onclick="closeModal()" class="btn bg-gray-800 text-white hover:bg-gray-700">❌ Fechar</button>
           </div>
         </form>
       </div>
@@ -198,34 +229,45 @@ $monthNames = ['', 'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', '
 
   <script>
     function openModal() {
+      document.getElementById('modalTitle').textContent = '📝 Novo Evento';
       document.getElementById('eventId').value = '';
       document.getElementById('eventTitle').value = '';
       document.getElementById('eventDesc').value = '';
       const now = new Date();
       const year = now.getFullYear();
-      const month = String(now.getMonth(Only').value = `${year}-${month}-${day}`;
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const day = String(now.getDate()).padStart(2, '0');
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      document.getElementById('eventDateOnly').value = `${year}-${month}-${day}`;
       document.getElementById('eventTimeOnly').value = `${hours}:${minutes}`;
       document.getElementById('eventAction').name = 'add';
       document.getElementById('deleteBtn').style.display = 'none';
-      document.getElementById('eventModal').style.display = 'block';
+      document.getElementById('eventModal').style.display = 'flex';
+      document.getElementById('eventModal').style.alignItems = 'center';
     }
+    
     function openEvent(e) {
+      document.getElementById('modalTitle').textContent = '✏️ Editar Evento';
       document.getElementById('eventId').value = e.id;
       document.getElementById('eventTitle').value = e.title;
       
       // Separar data e hora
       const dateTimeParts = e.start_date.split(' ');
-      const datePart = dateTimeParts[0]; // YYYY-MM-DD
-      const timePart = dateTimeParts[1] ? dateTimeParts[1].substring(0, 5) : ''; // HH:MM
+      const datePart = dateTimeParts[0];
+      const timePart = dateTimeParts[1] ? dateTimeParts[1].substring(0, 5) : '';
       
       document.getElementById('eventDateOnly').value = datePart;
       document.getElementById('eventTimeOnly').value = (timePart && timePart !== '00:00') ? timePart : '';
       document.getElementById('eventDesc').value = e.description || '';
       document.getElementById('eventAction').name = 'update';
       document.getElementById('deleteBtn').style.display = 'block';
-      document.getElementById('eventModal').style.display = 'block';
+      document.getElementById('eventModal').style.display = 'flex';
+      document.getElementById('eventModal').style.alignItems = 'center';
     }
+    
     function openDay(day) {
+      document.getElementById('modalTitle').textContent = '📝 Novo Evento';
       const month = String(<?= $currentMonth ?>).padStart(2, '0');
       const year = <?= $currentYear ?>;
       document.getElementById('eventId').value = '';
@@ -235,51 +277,15 @@ $monthNames = ['', 'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', '
       document.getElementById('eventTimeOnly').value = '09:00';
       document.getElementById('eventAction').name = 'add';
       document.getElementById('deleteBtn').style.display = 'none';
-      document.getElementById('eventModal').style.display = 'block';
+      document.getElementById('eventModal').style.display = 'flex';
+      document.getElementById('eventModal').style.alignItems = 'center';
     }
+    
     function closeModal() {
       document.getElementById('eventModal').style.display = 'none';
     }
-    function deleteEvent() {
-      if(confirm('Excluir este evento?')) {
-        const form = document.getElementById('eventForm');
-        form.innerHTML = '<input type="hidden" name="delete" value="1"><input type="hidden" name="id" value="' + document.getElementById('eventId').value + '">';
-        form.submit();
-      }
-    }
     
-    // Submeter formulário do modal com data e hora combinados
-    document.getElementById('eventForm').addEventListener('submit', function(e) {
-      if (!this.querySelector('input[name="delete"]')) {
-        e.preventDefault();
-        const formData = new FormData(this);
-        const dateOnly = formData.get('start_date');
-        const timeOnly = formData.get('start_time');
-        
-        // Se tem hora, combina; se não, usa só a data com 00:00:00
-        let finalDateTime = dateOnly;
-        if (timeOnly) {
-          finalDateTime = dateOnly + ' ' + timeOnly + ':00';
-        } else {
-          finalDateTime = dateOnly + ' 00:00:00';
-        }
-        
-        // Remove campos antigos e adiciona o combinado
-        this.querySelector('input[name="start_date"]').remove();
-        if (this.querySelector('input[name="start_time"]')) {
-          this.querySelector('input[name="start_time"]').remove();
-        }
-        
-        const hiddenInput = document.createElement('input');
-        hiddenInput.type = 'hidden';
-        hiddenInput.name = 'start_date';
-        hiddenInput.value = finalDateTime;
-        this.appendChild(hiddenInput);
-        
-        this.submit();
-      }
-    });
-  </script>nt() {
+    function deleteEvent() {
       if(confirm('Excluir este evento?')) {
         const form = document.getElementById('eventForm');
         form.innerHTML = '<input type="hidden" name="delete" value="1"><input type="hidden" name="id" value="' + document.getElementById('eventId').value + '">';
