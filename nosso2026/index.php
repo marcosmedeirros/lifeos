@@ -43,6 +43,10 @@ else { $progress = round((($now - $yearStart)/($yearEnd - $yearStart))*100); }
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#000000">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='0.9em' font-size='90'%3E📅%3C/text%3E%3C/svg%3E">
+  <link rel="manifest" href="<?= n26_link('manifest.json') ?>">
+  <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23000'/%3E%3Ctext x='50' y='50' font-size='60' text-anchor='middle' dominant-baseline='middle' fill='%23fff'%3E📅%3C/text%3E%3C/svg%3E">
   <title>Nosso 2026</title>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;700&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>

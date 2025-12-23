@@ -32,17 +32,9 @@ $monthNames = ['', 'Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set'
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Finanças • Nosso 2026</title>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;700&display=swap" rel="stylesheet">
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>tailwind.config={darkMode:'class'};</script>
-  <style>.glass{background:rgba(15,23,42,.8);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.08)}</style>
-</head>
-<!DOCTYPE html>
-<html lang="pt-BR" class="dark">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#000000">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='0.9em' font-size='90'%3E📅%3C/text%3E%3C/svg%3E">
+  <link rel="manifest" href="<?= n26_link('manifest.json') ?>">
   <title>Finanças • Nosso 2026</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
