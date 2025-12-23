@@ -51,6 +51,12 @@
             <a href="<?php echo BASE_PATH; ?>/modules/notes.php" class="nav-btn <?php echo ($page === 'notes') ? 'active' : ''; ?> text-left px-4 py-3 flex items-center gap-3">
                 <i class="fas fa-sticky-note w-5 text-center"></i> <span>Notas</span>
             </a>
+            <a href="<?php echo BASE_PATH; ?>/modules/diary.php" class="nav-btn <?php echo ($page === 'diary') ? 'active' : ''; ?> text-left px-4 py-3 flex items-center gap-3">
+                <i class="fas fa-book w-5 text-center"></i> <span>Diário</span>
+            </a>
+            <a href="<?php echo BASE_PATH; ?>/modules/board.php" class="nav-btn <?php echo ($page === 'board') ? 'active' : ''; ?> text-left px-4 py-3 flex items-center gap-3">
+                <i class="fas fa-images w-5 text-center"></i> <span>Board</span>
+            </a>
             <a href="<?php echo BASE_PATH; ?>/modules/workouts.php" class="nav-btn <?php echo ($page === 'workouts') ? 'active' : ''; ?> text-left px-4 py-3 flex items-center gap-3">
                 <i class="fas fa-dumbbell w-5 text-center"></i> <span>Treinos</span>
             </a>

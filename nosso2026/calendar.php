@@ -191,40 +191,46 @@ $monthNames = ['', 'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', '
       </form>
     </section>
 
-    <!-- Modal de Evento (JavaScript) -->
-    <div id="eventModal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:9999; overflow-y:auto; padding:20px;" onclick="closeModal()">
-      <div style="background:rgba(20,20,40,0.95); backdrop-filter:blur(10px); border:1px solid #333; border-radius:20px; padding:24px; max-width:600px; margin:40px auto; color:white;" onclick="event.stopPropagation()">
-        <h3 style="font-size:24px; font-weight:bold; margin-bottom:20px; color:white;" id="modalTitle">📝 Novo Evento</h3>
+    <!-- Modal de Evento - VERSÃO ATUALIZADA <?= time() ?> -->
+    <div id="eventModal" style="display:none !important; position:fixed; top:0; left:0; right:0; bottom:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:9999; overflow-y:auto; padding:20px;" onclick="closeModal()">
+      <div style="margin:40px auto; max-width:500px; background:rgba(20,20,40,0.95); backdrop-filter:blur(10px); border:1px solid #333; border-radius:20px; color:white; padding:32px; position:relative;" onclick="event.stopPropagation()">
+        <button type="button" onclick="closeModal()" style="position:absolute; top:16px; right:16px; background:transparent; border:none; cursor:pointer; font-size:24px; color:#999; width:32px; height:32px;">
+            ❌
+        </button>
         <form method="post" id="eventForm">
+          <h3 style="font-size:24px; font-weight:bold; margin-bottom:24px; color:#fff;" id="modalTitle">📝 Novo Evento</h3>
+          
           <input type="hidden" id="eventAction" name="add" value="1">
           <input type="hidden" name="id" id="eventId">
           
-          <div style="margin-bottom:16px;">
-            <label style="display:block; font-size:14px; font-weight:bold; margin-bottom:8px; color:#ddd;">Título *</label>
-            <input name="title" id="eventTitle" style="width:100%; background:#000; border:1px solid #333; border-radius:12px; padding:12px; color:white; font-size:16px;" placeholder="Nome do evento" required>
+          <!-- CAMPO TÍTULO -->
+          <div style="margin-bottom:20px;">
+            <label style="display:block; color:#aaa; font-size:13px; margin-bottom:6px;">Título do Evento</label>
+            <input name="title" id="eventTitle" type="text" placeholder="Nome do Evento" style="width:100%; background:#000; border:1px solid #444; border-radius:12px; padding:14px; color:white; font-size:16px;" required>
           </div>
           
-          <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:16px;">
+          <!-- CAMPOS DATA E HORA -->
+          <div style="display:grid; grid-template-columns:60% 40%; gap:12px; margin-bottom:20px;">
             <div>
-              <label style="display:block; font-size:14px; font-weight:bold; margin-bottom:8px; color:#ddd;">📅 Data *</label>
-              <input name="start_date" id="eventDateOnly" type="date" style="width:100%; background:#000; border:1px solid #333; border-radius:12px; padding:12px; color:white; font-size:16px;" required>
+              <label style="display:block; color:#aaa; font-size:13px; margin-bottom:6px;">📅 Data</label>
+              <input name="start_date" id="eventDateOnly" type="date" style="width:100%; background:#000; border:1px solid #444; border-radius:12px; padding:14px; color:white; font-size:16px;" required>
             </div>
             <div>
-              <label style="display:block; font-size:14px; font-weight:bold; margin-bottom:8px; color:#ddd;">🕐 Hora</label>
-              <input name="start_time" id="eventTimeOnly" type="time" style="width:100%; background:#000; border:1px solid #333; border-radius:12px; padding:12px; color:white; font-size:16px;">
-              <p style="font-size:11px; color:#888; margin-top:4px;">Deixe vazio para dia inteiro</p>
+              <label style="display:block; color:#aaa; font-size:13px; margin-bottom:6px;">🕐 Hora</label>
+              <input name="start_time" id="eventTimeOnly" type="time" style="width:100%; background:#000; border:1px solid #444; border-radius:12px; padding:14px; color:white; font-size:16px;">
             </div>
           </div>
           
-          <div style="margin-bottom:16px;">
-            <label style="display:block; font-size:14px; font-weight:bold; margin-bottom:8px; color:#ddd;">📝 Descrição</label>
-            <textarea name="description" id="eventDesc" style="width:100%; background:#000; border:1px solid #333; border-radius:12px; padding:12px; color:white; font-size:16px; resize:vertical;" rows="3" placeholder="Detalhes adicionais (opcional)"></textarea>
+          <!-- CAMPO DESCRIÇÃO -->
+          <div style="margin-bottom:24px;">
+            <label style="display:block; color:#aaa; font-size:13px; margin-bottom:6px;">Descrição (opcional)</label>
+            <textarea name="description" id="eventDesc" placeholder="Adicione detalhes sobre o evento..." style="width:100%; background:#000; border:1px solid #444; border-radius:12px; padding:14px; color:white; font-size:16px; resize:vertical; min-height:80px;" rows="3"></textarea>
           </div>
           
-          <div style="display:flex; gap:12px; flex-wrap:wrap;">
-            <button type="submit" style="flex:1; min-width:120px; background:#fff; color:#000; padding:12px 20px; border-radius:12px; font-weight:bold; border:none; cursor:pointer; font-size:16px;">💾 Salvar</button>
-            <button type="button" id="deleteBtn" style="display:none; background:#dc2626; color:#fff; padding:12px 20px; border-radius:12px; font-weight:bold; border:none; cursor:pointer; font-size:16px;" onclick="deleteEvent()">🗑️ Excluir</button>
-            <button type="button" onclick="closeModal()" style="background:#444; color:#fff; padding:12px 20px; border-radius:12px; font-weight:bold; border:none; cursor:pointer; font-size:16px;">❌ Fechar</button>
+          <!-- BOTÕES -->
+          <div style="display:flex; gap:12px;">
+            <button type="submit" style="flex:1; background:linear-gradient(to right, #fbbf24, #f97316); color:#000; padding:14px 24px; border-radius:12px; font-weight:bold; border:none; cursor:pointer; font-size:16px;">💾 Salvar</button>
+            <button type="button" id="deleteBtn" style="display:none; background:#dc2626; color:#fff; padding:14px 24px; border-radius:12px; font-weight:bold; border:none; cursor:pointer; font-size:16px;" onclick="deleteEvent()">🗑️</button>
           </div>
         </form>
       </div>
@@ -232,7 +238,10 @@ $monthNames = ['', 'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', '
   </main>
 
   <script>
+    console.log('✅ Script carregado - Modal disponível');
+    
     function openModal() {
+      console.log('🔓 Abrindo novo evento modal');
       document.getElementById('modalTitle').textContent = '📝 Novo Evento';
       document.getElementById('eventId').value = '';
       document.getElementById('eventTitle').value = '';

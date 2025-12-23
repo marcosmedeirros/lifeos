@@ -15,7 +15,7 @@ if (isset($_GET['api'])) {
 
 if ($action === 'get_routine_month') {
     $month = $_GET['month'] ?? date('Y-m');
-    $stmt = $pdo->prepare("SELECT id, log_date, mood, sleep_hours, day_status, content, photo_path FROM routine_logs WHERE log_date LIKE ?");
+    $stmt = $pdo->prepare("SELECT id, log_date, mood, content FROM routine_logs WHERE log_date LIKE ?");
     $stmt->execute(["$month%"]);
     echo json_encode($stmt->fetchAll());
     exit;
@@ -23,8 +23,7 @@ if ($action === 'get_routine_month') {
 
 if ($action === 'get_routine_day') {
     $date = $_GET['date'];
-    // Ajustado para selecionar apenas as colunas que agora existem (day_status e não mais gratitude)
-    $stmt = $pdo->prepare("SELECT id, log_date, mood, sleep_hours, day_status, content, photo_path FROM routine_logs WHERE log_date = ?");
+    $stmt = $pdo->prepare("SELECT id, log_date, mood, content FROM routine_logs WHERE log_date = ?");
     $stmt->execute([$date]);
     echo json_encode($stmt->fetch() ?: null);
     exit;
@@ -33,45 +32,18 @@ if ($action === 'get_routine_day') {
 if ($action === 'save_routine') {
     $date = $data['date'] ?? $_POST['date'];
     $mood = $data['mood'] ?? $_POST['mood'] ?? null;
-    $sleep_hours = $data['sleep_hours'] ?? $_POST['sleep_hours'] ?? 0;
-    $day_status = $data['day_status'] ?? $_POST['day_status'] ?? null; // NOVO CAMPO
     $content = $data['content'] ?? $_POST['content'] ?? '';
     
-    // Lógica de Upload de Imagem
-    $photoPath = null;
-    
-    // Verifica se já existe um registro para pegar a foto antiga caso não envie nova
-    $stmt = $pdo->prepare("SELECT id, photo_path FROM routine_logs WHERE log_date = ?");
+    $stmt = $pdo->prepare("SELECT id FROM routine_logs WHERE log_date = ?");
     $stmt->execute([$date]);
     $existing = $stmt->fetch();
 
-    if (isset($_FILES['photo']) && $_FILES['photo']['error'] === UPLOAD_ERR_OK) {
-        $ext = pathinfo($_FILES['photo']['name'], PATHINFO_EXTENSION);
-        $filename = "routine_" . $date . "_" . time() . "." . $ext;
-        
-        // Cria pasta se não existir
-        if (!is_dir('uploads')) mkdir('uploads', 0777, true);
-        
-        if (move_uploaded_file($_FILES['photo']['tmp_name'], "uploads/" . $filename)) {
-            $photoPath = "uploads/" . $filename;
-            // Apaga foto antiga se existir
-            if ($existing && !empty($existing['photo_path']) && file_exists($existing['photo_path'])) {
-                unlink($existing['photo_path']);
-            }
-        }
-    } else {
-        // Mantém a foto antiga se não enviou nova
-        $photoPath = $existing ? $existing['photo_path'] : null;
-    }
-
     if ($existing) {
-        // UPDATE: Removida a coluna 'gratitude' e adicionada 'day_status'
-        $sql = "UPDATE routine_logs SET mood=?, sleep_hours=?, day_status=?, content=?, photo_path=? WHERE log_date=?";
-        $pdo->prepare($sql)->execute([$mood, $sleep_hours, $day_status, $content, $photoPath, $date]);
+        $sql = "UPDATE routine_logs SET mood=?, content=? WHERE log_date=?";
+        $pdo->prepare($sql)->execute([$mood, $content, $date]);
     } else {
-        // INSERT: Removida a coluna 'gratitude' e adicionada 'day_status'
-        $sql = "INSERT INTO routine_logs (user_id, log_date, mood, sleep_hours, day_status, content, photo_path) VALUES (1, ?, ?, ?, ?, ?, ?)";
-        $pdo->prepare($sql)->execute([$date, $mood, $sleep_hours, $day_status, $content, $photoPath]);
+        $sql = "INSERT INTO routine_logs (user_id, log_date, mood, content) VALUES (?, ?, ?, ?)";
+        $pdo->prepare($sql)->execute([$user_id, $date, $mood, $content]);
     }
 
     echo json_encode(['success' => true]);
@@ -118,55 +90,36 @@ require_once __DIR__ . '/../includes/header.php';
 
 <!-- Modal Routine -->
 <div id="modal-overlay" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4" onclick="closeModal()">
-    <div id="modal-content" class="modal-glass rounded-2xl p-8 w-full max-w-md relative max-h-[90vh] overflow-y-auto" onclick="event.stopPropagation()">
+    <div id="modal-content" class="modal-glass rounded-2xl p-8 w-full max-w-lg relative max-h-[90vh] overflow-y-auto" onclick="event.stopPropagation()">
         <button onclick="closeModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white transition w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-800 z-50" type="button">
             <i class="fas fa-times text-xl"></i>
         </button>
-        <form id="modal-routine" class="modal-form hidden h-full flex flex-col" onsubmit="submitRoutine(event)">
-        <h3 class="text-2xl font-bold mb-6 text-white text-center" id="routine-modal-title">Diário</h3>
-        <input type="hidden" name="date" id="routine-date">
-        <input type="hidden" name="mood" id="routine-mood">
-        <input type="hidden" name="day_status" id="routine-day-status">
+        <form id="modal-routine" class="modal-form hidden" onsubmit="submitRoutine(event)">
+            <h3 class="text-2xl font-bold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-orange-400 text-center" id="routine-modal-title">Como foi seu dia?</h3>
+            <input type="hidden" name="date" id="routine-date">
+            <input type="hidden" name="mood" id="routine-mood">
 
-        <div class="space-y-6">
-            <div class="text-center">
-                <label class="block text-sm font-medium text-slate-300 mb-3">Qual o seu humor?</label>
-                <div class="flex justify-center gap-3 text-3xl">
-                    <button type="button" onclick="selectMood('otimo')" class="mood-btn transition hover:scale-125" id="mood-otimo" title="Ótimo">🤩</button>
-                    <button type="button" onclick="selectMood('bom')" class="mood-btn transition hover:scale-125" id="mood-bom" title="Bom">😊</button>
-                    <button type="button" onclick="selectMood('ok')" class="mood-btn transition hover:scale-125" id="mood-ok" title="OK">😐</button>
-                    <button type="button" onclick="selectMood('ruim')" class="mood-btn transition hover:scale-125" id="mood-ruim" title="Ruim">😟</button>
-                    <button type="button" onclick="selectMood('pessimo')" class="mood-btn transition hover:scale-125" id="mood-pessimo" title="Péssimo">😭</button>
-                </div>
-            </div>
-            
-            <div class="grid grid-cols-2 gap-4">
+            <div class="space-y-6">
                 <div>
-                    <label class="text-sm font-medium text-slate-300 block mb-1">Sono (Horas)</label>
-                    <input type="number" step="0.5" name="sleep_hours" id="routine-sleep" class="text-center font-bold">
-                </div>
-                <div>
-                    <label class="text-sm font-medium text-slate-300 block mb-1">Dia Bom?</label>
-                    <div class="flex h-12 gap-2 p-1 bg-slate-800 rounded-xl border border-slate-700">
-                        <button type="button" onclick="selectDayStatus('bom')" id="day-status-bom" class="flex-1 bg-slate-700/50 hover:bg-slate-700 text-white font-bold py-2 rounded-lg transition">Sim</button>
-                        <button type="button" onclick="selectDayStatus('ruim')" id="day-status-ruim" class="flex-1 bg-slate-700/50 hover:bg-slate-700 text-white font-bold py-2 rounded-lg transition">Não</button>
+                    <label class="block text-sm font-semibold mb-2 text-slate-300 text-center">😊 Qual o seu humor?</label>
+                    <div class="flex gap-4 justify-center py-3">
+                        <button type="button" onclick="selectMood('🤩')" data-mood="🤩" class="mood-btn text-5xl opacity-30 hover:opacity-100 transition-all hover:scale-125" title="Muito Bom">🤩</button>
+                        <button type="button" onclick="selectMood('😊')" data-mood="😊" class="mood-btn text-5xl opacity-30 hover:opacity-100 transition-all hover:scale-125" title="Bom">😊</button>
+                        <button type="button" onclick="selectMood('😐')" data-mood="😐" class="mood-btn text-5xl opacity-30 hover:opacity-100 transition-all hover:scale-125" title="OK">😐</button>
+                        <button type="button" onclick="selectMood('😟')" data-mood="😟" class="mood-btn text-5xl opacity-30 hover:opacity-100 transition-all hover:scale-125" title="Ruim">😟</button>
+                        <button type="button" onclick="selectMood('😭')" data-mood="😭" class="mood-btn text-5xl opacity-30 hover:opacity-100 transition-all hover:scale-125" title="Muito Ruim">😭</button>
                     </div>
                 </div>
+                
+                <div>
+                    <label class="block text-sm font-semibold mb-2 text-slate-300">📝 Descrição do Dia</label>
+                    <textarea name="content" id="routine-content" required class="w-full min-h-[200px] bg-slate-800/50 border border-slate-700 rounded-xl p-4 text-white" placeholder="Como foi seu dia?"></textarea>
+                </div>
+                
+                <button type="submit" class="w-full bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-400 hover:to-orange-400 text-black font-bold py-3 rounded-xl shadow-lg transition">Salvar</button>
             </div>
-            
-            <div>
-                <label class="text-sm font-medium text-slate-300 block mb-1">Resumo do Dia</label>
-                <textarea name="content" id="routine-content" rows="4" class="bg-slate-800/50" placeholder="Como foi seu dia?"></textarea>
-            </div>
-            
-            <div>
-                <label class="text-sm font-medium text-slate-300 block mb-1">Foto do Dia</label>
-                <input type="file" name="photo" id="routine-photo" accept="image/*" class="file:bg-slate-700 file:text-white file:border-0 file:rounded-lg file:px-4 file:py-2 hover:file:bg-slate-600">
-            </div>
-            <div id="routine-photo-preview" class="hidden rounded-xl overflow-hidden h-40 bg-cover bg-center"></div>
-            <button type="submit" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold py-3 rounded-xl shadow-lg">Salvar Diário</button>
-        </div>
-    </form>
+        </form>
+    </div>
 </div>
 
 <script src="<?php echo BASE_PATH; ?>/assets/js/common.js"></script>
@@ -176,14 +129,8 @@ let currentRoutineMonth = new Date();
 function selectMood(mood) { 
     document.getElementById('routine-mood').value = mood; 
     document.querySelectorAll('#modal-routine .mood-btn').forEach(b => b.classList.remove('selected')); 
-    document.getElementById('mood-' + mood).classList.add('selected'); 
-}
-
-function selectDayStatus(status) {
-    document.getElementById('routine-day-status').value = status;
-    document.getElementById('day-status-bom').classList.remove('selected');
-    document.getElementById('day-status-ruim').classList.remove('selected');
-    document.getElementById(`day-status-${status}`).classList.add('selected');
+    const btn = document.querySelector(`#modal-routine .mood-btn[data-mood="${mood}"]`);
+    if (btn) btn.classList.add('selected'); 
 }
 
 function changeRoutineMonth(dir) { 
@@ -197,13 +144,6 @@ async function loadRoutine() {
     const logs = await fetch(`?api=get_routine_month&month=${ym}`).then(r => r.json()); 
     const cal = document.getElementById('routine-calendar'); 
     cal.innerHTML = ''; 
-    
-    const moodMap = {
-        'otimo': '🤩', 'bom': '😊', 'ok': '😐', 'ruim': '😟', 'pessimo': '😭'
-    };
-    const dayStatusMap = {
-        'bom': '✅', 'ruim': '❌'
-    };
 
     const dim = new Date(currentRoutineMonth.getFullYear(), currentRoutineMonth.getMonth() + 1, 0).getDate(); 
     const pad = new Date(currentRoutineMonth.getFullYear(), currentRoutineMonth.getMonth(), 1).getDay(); 
@@ -219,19 +159,14 @@ async function loadRoutine() {
         const todayStr = new Date().toLocaleDateString('en-CA');
         const isToday = todayStr === dStr; 
         
-        const emojiPrimary = log ? moodMap[log.mood] || '📝' : '+';
-        const emojiSecondary = log && log.day_status ? dayStatusMap[log.day_status] : '';
+        const emoji = log ? log.mood || '📝' : '+';
 
         const cellClass = isToday ? 'bg-blue-500/10 border-blue-500/40' : 'bg-slate-800/30 border-slate-700/40 hover:bg-slate-800/50';
         const numClass = isToday ? 'text-blue-400' : 'text-slate-500';
 
         let html = `<div onclick="openRoutineDay('${dStr}')" class="${cellClass} p-2 h-28 rounded-xl border transition flex flex-col items-center justify-center cursor-pointer relative group">
             <span class="absolute top-2 left-3 text-sm font-bold ${numClass}">${i}</span>
-            <div class="text-4xl">
-                ${emojiPrimary}
-                ${emojiSecondary ? `<span class="absolute top-1 right-1 text-xs">${emojiSecondary}</span>` : ''}
-            </div>
-            ${log && log.photo_path ? '<div class="absolute bottom-2 right-2 w-2 h-2 bg-emerald-400 rounded-full"></div>' : ''}
+            <div class="text-4xl">${emoji}</div>
             <div class="opacity-0 group-hover:opacity-50 text-2xl text-slate-600 absolute inset-0 flex items-center justify-center">${log ? '' : '+'}</div>
         </div>`; 
 
@@ -245,20 +180,11 @@ async function openRoutineDay(date) {
     
     document.getElementById('routine-date').value = date; 
     const localTitleDate = new Date(`${date}T00:00:00`);
-    document.getElementById('routine-modal-title').innerText = `Diário - ${localTitleDate.toLocaleDateString('pt-BR')}`; 
+    document.getElementById('routine-modal-title').innerText = `${localTitleDate.toLocaleDateString('pt-BR')}`; 
     
     if (log) { 
-        if(log.mood) selectMood(log.mood); 
-        if(log.day_status) selectDayStatus(log.day_status);
-
-        document.getElementById('routine-sleep').value = log.sleep_hours; 
+        if(log.mood) selectMood(log.mood);
         document.getElementById('routine-content').value = log.content; 
-        
-        if (log.photo_path) { 
-            const preview = document.getElementById('routine-photo-preview'); 
-            preview.classList.remove('hidden'); 
-            preview.style.backgroundImage = `url('${log.photo_path}')`; 
-        } 
     } 
     openModal('modal-routine', false); 
 }
@@ -271,17 +197,12 @@ async function submitRoutine(e) {
     loadRoutine(); 
 }
 
-// CSS para mood/day-status selected
+// CSS para mood selected
 document.head.insertAdjacentHTML('beforeend', `<style>
 .mood-btn.selected {
+    opacity: 1 !important;
     transform: scale(1.3);
-    filter: drop-shadow(0 0 8px rgba(168, 85, 247, 0.6));
-}
-#day-status-bom.selected {
-    background: linear-gradient(135deg, rgb(16, 185, 129), rgb(5, 150, 105));
-}
-#day-status-ruim.selected {
-    background: linear-gradient(135deg, rgb(239, 68, 68), rgb(220, 38, 38));
+    filter: drop-shadow(0 0 8px rgba(250, 204, 21, 0.6));
 }
 </style>`);
 

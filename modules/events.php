@@ -135,7 +135,10 @@ require_once __DIR__ . '/../includes/header.php';
             <input type="hidden" name="id" id="event-id">
             <div class="space-y-5">
                 <input type="text" name="title" id="event-title" placeholder="Nome do Evento" required class="text-lg">
-                <input type="date" name="date" id="event-date" required>
+                <div class="grid grid-cols-2 gap-3">
+                    <input type="date" name="date" id="event-date" required>
+                    <input type="time" name="time" id="event-time" placeholder="Hora (opcional)">
+                </div>
                 <textarea name="desc" id="event-desc" placeholder="Descrição (opcional)" class="text-lg" rows="3"></textarea>
                 <div class="flex gap-3 pt-4">
                     <button type="submit" class="flex-1 bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-400 hover:to-orange-400 text-black font-bold py-3 rounded-xl shadow-lg transition">Salvar</button>
@@ -221,7 +224,11 @@ function editEventRow(id) {
     form.reset(); 
     document.getElementById('event-id').value = ev.id; 
     document.getElementById('event-title').value = ev.title; 
-    document.getElementById('event-date').value = ev.start_date.slice(0, 10); 
+    const dateTimeParts = ev.start_date.split(' ');
+    document.getElementById('event-date').value = dateTimeParts[0]; 
+    if (dateTimeParts[1]) {
+        document.getElementById('event-time').value = dateTimeParts[1].substring(0, 5);
+    }
     document.getElementById('event-desc').value = ev.description || ''; 
     document.getElementById('event-modal-title').innerText = 'Editar Evento'; 
     document.getElementById('btn-delete-event').classList.remove('hidden'); 
@@ -232,6 +239,10 @@ async function submitEvent(e) {
     e.preventDefault(); 
     const fd = new FormData(e.target); 
     const data = Object.fromEntries(fd); 
+    // Combinar data e hora
+    if (data.time) {
+        data.date = data.date + ' ' + data.time + ':00';
+    }
     await api('save_event', data); 
     closeEventModal(); 
     loadEvents(); 
