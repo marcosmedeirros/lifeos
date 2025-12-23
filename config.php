@@ -95,6 +95,70 @@ try {
         kudos INT DEFAULT 0,
         done BOOLEAN DEFAULT 0
     );
+
+    -- TABELAS DO MÓDULO NOSSO2026 (subsite público)
+    CREATE TABLE IF NOT EXISTS nosso2026_goals (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        owner ENUM('ela','ele','nosso') NOT NULL,
+        difficulty ENUM('facil','medio','dificil') NOT NULL,
+        title VARCHAR(255) NOT NULL,
+        progress TINYINT DEFAULT 0,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        due_date DATE NULL
+    );
+    CREATE TABLE IF NOT EXISTS nosso2026_meals (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        meal_date DATE NOT NULL,
+        meal VARCHAR(30) NOT NULL,
+        description TEXT,
+        kcal INT NULL,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+    CREATE TABLE IF NOT EXISTS nosso2026_workouts (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        name VARCHAR(255) NOT NULL,
+        workout_date DATE NOT NULL,
+        month INT NOT NULL,
+        year INT NOT NULL DEFAULT 2026,
+        done TINYINT DEFAULT 0,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+    CREATE TABLE IF NOT EXISTS nosso2026_finances (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        month INT NOT NULL,
+        year INT NOT NULL DEFAULT 2026,
+        type ENUM('income','expense') NOT NULL,
+        amount DECIMAL(10,2) NOT NULL,
+        category VARCHAR(100) DEFAULT NULL,
+        description VARCHAR(255) DEFAULT NULL,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+        CREATE TABLE IF NOT EXISTS nosso2026_memories (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+            owner ENUM('ela','ele','nosso') DEFAULT 'nosso',
+        title VARCHAR(255) DEFAULT NULL,
+        memory_date DATE DEFAULT NULL,
+        image_path VARCHAR(255) NOT NULL,
+        notes TEXT DEFAULT NULL,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+        CREATE TABLE IF NOT EXISTS nosso2026_movies (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            title VARCHAR(255) NOT NULL,
+            status ENUM('planejado','assistido') DEFAULT 'planejado',
+            planned_date DATE NULL,
+            rating TINYINT NULL,
+            notes TEXT DEFAULT NULL,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        );
+        CREATE TABLE IF NOT EXISTS nosso2026_market_list (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            item VARCHAR(255) NOT NULL,
+            qty VARCHAR(50) DEFAULT NULL,
+            notes VARCHAR(255) DEFAULT NULL,
+            done TINYINT DEFAULT 0,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        );
     ";
     $pdo->exec($sql_setup);
 
@@ -105,6 +169,8 @@ try {
     try { $pdo->query("SELECT group_id FROM events LIMIT 1"); } catch (Exception $e) { $pdo->exec("ALTER TABLE events ADD COLUMN group_id VARCHAR(50) DEFAULT NULL"); }
     try { $pdo->query("SELECT user_id FROM finance_categories LIMIT 1"); } catch (Exception $e) { $pdo->exec("ALTER TABLE finance_categories ADD COLUMN user_id INT DEFAULT 1"); }
     try { $pdo->query("SELECT done FROM strava_activities LIMIT 1"); } catch (Exception $e) { $pdo->exec("ALTER TABLE strava_activities ADD COLUMN done BOOLEAN DEFAULT 0"); }
+    try { $pdo->query("SELECT group_id FROM finances LIMIT 1"); } catch (Exception $e) { $pdo->exec("ALTER TABLE finances ADD COLUMN group_id VARCHAR(50) DEFAULT NULL"); }
+        try { $pdo->query("SELECT owner FROM nosso2026_memories LIMIT 1"); } catch (Exception $e) { $pdo->exec("ALTER TABLE nosso2026_memories ADD COLUMN owner ENUM('ela','ele','nosso') DEFAULT 'nosso'"); }
     
     // REPARO DE METAS: Adiciona user_id à tabela goals
     try { $pdo->query("SELECT user_id FROM goals LIMIT 1"); } catch (Exception $e) { $pdo->exec("ALTER TABLE goals ADD COLUMN user_id INT DEFAULT 1"); }

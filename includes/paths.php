@@ -3,15 +3,15 @@
 // Detecta automaticamente o base path da aplicação
 
 if (!defined('BASE_PATH')) {
-    // Detecta o host atual
     $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
-    
-    // Se for marcosmedeirros.io (produção), o base path é vazio (raiz)
-    // Se for localhost ou qualquer outro, usa /lifeos
-    if (strpos($host, 'marcosmedeirros.io') !== false) {
+
+    // Produção: qualquer host que termine com marcosmedeiros.io (com ou sem www)
+    $isProd = (bool)preg_match('/(^|\.)marcosmedeiros\.io$/', $host);
+
+    if ($isProd) {
         define('BASE_PATH', '');
     } else {
-        // Para localhost e desenvolvimento
+        // Ambiente local ou qualquer outro host usa /lifeos
         define('BASE_PATH', '/lifeos');
     }
 }
