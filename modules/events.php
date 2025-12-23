@@ -107,8 +107,8 @@ require_once __DIR__ . '/../includes/header.php';
                             <i class="fas fa-chevron-right"></i>
                         </button>
                     </div>
-                    <button onclick="openEventModal('modal-event')" class="bg-yellow-500 hover:bg-yellow-600 text-black px-5 py-2 rounded-lg font-bold shadow-lg shadow-yellow-500/20 transition">
-                        <i class="fas fa-plus mr-1"></i> Novo
+                    <button onclick="openEventModal('modal-event')" class="bg-gradient-to-r from-yellow-600 to-yellow-700 hover:from-yellow-500 hover:to-yellow-600 text-white px-5 py-2 rounded-lg font-bold shadow-lg shadow-yellow-600/30 transition">
+                        <i class="fas fa-plus mr-1"></i> 📅 Novo
                     </button>
                 </div>
             </div>
@@ -131,7 +131,7 @@ require_once __DIR__ . '/../includes/header.php';
             <i class="fas fa-times text-xl"></i>
         </button>
         <form id="modal-event" class="modal-form" onsubmit="submitEvent(event)">
-            <h3 class="text-2xl font-bold mb-6 text-white bg-clip-text text-transparent bg-gradient-to-r from-yellow-400 to-orange-400" id="event-modal-title">Novo Evento</h3>
+            <h3 class="text-2xl font-bold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-yellow-500" id="event-modal-title">📅 Novo Evento</h3>
             <input type="hidden" name="id" id="event-id">
             <div class="space-y-5">
                 <input type="text" name="title" id="event-title" placeholder="Nome do Evento" required class="text-lg">
@@ -141,7 +141,7 @@ require_once __DIR__ . '/../includes/header.php';
                 </div>
                 <textarea name="desc" id="event-desc" placeholder="Descrição (opcional)" class="text-lg" rows="3"></textarea>
                 <div class="flex gap-3 pt-4">
-                    <button type="submit" class="flex-1 bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-400 hover:to-orange-400 text-black font-bold py-3 rounded-xl shadow-lg transition">Salvar</button>
+                    <button type="submit" class="flex-1 bg-gradient-to-r from-yellow-600 to-yellow-700 hover:from-yellow-500 hover:to-yellow-600 text-white font-bold py-3 rounded-xl shadow-lg shadow-yellow-600/30 transition">💾 Salvar</button>
                     <button type="button" id="btn-delete-event" onclick="deleteEvent()" class="hidden bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 hover:text-rose-400 px-4 rounded-xl border border-rose-500/30 transition">
                         <i class="fas fa-trash"></i>
                     </button>
@@ -198,8 +198,8 @@ async function loadEvents() {
         const dStr = `${ym}-${String(i).padStart(2, '0')}`; 
         const evs = window.eventsData.filter(e => e.start_date.startsWith(dStr)); 
         const isToday = new Date().toISOString().slice(0,10) === dStr; 
-        const cellClass = isToday ? 'bg-purple-500/10 border-purple-500/50 ring-1 ring-purple-500/30' : 'bg-slate-800/40 border-slate-700/50 hover:bg-slate-800 hover:border-slate-600'; 
-        const numClass = isToday ? 'text-purple-400 font-bold' : 'text-slate-400 font-medium'; 
+        const cellClass = isToday ? 'bg-yellow-500/10 border-yellow-500/50 ring-1 ring-yellow-500/30' : 'bg-slate-800/40 border-slate-700/50 hover:bg-slate-800 hover:border-slate-600'; 
+        const numClass = isToday ? 'text-yellow-400 font-bold' : 'text-slate-400 font-medium'; 
         
         let html = `<div class="${cellClass} h-28 rounded-xl border p-2 cursor-pointer transition group relative flex flex-col" onclick="openEventModal('modal-event'); document.getElementById('event-date').value='${dStr}'">
             <span class="${numClass} text-sm mb-1 ml-1">${i}</span>

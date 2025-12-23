@@ -32,8 +32,8 @@ $watched = $pdo->query("SELECT * FROM nosso2026_movies WHERE status='assistido' 
   <style>
     body { background:#000; color:#fff; font-family:system-ui,-apple-system,sans-serif; }
     .glass { background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.06); }
-    .btn { background:#fff; color:#000; padding:0.5rem 1rem; border-radius:0.75rem; font-weight:600; transition:all 0.2s; display:inline-block; text-align:center; border:0; cursor:pointer; }
-    .btn:hover { background:#e5e5e5; transform: translateY(-1px); }
+    .btn { background:#d4af37; color:#000; padding:0.5rem 1rem; border-radius:0.75rem; font-weight:600; transition:all 0.2s; display:inline-block; text-align:center; border:0; cursor:pointer; }
+    .btn:hover { background:#c19b1a; transform: translateY(-1px); }
   </style>
 </head>
 <body>
@@ -48,7 +48,7 @@ $watched = $pdo->query("SELECT * FROM nosso2026_movies WHERE status='assistido' 
         <input name="title" class="md:col-span-2 bg-black border border-[#222] rounded-xl p-3 text-white" placeholder="Título" required>
         <input type="date" name="planned_date" class="bg-black border border-[#222] rounded-xl p-3 text-white">
         <input name="notes" class="bg-black border border-[#222] rounded-xl p-3 text-white" placeholder="Notas">
-        <button class="md:col-span-4 btn">Adicionar</button>
+        <button class="md:col-span-4 btn">🎬 Adicionar</button>
       </form>
     </section>
 
@@ -74,7 +74,7 @@ $watched = $pdo->query("SELECT * FROM nosso2026_movies WHERE status='assistido' 
                 <option value="">Nota</option>
                 <?php for($i=1;$i<=5;$i++): ?><option value="<?= $i ?>"><?= str_repeat('⭐', $i) ?></option><?php endfor; ?>
               </select>
-              <button class="btn text-sm">Marcar Assistido</button>
+              <button class="btn text-sm">🌟 Marcar Assistido</button>
             </form>
           </div>
           <?php endforeach; ?>

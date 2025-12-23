@@ -173,8 +173,8 @@ require_once __DIR__ . '/../includes/header.php';
             </div>
             
             <div class="flex gap-3 mb-6">
-            <button onclick="openActivityModal('modal-activity')" class="bg-primary hover:bg-purple-600 text-white px-5 py-2.5 rounded-xl font-bold shadow-lg shadow-purple-500/20 transition transform hover:-translate-y-0.5 flex items-center gap-2">
-                    <i class="fas fa-plus"></i> Nova Tarefa
+            <button onclick="openActivityModal('modal-activity')" class="bg-gradient-to-r from-yellow-600 to-yellow-700 hover:from-yellow-500 hover:to-yellow-600 text-white px-5 py-2.5 rounded-xl font-bold shadow-lg shadow-yellow-600/30 transition transform hover:-translate-y-0.5 flex items-center gap-2">
+                    <i class="fas fa-plus"></i> 📝 Nova Tarefa
                 </button>
                 <button onclick="openActivityModal('modal-category')" class="bg-slate-800 hover:bg-slate-700 text-white px-5 py-2.5 rounded-xl border border-slate-700 transition flex items-center gap-2">
                     <i class="fas fa-tags text-slate-400"></i> Categorias
@@ -195,7 +195,7 @@ require_once __DIR__ . '/../includes/header.php';
             <i class="fas fa-times text-xl"></i>
         </button>
         <form id="modal-activity" class="modal-form" onsubmit="submitActivity(event)">
-            <h3 class="text-2xl font-bold mb-6 text-white bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-400" id="activity-modal-title">Nova Atividade</h3>
+            <h3 class="text-2xl font-bold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-yellow-500" id="activity-modal-title">📝 Nova Atividade</h3>
             <input type="hidden" name="id" id="activity-id">
             <div class="space-y-5">
                 <input type="text" name="title" id="activity-title" placeholder="O que precisa ser feito?" required class="text-lg">
@@ -220,23 +220,23 @@ require_once __DIR__ . '/../includes/header.php';
                     <label class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 block">Repetir (Próx. 60 dias)</label>
                     <div class="flex justify-between gap-1">
                         <input type="checkbox" name="repeat_days[]" value="0" id="r0" class="hidden day-checkbox">
-                        <label for="r0" class="w-9 h-9 rounded-full border border-slate-600 flex items-center justify-center cursor-pointer text-xs font-bold hover:border-purple-500 transition hover:bg-purple-500/10">D</label>
+                        <label for="r0" class="w-9 h-9 rounded-full border border-slate-600 flex items-center justify-center cursor-pointer text-xs font-bold hover:border-yellow-500 transition hover:bg-yellow-500/10">D</label>
                         <input type="checkbox" name="repeat_days[]" value="1" id="r1" class="hidden day-checkbox">
-                        <label for="r1" class="w-9 h-9 rounded-full border border-slate-600 flex items-center justify-center cursor-pointer text-xs font-bold hover:border-purple-500 transition hover:bg-purple-500/10">S</label>
+                        <label for="r1" class="w-9 h-9 rounded-full border border-slate-600 flex items-center justify-center cursor-pointer text-xs font-bold hover:border-yellow-500 transition hover:bg-yellow-500/10">S</label>
                         <input type="checkbox" name="repeat_days[]" value="2" id="r2" class="hidden day-checkbox">
-                        <label for="r2" class="w-9 h-9 rounded-full border border-slate-600 flex items-center justify-center cursor-pointer text-xs font-bold hover:border-purple-500 transition hover:bg-purple-500/10">T</label>
+                        <label for="r2" class="w-9 h-9 rounded-full border border-slate-600 flex items-center justify-center cursor-pointer text-xs font-bold hover:border-yellow-500 transition hover:bg-yellow-500/10">T</label>
                         <input type="checkbox" name="repeat_days[]" value="3" id="r3" class="hidden day-checkbox">
-                        <label for="r3" class="w-9 h-9 rounded-full border border-slate-600 flex items-center justify-center cursor-pointer text-xs font-bold hover:border-purple-500 transition hover:bg-purple-500/10">Q</label>
+                        <label for="r3" class="w-9 h-9 rounded-full border border-slate-600 flex items-center justify-center cursor-pointer text-xs font-bold hover:border-yellow-500 transition hover:bg-yellow-500/10">Q</label>
                         <input type="checkbox" name="repeat_days[]" value="4" id="r4" class="hidden day-checkbox">
-                        <label for="r4" class="w-9 h-9 rounded-full border border-slate-600 flex items-center justify-center cursor-pointer text-xs font-bold hover:border-purple-500 transition hover:bg-purple-500/10">Q</label>
+                        <label for="r4" class="w-9 h-9 rounded-full border border-slate-600 flex items-center justify-center cursor-pointer text-xs font-bold hover:border-yellow-500 transition hover:bg-yellow-500/10">Q</label>
                         <input type="checkbox" name="repeat_days[]" value="5" id="r5" class="hidden day-checkbox">
-                        <label for="r5" class="w-9 h-9 rounded-full border border-slate-600 flex items-center justify-center cursor-pointer text-xs font-bold hover:border-purple-500 transition hover:bg-purple-500/10">S</label>
+                        <label for="r5" class="w-9 h-9 rounded-full border border-slate-600 flex items-center justify-center cursor-pointer text-xs font-bold hover:border-yellow-500 transition hover:bg-yellow-500/10">S</label>
                         <input type="checkbox" name="repeat_days[]" value="6" id="r6" class="hidden day-checkbox">
-                        <label for="r6" class="w-9 h-9 rounded-full border border-slate-600 flex items-center justify-center cursor-pointer text-xs font-bold hover:border-purple-500 transition hover:bg-purple-500/10">S</label>
+                        <label for="r6" class="w-9 h-9 rounded-full border border-slate-600 flex items-center justify-center cursor-pointer text-xs font-bold hover:border-yellow-500 transition hover:bg-yellow-500/10">S</label>
                     </div>
                 </div>
                 <div class="flex gap-3 pt-4">
-                    <button type="submit" class="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-bold py-3 rounded-xl shadow-lg transition">Salvar</button>
+                    <button type="submit" class="flex-1 bg-gradient-to-r from-yellow-600 to-yellow-700 hover:from-yellow-500 hover:to-yellow-600 text-white font-bold py-3 rounded-xl shadow-lg shadow-yellow-600/30 transition">💾 Salvar</button>
                     <button type="button" id="btn-delete-activity" onclick="deleteActivity()" class="hidden bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 hover:text-rose-400 px-4 rounded-xl border border-rose-500/30 transition">
                         <i class="fas fa-trash"></i>
                     </button>
@@ -249,7 +249,9 @@ require_once __DIR__ . '/../includes/header.php';
             <div class="mb-6 flex gap-3">
                 <input type="text" id="category-name" placeholder="Nome" required class="flex-1">
                 <input type="color" id="category-color" value="#BB86FC" class="h-12 w-12 p-1 border-0 rounded-lg cursor-pointer bg-slate-800">
-                <button type="button" onclick="addNewCategory()" class="bg-primary hover:bg-purple-400 text-white px-4 rounded-lg transition shadow-lg">
+                <button type="button" onclick="addNewCategory()" class="bg-gradient-to-r from-yellow-600 to-yellow-700 hover:from-yellow-500 hover:to-yellow-600 text-white px-4 rounded-lg transition shadow-lg shadow-yellow-600/30">
+                    <i class="fas fa-plus mr-2"></i>Nova Categoria
+                </button>
                     <i class="fas fa-plus"></i>
                 </button>
             </div>

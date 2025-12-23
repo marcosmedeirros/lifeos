@@ -51,7 +51,7 @@ function goalsBy($owner){
     .b-facil{background:#111;color:#fff}
     .b-medio{background:#222;color:#fff}
     .b-dificil{background:#333;color:#fff}
-    .btn{background:#fff;color:#000;padding:.5rem 1rem;border-radius:.5rem;font-weight:700}
+    .btn{background:#d4af37;color:#000;padding:.5rem 1rem;border-radius:.5rem;font-weight:700}
   </style>
 </head>
 <body class="min-h-screen" style="background:#000;color:#fff">
@@ -59,7 +59,7 @@ function goalsBy($owner){
   <main class="max-w-7xl mx-auto px-4 py-8">
     <div class="flex justify-between items-center mb-6">
       <h1 class="text-3xl font-bold">Metas 2026</h1>
-      <button onclick="openModal()" class="btn">+ Meta</button>
+      <button onclick="openModal()" class="btn">🌟 + Meta</button>
     </div>
 
     <div class="grid md:grid-cols-3 gap-8">
@@ -112,7 +112,7 @@ function goalsBy($owner){
               <input name="title" id="goalTitle" class="w-full bg-black border border-[#222] rounded-xl p-3 text-white" placeholder="Ex.: Correr 10k" required>
             </div>
             <div class="flex gap-3">
-              <button type="submit" class="btn flex-1">Salvar</button>
+              <button type="submit" class="btn flex-1">💾 Salvar</button>
               <button type="button" id="deleteBtn" style="display:none" onclick="deleteGoal()" class="btn" style="background:#dc2626">Excluir</button>
               <button type="button" onclick="closeModal()" class="btn" style="background:#333">Fechar</button>
             </div>

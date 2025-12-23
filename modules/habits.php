@@ -53,27 +53,27 @@ include __DIR__ . '/../includes/header.php';
 <div class="flex min-h-screen w-full">
     <?php include __DIR__ . '/../includes/sidebar.php'; ?>
     
-    <div class="flex-1 p-4 md:p-10 content-wrap transition-all duration-300">
+    <div class="flex-1 p-2 md:p-4 content-wrap transition-all duration-300">
         <div class="main-shell">
-            <div class="flex justify-between items-center mb-8">
-                <h2 class="text-3xl font-bold text-white">Rastreador de Hábitos</h2>
-                <div class="flex gap-3 items-center">
-                    <div class="flex items-center bg-slate-800 rounded-lg p-1">
-                        <button onclick="changeHabitMonth(-1)" class="w-8 h-8 hover:bg-slate-700 rounded text-slate-400">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-2 mb-4">
+                <h2 class="text-2xl md:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-yellow-500">🔥 Hábitos</h2>
+                <div class="flex flex-wrap gap-1 items-center">
+                    <div class="flex items-center bg-slate-800 rounded-lg p-0.5 border border-yellow-600/30">
+                        <button onclick="changeHabitMonth(-1)" class="w-6 h-6 hover:bg-slate-700 rounded text-yellow-500 text-xs">
                             <i class="fas fa-chevron-left"></i>
                         </button>
-                        <span id="habit-month-label" class="px-4 font-medium text-sm min-w-[140px] text-center capitalize">...</span>
-                        <button onclick="changeHabitMonth(1)" class="w-8 h-8 hover:bg-slate-700 rounded text-slate-400">
+                        <span id="habit-month-label" class="px-1 font-medium text-[10px] md:text-xs min-w-[80px] md:min-w-[120px] text-center capitalize text-white">...</span>
+                        <button onclick="changeHabitMonth(1)" class="w-6 h-6 hover:bg-slate-700 rounded text-yellow-500 text-xs">
                             <i class="fas fa-chevron-right"></i>
                         </button>
                     </div>
-                    <button onclick="openModal('modal-habit')" class="bg-teal-500 hover:bg-teal-600 text-black px-5 py-2 rounded-lg font-bold shadow-lg shadow-teal-500/20 transition">
-                        <i class="fas fa-plus mr-1"></i> Novo
+                    <button onclick="openModal('modal-habit')" class="bg-gradient-to-r from-yellow-600 to-yellow-700 hover:from-yellow-500 hover:to-yellow-600 text-white px-2 md:px-4 py-1.5 rounded-lg font-bold text-xs md:text-sm shadow-lg shadow-yellow-600/30 transition">
+                        <i class="fas fa-plus mr-1"></i>Novo
                     </button>
                 </div>
             </div>
             
-            <div class="glass-card rounded-2xl p-6 overflow-x-auto shadow-xl">
+            <div class="glass-card rounded-2xl p-2 md:p-4 overflow-x-auto shadow-xl max-h-[calc(100vh-280px)]">
                 <table class="w-full border-collapse" id="habits-table">
                     <thead>
                         <tr id="habits-header-row"></tr>
@@ -92,11 +92,11 @@ include __DIR__ . '/../includes/header.php';
         </button>
         
         <form id="modal-habit" class="modal-form hidden" onsubmit="submitHabit(event)">
-            <h3 class="text-2xl font-bold mb-6 text-white bg-clip-text text-transparent bg-gradient-to-r from-teal-400 to-emerald-400">Novo Hábito</h3>
+            <h3 class="text-2xl font-bold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-yellow-500">🔥 Novo Hábito</h3>
             <div class="space-y-5">
                 <input type="text" name="name" placeholder="Ex: Ler 10 páginas" required class="text-lg">
-                <button type="submit" class="w-full bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-400 hover:to-emerald-400 text-white font-bold py-3 rounded-xl shadow-lg transition mt-2">
-                    Criar Hábito
+                <button type="submit" class="w-full bg-gradient-to-r from-yellow-600 to-yellow-700 hover:from-yellow-500 hover:to-yellow-600 text-white font-bold py-3 rounded-xl shadow-lg shadow-yellow-600/30 transition mt-2">
+                    💾 Criar Hábito
                 </button>
             </div>
         </form>
@@ -119,21 +119,17 @@ async function loadHabits() {
     const dim = new Date(currentHabitMonth.getFullYear(), currentHabitMonth.getMonth() + 1, 0).getDate(); 
     const ym = currentHabitMonth.toISOString().slice(0, 7); 
     
-    let h = '<th class="p-3 text-left text-slate-400 font-medium bg-slate-900/50 sticky left-0 z-10 min-w-[150px]">Hábito</th>'; 
-    for(let i=1; i<=dim; i++) h += `<th class="p-2 text-center text-xs text-slate-500 w-10 min-w-[40px]">${i}</th>`; 
+    let h = '<th class="p-1 text-left text-yellow-500 font-bold text-xs bg-slate-900/50 sticky left-0 z-10 min-w-[90px] md:min-w-[130px] border-b border-yellow-600/30">Hábito</th>'; 
+    for(let i=1; i<=dim; i++) h += `<th class="p-0.5 text-center text-[7px] md:text-[8px] text-yellow-600 w-5 md:w-8 min-w-[20px] md:min-w-[32px] border-b border-yellow-600/30">${i}</th>`;
     document.getElementById('habits-header-row').innerHTML = h; 
     
     document.getElementById('habits-list').innerHTML = habits.map(hb => { 
         const checks = JSON.parse(hb.checked_dates || '[]'); 
-        let cells = `<td class="p-3 border-b border-slate-700/50 font-bold text-slate-200 sticky left-0 bg-slate-800 z-10 shadow-[4px_0_10px_rgba(0,0,0,0.2)]">${hb.name}</td>`; 
+        let cells = `<td class="p-1 border-b border-yellow-600/20 font-bold text-white text-xs md:text-sm sticky left-0 bg-slate-800 z-10 shadow-[4px_0_10px_rgba(0,0,0,0.2)]">✓ ${hb.name}</td>`; 
         for(let i=1; i<=dim; i++) { 
             const d = `${ym}-${String(i).padStart(2, '0')}`; 
             const isChecked = checks.includes(d); 
-            cells += `<td class="border-b border-slate-700/50 text-center p-1">
-                <button onclick="toggleHabitInstant(event, ${hb.id}, '${d}')" class="w-8 h-8 rounded-lg text-[10px] transition-all transform hover:scale-110 ${isChecked ? 'bg-teal-500 text-black shadow-[0_0_10px_rgba(20,184,166,0.4)]' : 'bg-slate-700/30 hover:bg-slate-700 text-transparent'}">
-                    ${isChecked ? '<i class="fas fa-check"></i>' : ''}
-                </button>
-            </td>`; 
+            cells += `<td class="border-b border-yellow-600/20 text-center p-0.5"><button onclick="toggleHabitInstant(event, ${hb.id}, '${d}')" class="w-5 h-5 md:w-6 md:h-6 rounded text-[6px] md:text-[8px] transition-all transform hover:scale-110 ${isChecked ? 'bg-gradient-to-r from-yellow-600 to-yellow-700 text-white shadow-[0_0_8px_rgba(212,175,55,0.4)]' : 'bg-slate-700/30 hover:bg-slate-700 text-transparent'}">${isChecked ? '<i class="fas fa-check"></i>' : ''}</button></td>`;
         } 
         return `<tr class="hover:bg-slate-800/30 transition">${cells}</tr>`; 
     }).join(''); 
@@ -141,12 +137,12 @@ async function loadHabits() {
 
 async function toggleHabitInstant(event, id, date) { 
     const btn = event.currentTarget; 
-    const isChecked = btn.classList.contains('bg-teal-500'); 
+    const isChecked = btn.classList.contains('bg-gradient-to-r'); 
     if (isChecked) { 
         btn.className = "w-8 h-8 rounded-lg text-[10px] transition-all transform hover:scale-110 bg-slate-700/30 hover:bg-slate-700 text-transparent"; 
         btn.innerHTML = ""; 
     } else { 
-        btn.className = "w-8 h-8 rounded-lg text-[10px] transition-all transform hover:scale-110 bg-teal-500 text-black shadow-[0_0_10px_rgba(20,184,166,0.4)]"; 
+        btn.className = "w-8 h-8 rounded-lg text-[10px] transition-all transform hover:scale-110 bg-gradient-to-r from-yellow-600 to-yellow-700 text-white shadow-[0_0_10px_rgba(212,175,55,0.4)]"; 
         btn.innerHTML = '<i class="fas fa-check"></i>'; 
     } 
     await api('toggle_habit', {id, date}); 

@@ -94,7 +94,7 @@ require_once __DIR__ . '/../includes/header.php';
     <div class="flex-1 p-4 md:p-8 content-wrap transition-all duration-300">
         <div class="main-shell">
             <div class="text-center mb-10">
-                <h2 class="text-5xl font-bold mb-3 bg-gradient-to-r from-yellow-400 to-orange-400 text-transparent bg-clip-text">📸 Memory Board</h2>
+                <h2 class="text-5xl font-bold mb-3 bg-gradient-to-r from-yellow-400 to-yellow-500 text-transparent bg-clip-text">📸 Memory Board</h2>
                 <p class="text-slate-400">Uma foto por dia, um ano de memórias</p>
             </div>
             
@@ -112,7 +112,7 @@ require_once __DIR__ . '/../includes/header.php';
                             <input type="file" name="photo" accept="image/*" required class="w-full">
                         </div>
                     </div>
-                    <button type="submit" class="w-full mt-4 bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-400 hover:to-orange-400 text-black font-bold py-3 rounded-xl shadow-lg transition">📤 Upload</button>
+                    <button type="submit" class="w-full mt-4 bg-gradient-to-r from-yellow-600 to-yellow-700 hover:from-yellow-500 hover:to-yellow-600 text-white font-bold py-3 rounded-xl shadow-lg shadow-yellow-600/30 transition">📤 Upload Foto</button>
                 </form>
             </div>
             

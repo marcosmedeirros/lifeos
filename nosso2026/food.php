@@ -62,8 +62,8 @@ $recipes = $stmt->fetchAll();
   <style>
     body { background:#000; color:#fff; font-family:system-ui,-apple-system,sans-serif; }
     .glass { background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.06); }
-    .btn { background:#fff; color:#000; padding:0.5rem 1rem; border-radius:0.75rem; font-weight:600; transition:all 0.2s; display:inline-block; text-align:center; border:0; cursor:pointer; }
-    .btn:hover { background:#e5e5e5; transform: translateY(-1px); }
+    .btn { background:#d4af37; color:#000; padding:0.5rem 1rem; border-radius:0.75rem; font-weight:600; transition:all 0.2s; display:inline-block; text-align:center; border:0; cursor:pointer; }
+    .btn:hover { background:#c19b1a; transform: translateY(-1px); }
   </style>
 </head>
 <body>
@@ -133,7 +133,7 @@ $recipes = $stmt->fetchAll();
             <input type="radio" name="owner" value="nosso" class="w-4 h-4" checked> Nosso
           </label>
         </div>
-        <button class="btn">Salvar Receita</button>
+        <button class="btn">💾 Salvar Receita</button>
       </form>
     </section>
 

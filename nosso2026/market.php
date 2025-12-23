@@ -31,8 +31,8 @@ $luiza = $pdo->query("SELECT * FROM nosso2026_market_list WHERE owner='luiza' AN
   <style>
     body { background:#000; color:#fff; font-family:system-ui,-apple-system,sans-serif; }
     .glass { background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.06); }
-    .btn { background:#fff; color:#000; padding:0.5rem 1rem; border-radius:0.75rem; font-weight:600; cursor:pointer; border:0; }
-    .btn:hover { background:#e5e5e5; }
+    .btn { background:#d4af37; color:#000; padding:0.5rem 1rem; border-radius:0.75rem; font-weight:600; cursor:pointer; border:0; }
+    .btn:hover { background:#c19b1a; }
   </style>
 </head>
 <body>
@@ -50,7 +50,7 @@ $luiza = $pdo->query("SELECT * FROM nosso2026_market_list WHERE owner='luiza' AN
         <option value="marcos">Marcos</option>
         <option value="luiza">Luiza</option>
       </select>
-      <button class="btn">Adicionar</button>
+      <button class="btn">📱 Adicionar</button>
     </form>
 
     <!-- 3 Colunas -->

@@ -141,31 +141,31 @@ include __DIR__ . '/../includes/header.php';
                             <i class="fas fa-chevron-right"></i>
                         </button>
                     </div>
-                    <button onclick="openModal('modal-finance')" class="bg-emerald-600 hover:bg-emerald-500 text-white px-6 py-2 rounded-lg font-bold shadow-lg shadow-emerald-900/20 flex items-center gap-2">
+                    <button onclick="openModal('modal-finance')" class="bg-gradient-to-r from-yellow-600 to-yellow-700 hover:from-yellow-500 hover:to-yellow-600 text-white px-6 py-2 rounded-lg font-bold shadow-lg shadow-yellow-600/30 flex items-center gap-2">
                         <i class="fas fa-plus"></i> Lançar
                     </button>
                 </div>
             </div>
             
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-                <div class="glass-card p-5 rounded-2xl border-b-4 border-blue-500">
-                    <p class="text-xs uppercase text-slate-400 font-bold mb-2">Saldo Geral</p>
+                <div class="glass-card p-5 rounded-2xl border-b-4 border-yellow-600">
+                    <p class="text-xs uppercase text-gray-400 font-bold mb-2">Saldo Geral</p>
                     <p class="text-2xl font-bold text-white" id="fin-total-balance">R$ 0,00</p>
                 </div>
-                <div class="glass-card p-5 rounded-2xl">
-                    <p class="text-xs uppercase text-slate-400 font-bold mb-2">Saldo (Mês)</p>
-                    <p class="text-2xl font-bold" id="fin-balance">R$ 0,00</p>
+                <div class="glass-card p-5 rounded-2xl border-l-4 border-gray-600">
+                    <p class="text-xs uppercase text-gray-400 font-bold mb-2">Saldo (Mês)</p>
+                    <p class="text-2xl font-bold text-white" id="fin-balance">R$ 0,00</p>
                 </div>
-                <div class="glass-card p-5 rounded-2xl">
+                <div class="glass-card p-5 rounded-2xl border-l-4 border-yellow-600">
                     <div class="flex justify-between mb-2">
-                        <p class="text-xs uppercase text-slate-400 font-bold">Entradas</p>
-                        <i class="fas fa-arrow-up text-emerald-500"></i>
+                        <p class="text-xs uppercase text-gray-400 font-bold">Entradas</p>
+                        <i class="fas fa-arrow-up text-yellow-500"></i>
                     </div>
-                    <p class="text-2xl font-bold text-emerald-400" id="fin-income">R$ 0,00</p>
+                    <p class="text-2xl font-bold text-yellow-400" id="fin-income">R$ 0,00</p>
                 </div>
-                <div class="glass-card p-5 rounded-2xl">
+                <div class="glass-card p-5 rounded-2xl border-l-4 border-gray-600">
                     <div class="flex justify-between mb-2">
-                        <p class="text-xs uppercase text-slate-400 font-bold">Saídas</p>
+                        <p class="text-xs uppercase text-gray-400 font-bold">Saídas</p>
                         <i class="fas fa-arrow-down text-rose-500"></i>
                     </div>
                     <p class="text-2xl font-bold text-rose-400" id="fin-outcome">R$ 0,00</p>
@@ -200,11 +200,11 @@ include __DIR__ . '/../includes/header.php';
         </button>
         
         <form id="modal-finance" class="modal-form hidden" onsubmit="submitFinance(event)">
-            <h3 class="text-2xl font-bold mb-6 text-white bg-clip-text text-transparent bg-gradient-to-r from-emerald-400 to-teal-400" id="finance-modal-title">Lançamento Financeiro</h3>
+            <h3 class="text-2xl font-bold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-yellow-500" id="finance-modal-title">💰 Lançamento Financeiro</h3>
             <input type="hidden" name="id" id="finance-id">
             <div class="space-y-5">
                 <div>
-                    <label class="text-sm font-medium text-slate-300 mb-1.5 block">Tipo</label>
+                    <label class="text-sm font-medium text-gray-300 mb-1.5 block">Tipo</label>
                     <select name="type" id="finance-type">
                         <option value="expense">Saída (Gasto)</option>
                         <option value="income">Entrada (Ganho)</option>
@@ -234,7 +234,7 @@ include __DIR__ . '/../includes/header.php';
                     <input type="datetime-local" name="date" id="finance-date" required>
                 </div>
                 <div class="flex gap-3 pt-4">
-                    <button type="submit" class="flex-1 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold py-3 rounded-xl shadow-lg transition">Salvar</button>
+                    <button type="submit" class="flex-1 bg-gradient-to-r from-yellow-600 to-yellow-700 hover:from-yellow-500 hover:to-yellow-600 text-white font-bold py-3 rounded-xl shadow-lg shadow-yellow-600/30 transition">💾 Salvar</button>
                     <button type="button" id="btn-delete-finance" onclick="deleteFinance()" class="hidden bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 hover:text-rose-400 px-4 rounded-xl border border-rose-500/30 transition">
                         <i class="fas fa-trash"></i>
                     </button>

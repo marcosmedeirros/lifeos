@@ -40,8 +40,8 @@ $monthNames = ['', 'Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set'
   <style>
     body { background:#000; color:#fff; font-family:system-ui,-apple-system,sans-serif; }
     .glass { background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.06); }
-    .btn { background:#fff; color:#000; padding:0.5rem 1rem; border-radius:0.75rem; font-weight:600; transition:all 0.2s; display:inline-block; text-align:center; border:0; cursor:pointer; }
-    .btn:hover { background:#e5e5e5; transform: translateY(-1px); }
+    .btn { background:#d4af37; color:#000; padding:0.5rem 1rem; border-radius:0.75rem; font-weight:600; transition:all 0.2s; display:inline-block; text-align:center; border:0; cursor:pointer; }
+    .btn:hover { background:#c19b1a; transform: translateY(-1px); }
   </style>
 </head>
 <body>
@@ -50,7 +50,7 @@ $monthNames = ['', 'Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set'
   <main class="max-w-7xl mx-auto px-4 py-10">
     <div class="flex justify-between items-center mb-8">
       <h1 class="text-3xl font-bold">Finanças 2026</h1>
-      <button onclick="openModal()" class="btn">+ Lançamento</button>
+      <button onclick="openModal()" class="btn">💰 + Lançamento</button>
     </div>
 
     <!-- Grid dos 12 Meses -->
@@ -140,7 +140,7 @@ $monthNames = ['', 'Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set'
             <input name="description" id="financeDescription" class="w-full bg-black border border-[#222] rounded-xl p-3 text-white" placeholder="Opcional">
           </div>
           <div class="flex gap-3">
-            <button type="submit" class="btn flex-1">Salvar</button>
+            <button type="submit" class="btn flex-1">💾 Salvar</button>
             <button type="button" id="deleteBtn" style="display:none" onclick="deleteFinance()" class="btn" style="background:#dc2626">Excluir</button>
             <button type="button" onclick="closeModal()" class="btn" style="background:#333">Fechar</button>
           </div>

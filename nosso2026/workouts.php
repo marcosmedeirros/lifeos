@@ -67,8 +67,8 @@ $doneWorkouts = count(array_filter($workouts, fn($w) => $w['done']));
   <style>
     body { background:#000; color:#fff; font-family:system-ui,-apple-system,sans-serif; }
     .glass { background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.06); }
-    .btn { background:#fff; color:#000; padding:0.5rem 1rem; border-radius:0.75rem; font-weight:600; transition:all 0.2s; display:inline-block; text-align:center; border:0; cursor:pointer; }
-    .btn:hover { background:#e5e5e5; transform: translateY(-1px); }
+    .btn { background:#d4af37; color:#000; padding:0.5rem 1rem; border-radius:0.75rem; font-weight:600; transition:all 0.2s; display:inline-block; text-align:center; border:0; cursor:pointer; }
+    .btn:hover { background:#c19b1a; transform: translateY(-1px); }
     .day-cell { min-height:90px; border:1px solid #222; }
     .day-cell:hover { background:rgba(255,255,255,0.03); }
   </style>
@@ -87,7 +87,7 @@ $doneWorkouts = count(array_filter($workouts, fn($w) => $w['done']));
         <a href="?month=<?= $prevMonth ?>&year=<?= $prevYear ?>" class="btn">← Anterior</a>
         <a href="?month=<?= date('m') ?>&year=<?= date('Y') ?>" class="btn">Hoje</a>
         <a href="?month=<?= $nextMonth ?>&year=<?= $nextYear ?>" class="btn">Próximo →</a>
-        <button onclick="openModal()" class="btn">+ Treino</button>
+        <button onclick="openModal()" class="btn">💪 + Treino</button>
       </div>
     </div>
 
@@ -138,7 +138,7 @@ $doneWorkouts = count(array_filter($workouts, fn($w) => $w['done']));
             <input name="workout_date" id="workoutDate" type="date" class="w-full bg-black border border-[#222] rounded-xl p-3 text-white" required>
           </div>
           <div class="flex gap-3">
-            <button type="submit" class="btn flex-1">Salvar</button>
+            <button type="submit" class="btn flex-1">💾 Salvar</button>
             <button type="button" id="deleteBtn" style="display:none" onclick="deleteWorkout()" class="btn" style="background:#dc2626">Excluir</button>
             <button type="button" onclick="closeModal()" class="btn" style="background:#333">Fechar</button>
           </div>

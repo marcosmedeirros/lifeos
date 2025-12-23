@@ -59,8 +59,8 @@ include __DIR__ . '/../includes/header.php';
         <div class="main-shell">
             <div class="flex justify-between items-center mb-8">
                 <h2 class="text-3xl font-bold text-white">Notas</h2>
-                <button onclick="openModal('modal-note')" class="bg-yellow-500 hover:bg-yellow-400 text-black px-6 py-2 rounded-lg font-bold shadow-lg shadow-yellow-500/20 transition transform hover:-translate-y-0.5">
-                    <i class="fas fa-sticky-note mr-2"></i> Criar Nota
+                <button onclick="openModal('modal-note')" class="bg-gradient-to-r from-yellow-600 to-yellow-700 hover:from-yellow-500 hover:to-yellow-600 text-white px-6 py-2 rounded-lg font-bold shadow-lg shadow-yellow-600/30 transition transform hover:-translate-y-0.5">
+                    <i class="fas fa-sticky-note mr-2"></i> 📝 Criar Nota
                 </button>
             </div>
             
@@ -77,7 +77,7 @@ include __DIR__ . '/../includes/header.php';
         
         <form id="modal-note" class="modal-form hidden h-full flex flex-col" onsubmit="submitNote(event)">
             <div class="flex justify-between items-center mb-4">
-                <h3 class="text-2xl font-bold text-yellow-400" id="note-modal-title">Nota</h3>
+                <h3 class="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-yellow-500" id="note-modal-title">📝 Nota</h3>
                 <button type="button" id="btn-delete-note" onclick="deleteNote()" class="hidden text-rose-400 hover:text-rose-300 transition">
                     <i class="fas fa-trash"></i>
                 </button>
@@ -85,8 +85,8 @@ include __DIR__ . '/../includes/header.php';
             <input type="hidden" name="id" id="note-id">
             <div class="flex-1 flex flex-col space-y-4">
                 <textarea name="content" id="note-content" class="flex-1 bg-slate-800/50 p-6 rounded-xl border border-slate-700/50 font-medium text-lg leading-relaxed focus:bg-slate-800 transition resize-none" placeholder="Comece a escrever..." required></textarea>
-                <button type="submit" class="w-full bg-yellow-500 hover:bg-yellow-400 text-black font-bold py-3 rounded-xl shadow-lg transition">
-                    Salvar Nota
+                <button type="submit" class="w-full bg-gradient-to-r from-yellow-600 to-yellow-700 hover:from-yellow-500 hover:to-yellow-600 text-white font-bold py-3 rounded-xl shadow-lg shadow-yellow-600/30 transition">
+                    💾 Salvar Nota
                 </button>
             </div>
         </form>

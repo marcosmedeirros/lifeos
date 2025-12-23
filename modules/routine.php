@@ -95,7 +95,7 @@ require_once __DIR__ . '/../includes/header.php';
             <i class="fas fa-times text-xl"></i>
         </button>
         <form id="modal-routine" class="modal-form hidden" onsubmit="submitRoutine(event)">
-            <h3 class="text-2xl font-bold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-orange-400 text-center" id="routine-modal-title">Como foi seu dia?</h3>
+            <h3 class="text-2xl font-bold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-yellow-500 text-center" id="routine-modal-title">😊 Como foi seu dia?</h3>
             <input type="hidden" name="date" id="routine-date">
             <input type="hidden" name="mood" id="routine-mood">
 
@@ -116,7 +116,7 @@ require_once __DIR__ . '/../includes/header.php';
                     <textarea name="content" id="routine-content" required class="w-full min-h-[200px] bg-slate-800/50 border border-slate-700 rounded-xl p-4 text-white" placeholder="Como foi seu dia?"></textarea>
                 </div>
                 
-                <button type="submit" class="w-full bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-400 hover:to-orange-400 text-black font-bold py-3 rounded-xl shadow-lg transition">Salvar</button>
+                <button type="submit" class="w-full bg-gradient-to-r from-yellow-600 to-yellow-700 hover:from-yellow-500 hover:to-yellow-600 text-white font-bold py-3 rounded-xl shadow-lg shadow-yellow-600/30 transition">💾 Salvar Dia</button>
             </div>
         </form>
     </div>

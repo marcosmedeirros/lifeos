@@ -182,15 +182,15 @@ include 'includes/header.php';
             
             <!-- SEÇÃO: CONTROLES RÁPIDOS -->
             <div class="mb-8">
-                <h3 class="text-xl font-bold text-white mb-4 flex items-center gap-2">
-                    <i class="fas fa-sliders-h text-purple-400"></i> Adicionar Rápido
+                <h3 class="text-xl font-bold text-yellow-500 mb-4 flex items-center gap-2">
+                    <i class="fas fa-sliders-h text-yellow-600"></i> Adicionar Rápido
                 </h3>
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                     <!-- Adicionar Atividade -->
                     <div class="glass-card p-4 rounded-xl">
                         <form onsubmit="addActivityQuick(event)" class="space-y-2">
                             <input type="text" id="quick-activity-title" placeholder="Nome da atividade" class="text-sm" required>
-                            <button type="submit" class="w-full bg-blue-600 hover:bg-blue-500 text-white px-3 py-2 rounded-lg text-sm font-bold transition">
+                            <button type="submit" class="w-full bg-gradient-to-r from-yellow-600 to-yellow-700 hover:from-yellow-500 hover:to-yellow-600 text-white px-3 py-2 rounded-lg text-sm font-bold transition shadow-lg shadow-yellow-600/30">
                                 <i class="fas fa-plus mr-1"></i> Atividade
                             </button>
                         </form>
@@ -200,7 +200,7 @@ include 'includes/header.php';
                     <div class="glass-card p-4 rounded-xl">
                         <form onsubmit="addEventQuick(event)" class="space-y-2">
                             <input type="text" id="quick-event-title" placeholder="Nome do evento" class="text-sm" required>
-                            <button type="submit" class="w-full bg-yellow-600 hover:bg-yellow-500 text-black px-3 py-2 rounded-lg text-sm font-bold transition">
+                            <button type="submit" class="w-full bg-gradient-to-r from-yellow-600 to-yellow-700 hover:from-yellow-500 hover:to-yellow-600 text-white px-3 py-2 rounded-lg text-sm font-bold transition shadow-lg shadow-yellow-600/30">
                                 <i class="fas fa-plus mr-1"></i> Evento
                             </button>
                         </form>
@@ -210,7 +210,7 @@ include 'includes/header.php';
                     <div class="glass-card p-4 rounded-xl">
                         <form onsubmit="addHabitQuick(event)" class="space-y-2">
                             <input type="text" id="quick-habit-name" placeholder="Nome do hábito" class="text-sm" required>
-                            <button type="submit" class="w-full bg-rose-600 hover:bg-rose-500 text-white px-3 py-2 rounded-lg text-sm font-bold transition">
+                            <button type="submit" class="w-full bg-gradient-to-r from-yellow-600 to-yellow-700 hover:from-yellow-500 hover:to-yellow-600 text-white px-3 py-2 rounded-lg text-sm font-bold transition shadow-lg shadow-yellow-600/30">
                                 <i class="fas fa-plus mr-1"></i> Hábito
                             </button>
                         </form>
@@ -227,7 +227,7 @@ include 'includes/header.php';
                                 <input type="number" step="0.01" id="quick-fin-amount" placeholder="Valor" class="text-sm" required>
                             </div>
                             <input type="text" id="quick-fin-desc" placeholder="Descrição (opcional)" class="text-sm">
-                            <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-2 rounded-lg text-sm font-bold transition">
+                            <button type="submit" class="w-full bg-gradient-to-r from-yellow-600 to-yellow-700 hover:from-yellow-500 hover:to-yellow-600 text-white px-3 py-2 rounded-lg text-sm font-bold transition shadow-lg shadow-yellow-600/30">
                                 <i class="fas fa-plus mr-1"></i> Lançar Finanças
                             </button>
                         </form>
@@ -238,39 +238,39 @@ include 'includes/header.php';
             <!-- 6 Cards Principais -->
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
         <!-- 1. Entradas (Semana) -->
-        <div class="glass-card p-6 rounded-2xl border-l-4 border-emerald-500">
-            <h3 class="text-emerald-400 text-sm font-bold uppercase tracking-wider mb-1">Entradas (Semana)</h3>
+        <div class="glass-card p-6 rounded-2xl border-l-4 border-yellow-600">
+            <h3 class="text-yellow-500 text-sm font-bold uppercase tracking-wider mb-1">💰 Entradas (Semana)</h3>
             <p class="text-3xl font-bold text-white" id="dash-income">R$ 0,00</p>
         </div>
         
         <!-- 2. Saídas (Semana) -->
-        <div class="glass-card p-6 rounded-2xl border-l-4 border-rose-500">
-            <h3 class="text-rose-400 text-sm font-bold uppercase tracking-wider mb-1">Saídas (Semana)</h3>
+        <div class="glass-card p-6 rounded-2xl border-l-4 border-gray-600">
+            <h3 class="text-gray-300 text-sm font-bold uppercase tracking-wider mb-1">📊 Saídas (Semana)</h3>
             <p class="text-3xl font-bold text-white" id="dash-outcome">R$ 0,00</p>
         </div>
         
         <!-- 3. Pontos (XP Total) -->
-        <div class="glass-card p-6 rounded-2xl border-l-4 border-cyan-500">
-            <h3 class="text-cyan-400 text-sm font-bold uppercase tracking-wider mb-1">Pontos (XP Total)</h3>
+        <div class="glass-card p-6 rounded-2xl border-l-4 border-yellow-600">
+            <h3 class="text-yellow-500 text-sm font-bold uppercase tracking-wider mb-1">⭐ Pontos (XP Total)</h3>
             <p class="text-3xl font-bold text-white" id="dash-xp-total">0 XP</p>
         </div>
         
         <!-- 4. Tarefas Pendentes Hoje -->
-        <div class="glass-card p-6 rounded-2xl border-l-4 border-purple-500">
-            <h3 class="text-purple-400 text-sm font-bold uppercase tracking-wider mb-1">Tarefas Pendentes Hoje</h3>
+        <div class="glass-card p-6 rounded-2xl border-l-4 border-gray-600">
+            <h3 class="text-gray-300 text-sm font-bold uppercase tracking-wider mb-1">✓ Tarefas Pendentes Hoje</h3>
             <p class="text-3xl font-bold text-white" id="dash-tasks-count">0</p>
         </div>
         
         <!-- 5. Próximo Evento -->
-        <div class="glass-card p-6 rounded-2xl border-l-4 border-amber-500">
-            <h3 class="text-amber-400 text-sm font-bold uppercase tracking-wider mb-1">Próximo Evento</h3>
+        <div class="glass-card p-6 rounded-2xl border-l-4 border-yellow-600">
+            <h3 class="text-yellow-500 text-sm font-bold uppercase tracking-wider mb-1">📅 Próximo Evento</h3>
             <p class="text-xl font-bold text-white truncate" id="dash-next-event-title">Nenhum evento</p>
-            <p class="text-xs text-slate-400" id="dash-next-event-time">Sem data</p>
+            <p class="text-xs text-gray-400" id="dash-next-event-time">Sem data</p>
         </div>
         
         <!-- 6. Card de Motivação -->
-        <div class="glass-card p-6 rounded-2xl border-l-4 border-indigo-500 flex flex-col justify-center">
-            <h3 class="text-indigo-400 text-sm font-bold uppercase tracking-wider mb-1">Treinos (Semana)</h3>
+        <div class="glass-card p-6 rounded-2xl border-l-4 border-gray-600 flex flex-col justify-center">
+            <h3 class="text-gray-300 text-sm font-bold uppercase tracking-wider mb-1">🏋️ Treinos (Semana)</h3>
             <p class="text-3xl font-bold text-white" id="dash-strava-count">0</p>
         </div>
     </div>
@@ -279,7 +279,7 @@ include 'includes/header.php';
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <!-- Atividades de Hoje -->
         <div class="glass-card p-6 rounded-2xl">
-            <h3 class="font-bold mb-4 text-blue-400 flex items-center gap-2">
+            <h3 class="font-bold mb-4 text-yellow-500 flex items-center gap-2">
                 <i class="fas fa-check-circle"></i> Hoje
             </h3>
             <div id="dash-activities-list" class="space-y-2"></div>
@@ -287,7 +287,7 @@ include 'includes/header.php';
         
         <!-- Eventos desta Semana -->
         <div class="glass-card p-6 rounded-2xl">
-            <h3 class="font-bold mb-4 text-yellow-400 flex items-center gap-2">
+            <h3 class="font-bold mb-4 text-yellow-500 flex items-center gap-2">
                 <i class="fas fa-calendar-week"></i> Eventos
             </h3>
             <div id="dash-events-list" class="space-y-2"></div>
@@ -295,7 +295,7 @@ include 'includes/header.php';
         
         <!-- Hábitos -->
         <div class="glass-card p-6 rounded-2xl">
-            <h3 class="font-bold mb-4 text-rose-400 flex items-center gap-2">
+            <h3 class="font-bold mb-4 text-yellow-500 flex items-center gap-2">
                 <i class="fas fa-fire"></i> Hábitos
             </h3>
             <div id="dash-habits-list" class="space-y-2"></div>

@@ -111,18 +111,18 @@ include __DIR__ . '/../includes/header.php';
     <div class="flex-1 p-4 md:p-10 content-wrap transition-all duration-300">
         <div class="main-shell">
             <div class="flex justify-between items-center mb-8">
-                <h2 class="text-3xl font-bold text-white">Metas</h2>
-                <button onclick="openModal('modal-goal')" class="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white px-6 py-2 rounded-lg font-bold shadow-lg shadow-blue-500/20 transition transform hover:-translate-y-0.5">
+                <h2 class="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-yellow-500">🎯 Metas</h2>
+                <button onclick="openModal('modal-goal')" class="bg-gradient-to-r from-yellow-600 to-yellow-700 hover:from-yellow-500 hover:to-yellow-600 text-white px-6 py-2 rounded-lg font-bold shadow-lg shadow-yellow-600/30 transition transform hover:-translate-y-0.5">
                     <i class="fas fa-plus mr-2"></i> Nova Meta
                 </button>
             </div>
             
             <!-- Abas de Navegação -->
-            <div class="flex gap-4 mb-8 border-b border-slate-700/50">
-                <button onclick="switchGoalType('geral')" id="tab-geral" class="px-6 py-3 font-bold text-white border-b-2 border-blue-500 transition">
+            <div class="flex gap-4 mb-8 border-b border-yellow-600/20">
+                <button onclick="switchGoalType('geral')" id="tab-geral" class="px-6 py-3 font-bold text-white border-b-2 border-yellow-500 transition">
                     <i class="fas fa-target mr-2"></i>Metas Gerais
                 </button>
-                <button onclick="switchGoalType('anual')" id="tab-anual" class="px-6 py-3 font-bold text-slate-400 border-b-2 border-transparent hover:text-white transition">
+                <button onclick="switchGoalType('anual')" id="tab-anual" class="px-6 py-3 font-bold text-gray-400 border-b-2 border-transparent hover:text-white transition">
                     <i class="fas fa-calendar mr-2"></i>Metas 2026
                 </button>
             </div>
@@ -139,13 +139,13 @@ include __DIR__ . '/../includes/header.php';
         </button>
         
         <form id="modal-goal" class="modal-form hidden" onsubmit="submitGoal(event)">
-            <h3 class="text-2xl font-bold mb-6 text-white bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-cyan-400" id="goal-modal-title">Nova Meta</h3>
+            <h3 class="text-2xl font-bold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-yellow-500" id="goal-modal-title">🎯 Nova Meta</h3>
             <input type="hidden" name="id" id="goal-id">
             <input type="hidden" name="goal_type" id="goal-type" value="geral">
             <div class="space-y-5">
                 <input type="text" name="title" id="goal-title" placeholder="Qual seu objetivo?" required class="text-lg">
                 <div>
-                    <label class="text-sm font-medium text-slate-300 mb-1.5 block">Dificuldade</label>
+                    <label class="text-sm font-medium text-gray-300 mb-1.5 block">Dificuldade</label>
                     <select name="difficulty" id="goal-difficulty">
                         <option value="facil">Fácil</option>
                         <option value="media" selected>Média</option>
@@ -153,8 +153,8 @@ include __DIR__ . '/../includes/header.php';
                     </select>
                 </div>
                 <div class="flex gap-3 pt-4">
-                    <button type="submit" class="flex-1 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white font-bold py-3 rounded-xl shadow-lg transition mt-2">
-                        Salvar Meta
+                    <button type="submit" class="flex-1 bg-gradient-to-r from-yellow-600 to-yellow-700 hover:from-yellow-500 hover:to-yellow-600 text-white font-bold py-3 rounded-xl shadow-lg shadow-yellow-600/30 transition mt-2">
+                        💾 Salvar Meta
                     </button>
                     <button type="button" id="btn-delete-goal" onclick="deleteGoal()" class="hidden bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 px-4 rounded-xl border border-rose-500/30 transition">
                         <i class="fas fa-trash"></i>
@@ -198,7 +198,7 @@ async function loadGoals() {
                     <span class="text-[10px] font-bold uppercase tracking-wider ${config.text} bg-slate-900/50 px-2 py-1 rounded border border-slate-700/50">${config.title}</span>
                     <label class="custom-checkbox relative inline-flex items-center cursor-pointer">
                         <input type="checkbox" onchange="event.stopPropagation(); toggleGoal(${g.id})" class="sr-only peer" ${isDone ? 'checked' : ''}>
-                        <div class="w-6 h-6 border-2 border-slate-500 rounded-full peer-checked:bg-purple-600 peer-checked:border-purple-600 transition flex items-center justify-center">
+                        <div class="w-6 h-6 border-2 border-slate-500 rounded-full peer-checked:bg-yellow-600 peer-checked:border-yellow-600 transition flex items-center justify-center">
                             <i class="fas fa-check text-white text-xs opacity-0 peer-checked:opacity-100 transition-opacity"></i>
                         </div>
                     </label>

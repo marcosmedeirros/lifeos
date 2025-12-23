@@ -98,8 +98,8 @@ $monthNames = ['', 'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', '
   <style>
     body { background:#000; color:#fff; font-family:system-ui,-apple-system,sans-serif; }
     .glass { background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.06); }
-    .btn { background:#fff; color:#000; padding:0.5rem 1rem; border-radius:0.75rem; font-weight:600; transition:all 0.2s; display:inline-block; text-align:center; border:0; cursor:pointer; }
-    .btn:hover { background:#e5e5e5; transform: translateY(-1px); }
+    .btn { background:#d4af37; color:#000; padding:0.5rem 1rem; border-radius:0.75rem; font-weight:600; transition:all 0.2s; display:inline-block; text-align:center; border:0; cursor:pointer; }
+    .btn:hover { background:#c19b1a; transform: translateY(-1px); }
     .day-cell { min-height:100px; border:1px solid #222; }
     .day-cell:hover { background:rgba(255,255,255,0.03); }
   </style>
@@ -115,7 +115,7 @@ $monthNames = ['', 'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', '
         <a href="?month=<?= $prevMonth ?>&year=<?= $prevYear ?>" class="btn">← Anterior</a>
         <a href="?month=<?= date('m') ?>&year=<?= date('Y') ?>" class="btn">Hoje</a>
         <a href="?month=<?= $nextMonth ?>&year=<?= $nextYear ?>" class="btn">Próximo →</a>
-        <button onclick="openModal()" class="btn">+ Evento</button>
+        <button onclick="openModal()" class="btn">📅 + Evento</button>
       </div>
     </div>
 
@@ -185,7 +185,7 @@ $monthNames = ['', 'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', '
             <p class="text-xs text-gray-500 mt-1">Deixe vazio para evento de dia inteiro</p>
           </div>
           <div class="flex items-end">
-            <button class="btn w-full">Adicionar</button>
+            <button class="btn w-full">💾 Adicionar</button>
           </div>
         </div>
       </form>

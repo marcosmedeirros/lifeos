@@ -1,6 +1,6 @@
 body { 
-    background: radial-gradient(circle at top right, #1e1b4b, #0f172a, #020617); 
-    color: #e2e8f0; 
+    background: #0a0a0a;
+    color: #ffffff; 
     font-family: 'Outfit', sans-serif; 
     min-height: 100vh;
 }
@@ -25,9 +25,9 @@ body {
 }
 
 input, select, textarea { 
-    background-color: #1e293b; 
-    border: 1px solid #334155; 
-    color: white; 
+    background-color: #1a1a1a; 
+    border: 1px solid #333333; 
+    color: #ffffff; 
     padding: 12px; 
     border-radius: 10px; 
     width: 100%; 
@@ -37,47 +37,47 @@ input, select, textarea {
 
 input:focus, select:focus, textarea:focus { 
     outline: none; 
-    border-color: #a855f7; 
-    box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.2); 
-    background-color: #0f172a; 
+    border-color: #d4af37; 
+    box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.2); 
+    background-color: #0f0f0f; 
 }
 
 .glass-sidebar { 
-    background: rgba(30, 41, 59, 0.95); 
+    background: rgba(10, 10, 10, 0.95); 
     backdrop-filter: blur(10px); 
-    border-right: 1px solid rgba(255,255,255,0.05); 
+    border-right: 1px solid rgba(212, 175, 55, 0.2); 
 }
 
 .glass-card { 
-    background: rgba(30, 41, 59, 0.6); 
+    background: rgba(20, 20, 20, 0.8); 
     backdrop-filter: blur(12px); 
-    border: 1px solid rgba(255, 255, 255, 0.05); 
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); 
+    border: 1px solid rgba(212, 175, 55, 0.15); 
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3); 
 }
 
 .modal-glass { 
-    background: rgba(15, 23, 42, 0.98); 
+    background: rgba(10, 10, 10, 0.98); 
     backdrop-filter: blur(16px); 
-    border: 1px solid rgba(255, 255, 255, 0.1); 
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7); 
+    border: 1px solid rgba(212, 175, 55, 0.2); 
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.9); 
 }
 
 .nav-btn { 
     border-radius: 12px; 
     transition: all 0.2s; 
-    color: #94a3b8; 
+    color: #b0b0b0; 
     font-weight: 500; 
 }
 
 .nav-btn:hover { 
-    background-color: rgba(168, 85, 247, 0.1); 
-    color: white; 
+    background-color: rgba(212, 175, 55, 0.1); 
+    color: #ffffff; 
 }
 
 .nav-btn.active { 
-    background: linear-gradient(135deg, rgba(168, 85, 247, 0.2) 0%, rgba(168, 85, 247, 0.05) 100%); 
-    color: #d8b4fe; 
-    border-left: 3px solid #a855f7; 
+    background: linear-gradient(135deg, rgba(212, 175, 55, 0.15) 0%, rgba(212, 175, 55, 0.05) 100%); 
+    color: #d4af37; 
+    border-left: 3px solid #d4af37; 
 }
 
 /* Layout helpers */
@@ -128,8 +128,8 @@ input:focus, select:focus, textarea:focus {
 }
 
 ::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: #0f172a; }
-::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+::-webkit-scrollbar-track { background: #0a0a0a; }
+::-webkit-scrollbar-thumb { background: #333333; border-radius: 3px; }
 
 /* ===== PWA & MOBILE RESPONSIVENESS ===== */
 
