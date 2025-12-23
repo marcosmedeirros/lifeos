@@ -126,3 +126,115 @@ input:focus, select:focus, textarea:focus {
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: #0f172a; }
 ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+
+/* ===== PWA & MOBILE RESPONSIVENESS ===== */
+
+/* Mobile First */
+@media (max-width: 767px) {
+    body { padding-left: 0 !important; }
+    
+    .glass-sidebar { 
+        position: fixed;
+        left: -100%;
+        transition: left 0.3s ease;
+        z-index: 50;
+    }
+    
+    .glass-sidebar.active { left: 0; }
+    
+    main { padding: 1rem !important; }
+    
+    .glass-card { padding: 1rem !important; }
+    
+    /* Grid adaptativo */
+    .grid.sm\:grid-cols-2,
+    .grid.lg\:grid-cols-3,
+    .grid.grid-cols-2,
+    .grid.grid-cols-3 {
+        grid-template-columns: 1fr !important;
+    }
+    
+    /* Formulários em coluna */
+    form.flex { flex-direction: column; }
+    form.flex > * { width: 100% !important; }
+    
+    /* Botões maiores para touch */
+    button, .btn, a.btn {
+        min-height: 44px;
+        padding: 0.75rem 1.25rem;
+    }
+    
+    /* Inputs maiores */
+    input, select, textarea {
+        min-height: 44px;
+        font-size: 16px; /* Evita zoom no iOS */
+    }
+    
+    /* Títulos menores */
+    h1 { font-size: 1.75rem !important; }
+    h2 { font-size: 1.5rem !important; }
+    h3 { font-size: 1.25rem !important; }
+    
+    /* Tabelas scroll horizontal */
+    table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+    
+    /* Dashboard cards ajustados */
+    .board-grid {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+/* Tablets */
+@media (min-width: 768px) and (max-width: 1024px) {
+    .grid.lg\:grid-cols-3 {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+    
+    .glass-sidebar {
+        width: 16rem;
+    }
+    
+    body { padding-left: 16rem; }
+}
+
+/* Landscape mobile */
+@media (max-width: 900px) and (orientation: landscape) {
+    .glass-card { padding: 0.75rem !important; }
+    h1 { font-size: 1.5rem !important; }
+    h2 { font-size: 1.25rem !important; }
+}
+
+/* Touch devices */
+@media (hover: none) and (pointer: coarse) {
+    button, a, input[type="submit"], .btn, .nav-btn {
+        min-height: 44px;
+        min-width: 44px;
+    }
+    
+    .nav-btn { padding: 0.75rem 1rem; }
+}
+
+/* Telas muito pequenas */
+@media (max-width: 375px) {
+    body { font-size: 14px; }
+    main { padding: 0.75rem !important; }
+    .glass-card { padding: 0.75rem !important; }
+    h1 { font-size: 1.5rem !important; }
+    h2 { font-size: 1.25rem !important; }
+    h3 { font-size: 1.1rem !important; }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}

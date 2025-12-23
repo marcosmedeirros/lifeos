@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Gerador de Ícones - LifeOS</title>
+</head>
+<body>
+    <h2>Gerando ícones LifeOS...</h2>
+    <script>
+        function createLifeOSIcon(size, filename) {
+            const canvas = document.createElement('canvas');
+            canvas.width = size;
+            canvas.height = size;
+            const ctx = canvas.getContext('2d');
+            
+            // Fundo gradiente roxo
+            const gradient = ctx.createLinearGradient(0, 0, size, size);
+            gradient.addColorStop(0, '#a855f7');
+            gradient.addColorStop(1, '#6366f1');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, size, size);
+            
+            // Círculo central mais claro
+            const centerGradient = ctx.createRadialGradient(size/2, size/2, 0, size/2, size/2, size/2);
+            centerGradient.addColorStop(0, 'rgba(255, 255, 255, 0.3)');
+            centerGradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+            ctx.fillStyle = centerGradient;
+            ctx.fillRect(0, 0, size, size);
+            
+            // Símbolo do raio estilizado
+            ctx.fillStyle = '#ffffff';
+            const centerX = size / 2;
+            const centerY = size / 2;
+            const boltWidth = size * 0.35;
+            const boltHeight = size * 0.6;
+            
+            ctx.beginPath();
+            // Parte superior do raio
+            ctx.moveTo(centerX + boltWidth * 0.1, centerY - boltHeight/2);
+            ctx.lineTo(centerX - boltWidth * 0.3, centerY - boltHeight/2);
+            ctx.lineTo(centerX + boltWidth * 0.2, centerY * 0.05);
+            ctx.lineTo(centerX - boltWidth * 0.1, centerY * 0.05);
+            // Parte inferior do raio
+            ctx.lineTo(centerX + boltWidth * 0.3, centerY + boltHeight/2);
+            ctx.lineTo(centerX - boltWidth * 0.2, centerY + boltHeight/4);
+            ctx.lineTo(centerX + boltWidth * 0.1, centerY + boltHeight/4);
+            ctx.closePath();
+            ctx.fill();
+            
+            // Adicionar círculo decorativo
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+            ctx.lineWidth = size * 0.02;
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, size * 0.4, 0, 2 * Math.PI);
+            ctx.stroke();
+            
+            return canvas.toDataURL('image/png');
+        }
+
+        // Gerar os ícones
+        const icon192 = createLifeOSIcon(192, 'icon-192.png');
+        const icon512 = createLifeOSIcon(512, 'icon-512.png');
+        const iconApple = createLifeOSIcon(180, 'apple-touch-icon.png');
+
+        // Criar formulário
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = 'save_lifeos_icons.php';
+        
+        ['icon192', 'icon512', 'iconApple'].forEach((name, idx) => {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = name;
+            input.value = [icon192, icon512, iconApple][idx];
+            form.appendChild(input);
+        });
+        
+        document.body.appendChild(form);
+        form.submit();
+    </script>
+</body>
+</html>

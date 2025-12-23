@@ -1,0 +1,27 @@
+{
+  "name": "LifeOS",
+  "short_name": "LifeOS",
+  "description": "Sistema de Gestão de Vida - Dashboard Pessoal",
+  "start_url": "./index.php",
+  "scope": "/lifeos/",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#a855f7",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["productivity", "lifestyle", "utilities"],
+  "screenshots": []
+}
