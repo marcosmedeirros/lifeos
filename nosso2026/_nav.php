@@ -19,7 +19,7 @@
     </nav>
     
     <!-- Mobile Hamburger Button -->
-    <button id="n26-menu-toggle" class="md:hidden text-white focus:outline-none" aria-label="Menu">
+    <button id="n26-menu-toggle" class="md:hidden text-white focus:outline-none touch-manipulation" aria-label="Menu" style="min-width: 44px; min-height: 44px;">
       <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
       </svg>
@@ -27,17 +27,17 @@
   </div>
   
   <!-- Mobile Menu (Hidden by default) -->
-  <nav id="n26-mobile-menu" class="hidden md:hidden bg-black border-t border-gray-800">
+  <nav id="n26-mobile-menu" class="hidden md:hidden bg-black border-t border-gray-800 max-h-[80vh] overflow-y-auto">
     <div class="px-4 py-2 space-y-1">
-      <a href="<?= n26_link('index.php') ?>" class="block py-2 hover:bg-gray-900 rounded px-3">Dashboard</a>
-      <a href="<?= n26_link('goals.php') ?>" class="block py-2 hover:bg-gray-900 rounded px-3">Metas</a>
-      <a href="<?= n26_link('calendar.php') ?>" class="block py-2 hover:bg-gray-900 rounded px-3">Compromissos</a>
-      <a href="<?= n26_link('workouts.php') ?>" class="block py-2 hover:bg-gray-900 rounded px-3">Treinos</a>
-      <a href="<?= n26_link('finances.php') ?>" class="block py-2 hover:bg-gray-900 rounded px-3">Finanças</a>
-      <a href="<?= n26_link('memories.php') ?>" class="block py-2 hover:bg-gray-900 rounded px-3">Memórias</a>
-      <a href="<?= n26_link('food.php') ?>" class="block py-2 hover:bg-gray-900 rounded px-3">Alimentação</a>
-      <a href="<?= n26_link('market.php') ?>" class="block py-2 hover:bg-gray-900 rounded px-3">Mercado</a>
-      <a href="<?= n26_link('movies.php') ?>" class="block py-2 hover:bg-gray-900 rounded px-3">Filmes</a>
+      <a href="<?= n26_link('index.php') ?>" class="block py-3 hover:bg-gray-900 rounded px-3 touch-manipulation">📊 Dashboard</a>
+      <a href="<?= n26_link('goals.php') ?>" class="block py-3 hover:bg-gray-900 rounded px-3 touch-manipulation">🎯 Metas</a>
+      <a href="<?= n26_link('calendar.php') ?>" class="block py-3 hover:bg-gray-900 rounded px-3 touch-manipulation">📅 Compromissos</a>
+      <a href="<?= n26_link('workouts.php') ?>" class="block py-3 hover:bg-gray-900 rounded px-3 touch-manipulation">💪 Treinos</a>
+      <a href="<?= n26_link('finances.php') ?>" class="block py-3 hover:bg-gray-900 rounded px-3 touch-manipulation">💰 Finanças</a>
+      <a href="<?= n26_link('memories.php') ?>" class="block py-3 hover:bg-gray-900 rounded px-3 touch-manipulation">📸 Memórias</a>
+      <a href="<?= n26_link('food.php') ?>" class="block py-3 hover:bg-gray-900 rounded px-3 touch-manipulation">🍽️ Alimentação</a>
+      <a href="<?= n26_link('market.php') ?>" class="block py-3 hover:bg-gray-900 rounded px-3 touch-manipulation">🛒 Mercado</a>
+      <a href="<?= n26_link('movies.php') ?>" class="block py-3 hover:bg-gray-900 rounded px-3 touch-manipulation">🎬 Filmes</a>
     </div>
   </nav>
 </header>

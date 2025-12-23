@@ -1,6 +1,33 @@
 <?php
 require_once __DIR__ . '/_bootstrap.php';
 
+// Função para formatar data em formato brasileiro
+function formatDateBR($date, $includeTime = false) {
+    if (!$date) return '';
+    $timestamp = strtotime($date);
+    if ($includeTime && date('H:i', $timestamp) != '00:00') {
+        return date('d/m/Y', $timestamp) . ' às ' . date('H:i', $timestamp);
+    }
+    return date('d/m/Y', $timestamp);
+}
+
+// Função para converter data BR para formato SQL
+function convertDateBRtoSQL($dateBR, $timeBR = null) {
+    if (strpos($dateBR, '/') !== false) {
+        // Formato DD/MM/YYYY
+        list($day, $month, $year) = explode('/', $dateBR);
+        $sqlDate = "$year-$month-$day";
+    } else {
+        // Já está em formato YYYY-MM-DD
+        $sqlDate = $dateBR;
+    }
+    
+    if ($timeBR) {
+        return $sqlDate . ' ' . $timeBR . ':00';
+    }
+    return $sqlDate;
+}
+
 // POST: add/edit/delete
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['delete'])) {
@@ -9,8 +36,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt = $pdo->prepare("UPDATE events SET title=?, start_date=?, description=? WHERE id=? AND group_id='nosso2026'");
         $stmt->execute([trim($_POST['title']), $_POST['start_date'], trim($_POST['description']), intval($_POST['id'])]);
     } else {
+        // Combinar data e hora se fornecidos separadamente
+        $startDate = $_POST['start_date'];
+        if (isset($_POST['start_time'])) {
+            $startDate = convertDateBRtoSQL($_POST['start_date'], $_POST['start_time']);
+        }
         $stmt = $pdo->prepare("INSERT INTO events (user_id, group_id, title, start_date, description) VALUES (1, 'nosso2026', ?, ?, ?)");
-        $stmt->execute([trim($_POST['title']), $_POST['start_date'], trim($_POST['description'])]);
+        $stmt->execute([trim($_POST['title']), $startDate, trim($_POST['description'])]);
     }
     header('Location: ' . n26_link('calendar.php'));
     exit;
@@ -101,8 +133,14 @@ $monthNames = ['', 'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', '
             <div class="font-bold text-sm <?= $isToday ? 'text-white' : 'text-[#999]' ?>"><?= $day ?></div>
             <?php if($hasEvents): ?>
               <div class="mt-2 space-y-1">
-                <?php foreach($eventsByDay[$day] as $e): ?>
-                  <div class="text-xs bg-white text-black rounded px-1 py-0.5 truncate cursor-pointer" onclick="event.stopPropagation(); openEvent(<?= htmlspecialchars(json_encode($e)) ?>)">
+                <?php foreach($eventsByDay[$day] as $e): 
+                  $eventTime = date('H:i', strtotime($e['start_date']));
+                  $showTime = ($eventTime != '00:00');
+                ?>
+                  <div class="text-xs bg-white text-black rounded px-1 py-0.5 truncate cursor-pointer" onclick="event.stopPropagation(); openEvent(<?= htmlspecialchars(json_encode($e)) ?>)" title="<?= $showTime ? $eventTime . ' - ' : '' ?><?= htmlspecialchars($e['title']) ?>">
+                    <?php if($showTime): ?>
+                      <span class="font-bold"><?= $eventTime ?></span> 
+                    <?php endif; ?>
                     <?= htmlspecialchars($e['title']) ?>
                   </div>
                 <?php endforeach; ?>
@@ -115,13 +153,15 @@ $monthNames = ['', 'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', '
 
     <!-- Adicionar Evento -->
     <section class="glass rounded-2xl p-6">
-      <h2 class="text-xl font-bold mb-4">Adicionar Evento</h2>
-      <form method="post" class="grid md:grid-cols-5 gap-3">
-        <input name="title" class="md:col-span-2 bg-black border border-[#222] rounded-xl p-3 text-white" placeholder="Título" required>
-        <input name="start_date" type="datetime-local" class="bg-black border border-[#222] rounded-xl p-3 text-white" required>
-        <input name="description" class="bg-black border border-[#222] rounded-xl p-3 text-white" placeholder="Descrição">
+      <h2 class="text-xl font-bold mb-4">Adicionar Evento Rápido</h2>
+      <form method="post" class="grid md:grid-cols-6 gap-3">
+        <input name="title" class="md:col-span-2 bg-black border border-[#222] rounded-xl p-3 text-white" placeholder="Título do evento" required>
+        <input name="start_date" type="date" class="bg-black border border-[#222] rounded-xl p-3 text-white" value="<?= date('Y-m-d') ?>" required>
+        <input name="start_time" type="time" class="bg-black border border-[#222] rounded-xl p-3 text-white" value="09:00">
+        <input name="description" class="bg-black border border-[#222] rounded-xl p-3 text-white" placeholder="Descrição (opcional)">
         <button class="btn">Adicionar</button>
       </form>
+      <p class="text-xs text-gray-400 mt-2">💡 Deixe a hora vazia se o evento for o dia todo</p>
     </section>
 
     <!-- Modal de Evento (JavaScript) -->
@@ -135,8 +175,12 @@ $monthNames = ['', 'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', '
             <input name="title" id="eventTitle" class="w-full bg-black border border-[#222] rounded-xl p-3 text-white" required>
           </div>
           <div class="mb-4">
-            <label class="block text-sm font-bold mb-2">Data e Hora</label>
-            <input name="start_date" id="eventDate" type="datetime-local" class="w-full bg-black border border-[#222] rounded-xl p-3 text-white" required>
+            <label class="block text-sm font-bold mb-2">Data</label>
+            <input name="start_date" id="eventDateOnly" type="date" class="w-full bg-black border border-[#222] rounded-xl p-3 text-white" required>
+          </div>
+          <div class="mb-4">
+            <label class="block text-sm font-bold mb-2">Hora (opcional)</label>
+            <input name="start_time" id="eventTimeOnly" type="time" class="w-full bg-black border border-[#222] rounded-xl p-3 text-white" placeholder="Deixe vazio se for o dia todo">
           </div>
           <div class="mb-4">
             <label class="block text-sm font-bold mb-2">Descrição</label>
@@ -159,11 +203,8 @@ $monthNames = ['', 'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', '
       document.getElementById('eventDesc').value = '';
       const now = new Date();
       const year = now.getFullYear();
-      const month = String(now.getMonth() + 1).padStart(2, '0');
-      const day = String(now.getDate()).padStart(2, '0');
-      const hours = String(now.getHours()).padStart(2, '0');
-      const minutes = String(now.getMinutes()).padStart(2, '0');
-      document.getElementById('eventDate').value = `${year}-${month}-${day}T${hours}:${minutes}`;
+      const month = String(now.getMonth(Only').value = `${year}-${month}-${day}`;
+      document.getElementById('eventTimeOnly').value = `${hours}:${minutes}`;
       document.getElementById('eventAction').name = 'add';
       document.getElementById('deleteBtn').style.display = 'none';
       document.getElementById('eventModal').style.display = 'block';
@@ -171,7 +212,14 @@ $monthNames = ['', 'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', '
     function openEvent(e) {
       document.getElementById('eventId').value = e.id;
       document.getElementById('eventTitle').value = e.title;
-      document.getElementById('eventDate').value = e.start_date.replace(' ', 'T').substring(0, 16);
+      
+      // Separar data e hora
+      const dateTimeParts = e.start_date.split(' ');
+      const datePart = dateTimeParts[0]; // YYYY-MM-DD
+      const timePart = dateTimeParts[1] ? dateTimeParts[1].substring(0, 5) : ''; // HH:MM
+      
+      document.getElementById('eventDateOnly').value = datePart;
+      document.getElementById('eventTimeOnly').value = (timePart && timePart !== '00:00') ? timePart : '';
       document.getElementById('eventDesc').value = e.description || '';
       document.getElementById('eventAction').name = 'update';
       document.getElementById('deleteBtn').style.display = 'block';
@@ -180,12 +228,11 @@ $monthNames = ['', 'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', '
     function openDay(day) {
       const month = String(<?= $currentMonth ?>).padStart(2, '0');
       const year = <?= $currentYear ?>;
-      const hours = '09';
-      const minutes = '00';
       document.getElementById('eventId').value = '';
       document.getElementById('eventTitle').value = '';
       document.getElementById('eventDesc').value = '';
-      document.getElementById('eventDate').value = `${year}-${month}-${String(day).padStart(2,'0')}T${hours}:${minutes}`;
+      document.getElementById('eventDateOnly').value = `${year}-${month}-${String(day).padStart(2,'0')}`;
+      document.getElementById('eventTimeOnly').value = '09:00';
       document.getElementById('eventAction').name = 'add';
       document.getElementById('deleteBtn').style.display = 'none';
       document.getElementById('eventModal').style.display = 'block';
@@ -194,6 +241,45 @@ $monthNames = ['', 'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', '
       document.getElementById('eventModal').style.display = 'none';
     }
     function deleteEvent() {
+      if(confirm('Excluir este evento?')) {
+        const form = document.getElementById('eventForm');
+        form.innerHTML = '<input type="hidden" name="delete" value="1"><input type="hidden" name="id" value="' + document.getElementById('eventId').value + '">';
+        form.submit();
+      }
+    }
+    
+    // Submeter formulário do modal com data e hora combinados
+    document.getElementById('eventForm').addEventListener('submit', function(e) {
+      if (!this.querySelector('input[name="delete"]')) {
+        e.preventDefault();
+        const formData = new FormData(this);
+        const dateOnly = formData.get('start_date');
+        const timeOnly = formData.get('start_time');
+        
+        // Se tem hora, combina; se não, usa só a data com 00:00:00
+        let finalDateTime = dateOnly;
+        if (timeOnly) {
+          finalDateTime = dateOnly + ' ' + timeOnly + ':00';
+        } else {
+          finalDateTime = dateOnly + ' 00:00:00';
+        }
+        
+        // Remove campos antigos e adiciona o combinado
+        this.querySelector('input[name="start_date"]').remove();
+        if (this.querySelector('input[name="start_time"]')) {
+          this.querySelector('input[name="start_time"]').remove();
+        }
+        
+        const hiddenInput = document.createElement('input');
+        hiddenInput.type = 'hidden';
+        hiddenInput.name = 'start_date';
+        hiddenInput.value = finalDateTime;
+        this.appendChild(hiddenInput);
+        
+        this.submit();
+      }
+    });
+  </script>nt() {
       if(confirm('Excluir este evento?')) {
         const form = document.getElementById('eventForm');
         form.innerHTML = '<input type="hidden" name="delete" value="1"><input type="hidden" name="id" value="' + document.getElementById('eventId').value + '">';

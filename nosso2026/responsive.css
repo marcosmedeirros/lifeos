@@ -1,0 +1,214 @@
+/* nosso2026/responsive.css - Estilos responsivos adicionais */
+
+/* PWA Standalone Mode Detection */
+@media all and (display-mode: standalone) {
+  /* Garantir que elementos são acessíveis no modo PWA */
+  body {
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  
+  /* Menu hambúrguer sempre visível no PWA */
+  #n26-menu-toggle {
+    display: block !important;
+  }
+}
+
+/* Touch device optimizations */
+.touch-manipulation {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Mobile First - Ajustes para telas pequenas */
+@media (max-width: 640px) {
+  /* Padding reduzido em mobile */
+  main {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+    padding-top: 1.5rem !important;
+  }
+  
+  /* Cards com padding menor */
+  .glass {
+    padding: 1rem !important;
+  }
+  
+  /* Títulos menores em mobile */
+  h1 { font-size: 1.75rem !important; }
+  h2 { font-size: 1.5rem !important; }
+  h3 { font-size: 1.25rem !important; }
+  
+  /* Botões ocupando largura total em formulários pequenos */
+  form .btn {
+    width: 100%;
+    margin-top: 0.5rem;
+  }
+  
+  /* Grid de calendário responsivo */
+  .grid.grid-cols-7 > div {
+    font-size: 0.75rem;
+    padding: 0.5rem 0.25rem;
+  }
+  
+  /* Inputs em formulários inline quebram para full width */
+  form.flex.gap-2,
+  form.flex.gap-3 {
+    flex-direction: column;
+  }
+  
+  form.flex input[type="text"],
+  form.flex input[type="number"],
+  form.flex input[type="date"],
+  form.flex input[type="time"],
+  form.flex input[type="email"],
+  form.flex select,
+  form.flex textarea {
+    width: 100% !important;
+  }
+  
+  /* Navegação mais compacta */
+  nav a {
+    font-size: 0.875rem;
+    padding: 0.5rem !important;
+  }
+  
+  /* Estatísticas com números menores */
+  .text-5xl { font-size: 2.5rem !important; }
+  .text-4xl { font-size: 2rem !important; }
+  
+  /* Scroll horizontal para tabelas */
+  table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+  
+  /* Menu mobile visível e acessível */
+  #n26-menu-toggle {
+    min-height: 44px;
+    min-width: 44px;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  /* Links do menu mobile com área de toque adequada */
+  #n26-mobile-menu a {
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+  }
+}
+
+/* Tablets e dispositivos médios */
+@media (min-width: 641px) and (max-width: 1024px) {
+  /* Grid adapta para 2 colunas em vez de 3 */
+  .grid.md\:grid-cols-3 {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+  
+  /* Padding intermediário */
+  main {
+    padding-left: 2rem !important;
+    padding-right: 2rem !important;
+  }
+}
+
+/* Landscape em dispositivos pequenos */
+@media (max-width: 900px) and (orientation: landscape) {
+  /* Reduz altura de elementos para aproveitar espaço vertical */
+  .glass {
+    padding: 0.75rem !important;
+  }
+  
+  h1 { font-size: 1.5rem !important; }
+  h2 { font-size: 1.25rem !important; }
+  
+  /* Calendário mais compacto */
+  .grid.grid-cols-7 > div {
+    padding: 0.25rem;
+    font-size: 0.7rem;
+  }
+}
+
+/* Telas muito pequenas (< 375px) */
+@media (max-width: 375px) {
+  body {
+    font-size: 14px;
+  }
+  
+  main {
+    padding: 1rem 0.75rem !important;
+  }
+  
+  .glass {
+    padding: 0.75rem !important;
+    border-radius: 1rem !important;
+  }
+  
+  h1 { font-size: 1.5rem !important; }
+  h2 { font-size: 1.25rem !important; }
+  h3 { font-size: 1.1rem !important; }
+  
+  .btn {
+    padding: 0.5rem 0.75rem !important;
+    font-size: 0.875rem !important;
+  }
+  
+  /* Gap menor entre elementos de grid */
+  .gap-6 { gap: 1rem !important; }
+  .gap-3 { gap: 0.5rem !important; }
+}
+
+/* Melhorias para acessibilidade touch */
+@media (hover: none) and (pointer: coarse) {
+  /* Aumenta áreas de toque em dispositivos touch */
+  button, a, input[type="submit"], .btn {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Links e botões com espaçamento adequado */
+  nav a {
+    padding: 0.75rem 1rem !important;
+  }
+  
+  /* Inputs maiores para facilitar interação */
+  input, select, textarea {
+    min-height: 44px;
+    font-size: 16px; /* Evita zoom automático no iOS */
+  }
+}
+
+/* Print styles */
+@media print {
+  body {
+    background: white !important;
+    color: black !important;
+  }
+  
+  .glass {
+    border: 1px solid #ccc !important;
+    background: white !important;
+  }
+  
+  nav, footer {
+    display: none;
+  }
+  
+  button, .btn {
+    display: none;
+  }
+}
+
+/* Reduced motion para acessibilidade */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
