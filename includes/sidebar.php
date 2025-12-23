@@ -1,13 +1,29 @@
-<nav class="md:w-72 glass-sidebar p-6 flex flex-col fixed md:fixed md:top-0 md:left-0 w-full z-10 bottom-0 md:bottom-auto md:h-screen md:overflow-y-auto shadow-2xl">
+<!-- Hamburger Button (Mobile) -->
+<button id="menu-toggle" class="md:hidden fixed top-4 left-4 z-50 bg-purple-600 hover:bg-purple-700 text-white p-3 rounded-xl shadow-lg transition" aria-label="Menu">
+    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+    </svg>
+</button>
+
+<!-- Overlay (Mobile) -->
+<div id="menu-overlay" class="hidden fixed inset-0 bg-black/70 z-40 md:hidden"></div>
+
+<!-- Sidebar Navigation -->
+<nav id="sidebar" class="glass-sidebar fixed top-0 left-0 h-screen w-72 p-6 flex flex-col z-50 transform -translate-x-full md:translate-x-0 transition-transform duration-300 overflow-y-auto shadow-2xl">
     <div class="mb-10 flex items-center gap-3 px-2">
         <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-purple-600 to-blue-500 flex items-center justify-center shadow-lg shadow-purple-500/20">
             <i class="fas fa-biohazard text-white text-xl"></i>
         </div>
         <h1 class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-blue-400">LifeOS</h1>
+        <button id="menu-close" class="md:hidden ml-auto text-white/50 hover:text-white">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+        </button>
     </div>
     
     <div class="flex-1 flex flex-col">
-        <div class="flex md:flex-col gap-2 overflow-x-auto md:overflow-visible no-scrollbar pb-2 md:pb-0">
+        <div class="flex flex-col gap-2">
             <a href="<?php echo BASE_PATH; ?>/" class="nav-btn <?php echo ($page === 'dashboard') ? 'active' : ''; ?> text-left px-4 py-3 flex items-center gap-3">
                 <i class="fas fa-chart-pie w-5 text-center"></i> <span>Dashboard</span>
             </a>
@@ -44,7 +60,7 @@
         </div>
         
         <!-- Área do usuário e logout -->
-        <div class="mt-6 pt-6 border-t border-white/10 hidden md:block">
+        <div class="mt-6 pt-6 border-t border-white/10">
             <div class="flex items-center gap-3 px-4 py-3 bg-purple-500/10 rounded-xl mb-3">
                 <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-purple-600 to-blue-500 flex items-center justify-center shadow-lg">
                     <i class="fas fa-user text-white text-sm"></i>
@@ -60,3 +76,39 @@
         </div>
     </div>
 </nav>
+
+<script>
+// Mobile menu functionality
+const menuToggle = document.getElementById('menu-toggle');
+const menuClose = document.getElementById('menu-close');
+const sidebar = document.getElementById('sidebar');
+const overlay = document.getElementById('menu-overlay');
+
+function openMenu() {
+    sidebar.classList.remove('-translate-x-full');
+    overlay.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeMenu() {
+    sidebar.classList.add('-translate-x-full');
+    overlay.classList.add('hidden');
+    document.body.style.overflow = '';
+}
+
+menuToggle?.addEventListener('click', openMenu);
+menuClose?.addEventListener('click', closeMenu);
+overlay?.addEventListener('click', closeMenu);
+
+// Close menu on escape key
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeMenu();
+});
+
+// Close menu when navigating (on mobile)
+sidebar?.querySelectorAll('a').forEach(link => {
+    link.addEventListener('click', function() {
+        if (window.innerWidth < 768) closeMenu();
+    });
+});
+</script>

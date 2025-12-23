@@ -5,8 +5,15 @@ body {
     min-height: 100vh;
 }
 
+/* Desktop: sidebar visible with body padding */
 @media (min-width: 768px) {
     body { padding-left: 18rem; }
+}
+
+/* Mobile: no body padding, sidebar slides from left */
+@media (max-width: 767px) {
+    body { padding-left: 0 !important; }
+    main { padding-top: 60px !important; } /* Space for hamburger button */
 }
 
 .tab-content { display: none; animation: fadeIn 0.3s ease-in-out; }
@@ -36,12 +43,9 @@ input:focus, select:focus, textarea:focus {
 }
 
 .glass-sidebar { 
-    background: rgba(30, 41, 59, 0.7); 
+    background: rgba(30, 41, 59, 0.95); 
     backdrop-filter: blur(10px); 
     border-right: 1px solid rgba(255,255,255,0.05); 
-    min-height: 100vh; 
-    height: 100vh;
-    width: 18rem;
 }
 
 .glass-card { 
