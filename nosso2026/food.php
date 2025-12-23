@@ -52,6 +52,11 @@ $recipes = $stmt->fetchAll();
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#000000">
+  <link rel="icon" href="<?= n26_link('icons/icon-192.png') ?>">
+  <link rel="manifest" href="<?= n26_link('manifest.json') ?>">
+  <link rel="apple-touch-icon" href="<?= n26_link('icons/apple-touch-icon.png') ?>">
+  <link rel="stylesheet" href="<?= n26_link('responsive.css') ?>">
   <title>Receitas • Nosso 2026</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
