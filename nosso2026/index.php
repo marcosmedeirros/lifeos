@@ -10,17 +10,23 @@ $m=intval(date('m')); $y=intval(date('Y'));
 $inc=$pdo->query("SELECT SUM(amount) FROM nosso2026_finances WHERE month=$m AND year=$y AND type='income'")->fetchColumn()?:0;
 $out=$pdo->query("SELECT SUM(amount) FROM nosso2026_finances WHERE month=$m AND year=$y AND type='expense'")->fetchColumn()?:0;
 $marketItems = $pdo->query("SELECT * FROM nosso2026_market_list WHERE done=0 ORDER BY id DESC LIMIT 10")->fetchAll();
+$movieItems = $pdo->query("SELECT * FROM nosso2026_movies WHERE status='planejado' OR status IS NULL ORDER BY id DESC LIMIT 10")->fetchAll();
 
 // POST para mercado (adicionar/marcar)
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (isset($_POST['add_market'])) {
-        $stmt = $pdo->prepare("INSERT INTO nosso2026_market_list (item, qty, notes) VALUES (?,?,?)");
-        $stmt->execute([trim($_POST['item']), trim($_POST['qty']), trim($_POST['notes'])]);
-    } elseif (isset($_POST['done_market'])) {
-        $pdo->prepare("UPDATE nosso2026_market_list SET done=1 WHERE id=?")->execute([intval($_POST['id'])]);
-    }
-    header('Location: ' . n26_link('index.php'));
-    exit;
+  if (isset($_POST['add_market'])) {
+    $stmt = $pdo->prepare("INSERT INTO nosso2026_market_list (item, qty, notes) VALUES (?,?,?)");
+    $stmt->execute([trim($_POST['item']), trim($_POST['qty']), trim($_POST['notes'])]);
+  } elseif (isset($_POST['done_market'])) {
+    $pdo->prepare("UPDATE nosso2026_market_list SET done=1 WHERE id=?")->execute([intval($_POST['id'])]);
+  } elseif (isset($_POST['add_movie'])) {
+    $stmt = $pdo->prepare("INSERT INTO nosso2026_movies (title, status) VALUES (?, 'planejado')");
+    $stmt->execute([trim($_POST['title'])]);
+  } elseif (isset($_POST['del_movie'])) {
+    $pdo->prepare("DELETE FROM nosso2026_movies WHERE id=?")->execute([intval($_POST['id'])]);
+  }
+  header('Location: ' . n26_link('index.php'));
+  exit;
 }
 
 // Progresso do ano
@@ -64,8 +70,8 @@ else { $progress = round((($now - $yearStart)/($yearEnd - $yearStart))*100); }
       </div>
     </section>
 
-    <!-- Grid de Widgets -->
-    <div class="grid md:grid-cols-3 gap-6 mb-8">
+    <!-- Grid de Widgets (3 por linha) -->
+    <div class="grid md:grid-cols-3 gap-6 mb-6">
       <!-- Metas -->
       <div class="glass p-6 rounded-2xl">
         <div class="flex items-center justify-between mb-4">
@@ -128,35 +134,54 @@ else { $progress = round((($now - $yearStart)/($yearEnd - $yearStart))*100); }
       </div>
     </div>
 
-    <!-- Lista de Mercado -->
-    <section class="glass p-6 rounded-2xl">
-      <h3 class="text-xl font-bold mb-4">Lista de Mercado</h3>
-      <form method="post" class="grid md:grid-cols-4 gap-3 mb-6">
-        <input type="hidden" name="add_market" value="1">
-        <input name="item" class="w-full bg-black border border-[#222] rounded-xl p-3 text-white" placeholder="Item" required>
-        <input name="qty" class="w-full bg-black border border-[#222] rounded-xl p-3 text-white" placeholder="Qtd (opcional)">
-        <input name="notes" class="w-full bg-black border border-[#222] rounded-xl p-3 text-white" placeholder="Notas">
-        <button class="btn">Adicionar</button>
-      </form>
-      <div class="grid md:grid-cols-2 gap-3">
-        <?php foreach($marketItems as $it): ?>
-        <form method="post" class="flex items-center justify-between border border-[#222] rounded-xl p-3">
-          <div class="flex-1">
-            <p class="font-semibold"><?= htmlspecialchars($it['item']) ?></p>
-            <?php if($it['qty'] || $it['notes']): ?>
-              <p class="text-xs text-[#999]"><?= htmlspecialchars($it['qty']) ?> <?= htmlspecialchars($it['notes']) ?></p>
-            <?php endif; ?>
-          </div>
-          <input type="hidden" name="done_market" value="1">
-          <input type="hidden" name="id" value="<?= $it['id'] ?>">
-          <button class="btn">OK</button>
+    <!-- Segunda linha: Mercado e Filmes -->
+    <div class="grid md:grid-cols-2 gap-6 mb-8">
+      <!-- Lista de Mercado -->
+      <div class="glass p-6 rounded-2xl">
+        <h3 class="text-xl font-bold mb-3">Mercado</h3>
+        <form method="post" class="flex gap-2 mb-3">
+          <input type="hidden" name="add_market" value="1">
+          <input name="item" class="flex-1 bg-black border border-[#222] rounded-lg p-2 text-white text-sm" placeholder="Item" required>
+          <button class="btn text-sm">OK</button>
         </form>
-        <?php endforeach; ?>
-        <?php if(empty($marketItems)): ?>
-          <p class="text-sm text-[#999] text-center py-4 col-span-2">Lista vazia</p>
-        <?php endif; ?>
+        <div class="space-y-2">
+          <?php foreach($marketItems as $it): ?>
+          <form method="post" class="flex items-center justify-between bg-black border border-[#222] rounded-lg p-2">
+            <span class="text-sm font-semibold flex-1"><?= htmlspecialchars($it['item']) ?></span>
+            <input type="hidden" name="done_market" value="1">
+            <input type="hidden" name="id" value="<?= $it['id'] ?>">
+            <button class="text-xs text-green-400 hover:text-green-300">✓</button>
+          </form>
+          <?php endforeach; ?>
+          <?php if(empty($marketItems)): ?>
+            <p class="text-xs text-[#999] text-center py-2">Vazio</p>
+          <?php endif; ?>
+        </div>
       </div>
-    </section>
+
+      <!-- Filmes (ao lado do Mercado) -->
+      <div class="glass p-6 rounded-2xl">
+        <h3 class="text-xl font-bold mb-3">Filmes</h3>
+        <form method="post" class="flex gap-2 mb-3">
+          <input type="hidden" name="add_movie" value="1">
+          <input name="title" class="flex-1 bg-black border border-[#222] rounded-lg p-2 text-white text-sm" placeholder="Título" required>
+          <button class="btn text-sm">OK</button>
+        </form>
+        <div class="space-y-2">
+          <?php foreach($movieItems as $mv): ?>
+          <form method="post" class="flex items-center justify-between bg-black border border-[#222] rounded-lg p-2">
+            <span class="text-sm font-semibold flex-1 truncate"><?= htmlspecialchars($mv['title']) ?></span>
+            <input type="hidden" name="del_movie" value="1">
+            <input type="hidden" name="id" value="<?= $mv['id'] ?>">
+            <button class="text-xs text-red-400 hover:text-red-300" title="Remover">X</button>
+          </form>
+          <?php endforeach; ?>
+          <?php if(empty($movieItems)): ?>
+            <p class="text-xs text-[#999] text-center py-2">Vazio</p>
+          <?php endif; ?>
+        </div>
+      </div>
+    </div>
   </main>
 
   <footer class="max-w-6xl mx-auto px-4 py-10 text-center text-[#999]">

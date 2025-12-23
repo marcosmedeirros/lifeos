@@ -1,7 +1,19 @@
 <?php
 require_once __DIR__ . '/_bootstrap.php';
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['upload'])) {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete'])) {
+  $id = intval($_POST['id']);
+  $mem = $pdo->prepare("SELECT image_path FROM nosso2026_memories WHERE id=?");
+  $mem->execute([$id]);
+  $m = $mem->fetch();
+  if ($m && $m['image_path']) {
+    $filePath = __DIR__ . '/..' . str_replace('/lifeos', '', $m['image_path']);
+    if (file_exists($filePath)) @unlink($filePath);
+  }
+  $pdo->prepare("DELETE FROM nosso2026_memories WHERE id=?")->execute([$id]);
+  header('Location: ' . n26_link('memories.php'));
+  exit;
+} elseif ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['upload'])) {
   $dir = __DIR__ . '/../uploads/nosso2026';
   if (!is_dir($dir)) { @mkdir($dir, 0777, true); }
   if (!empty($_FILES['photo']['name'])) {
@@ -13,33 +25,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['upload'])) {
       $safe = 'n26_' . time() . '_' . mt_rand(1000,9999) . '.' . $ext;
       $target = $dir . '/' . $safe;
       if (move_uploaded_file($files['tmp_name'][$i], $target)) {
-        // Compressão básica via GD (JPEG/PNG)
-        $rel = '/lifeos/uploads/nosso2026/' . $safe; // localhost
+        $rel = '/lifeos/uploads/nosso2026/' . $safe;
         if (strpos($_SERVER['HTTP_HOST'],'localhost')===false) {
-          $rel = '/uploads/nosso2026/' . $safe; // produção
+          $rel = '/uploads/nosso2026/' . $safe;
         }
-        try {
-          if (in_array($ext, ['jpg','jpeg','png'])) {
-            $maxW = 1600; $quality = 80;
-            if ($ext === 'png') { $quality = 6; } // compressão png
-            $img = ($ext==='png') ? imagecreatefrompng($target) : imagecreatefromjpeg($target);
-            if ($img) {
-              $w = imagesx($img); $h = imagesy($img);
-              if ($w > $maxW) {
-                $newW = $maxW; $newH = intval($h * ($newW/$w));
-                $res = imagecreatetruecolor($newW, $newH);
-                imagecopyresampled($res, $img, 0,0,0,0, $newW,$newH,$w,$h);
-                if ($ext==='png') imagepng($res, $target, $quality); else imagejpeg($res, $target, $quality);
-                imagedestroy($res);
-              } else {
-                if ($ext!=='png') imagejpeg($img, $target, $quality);
-              }
-              imagedestroy($img);
-            }
-          }
-        } catch (Exception $e) { /* falha de compressão, segue original */ }
         $stmt = $pdo->prepare("INSERT INTO nosso2026_memories (owner, title, memory_date, image_path, notes) VALUES (?,?,?,?,?)");
-        $stmt->execute([$_POST['owner'] ?? 'nosso', trim($_POST['title']), $_POST['memory_date'] ?: NULL, $rel, trim($_POST['notes'])]);
+        $stmt->execute(['nosso', '', $_POST['memory_date'] ?? NULL, $rel, '']);
       }
     }
   }
@@ -47,7 +38,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['upload'])) {
   exit;
 }
 
-$items = $pdo->query("SELECT * FROM nosso2026_memories ORDER BY memory_date DESC, id DESC")->fetchAll();
+$items = $pdo->query("SELECT * FROM nosso2026_memories WHERE owner='nosso' ORDER BY memory_date DESC, id DESC")->fetchAll();
 ?>
 <!DOCTYPE html>
 <html lang="pt-BR" class="dark">
@@ -73,19 +64,15 @@ $items = $pdo->query("SELECT * FROM nosso2026_memories ORDER BY memory_date DESC
     <!-- Upload -->
     <section class="glass rounded-2xl p-6 mb-8">
       <h2 class="text-2xl font-bold mb-4">Adicionar Memória</h2>
-      <form method="post" enctype="multipart/form-data" class="grid md:grid-cols-5 gap-3">
+      <form method="post" enctype="multipart/form-data" class="flex gap-3 flex-wrap">
         <input type="hidden" name="upload" value="1">
-        <select name="owner" class="bg-black border border-[#222] rounded-xl p-3 text-white">
-          <option value="nosso">Nosso</option>
-          <option value="ela">Ela</option>
-          <option value="ele">Ele</option>
-        </select>
-        <input name="title" class="md:col-span-2 bg-black border border-[#222] rounded-xl p-3 text-white" placeholder="Título">
-        <input type="date" name="memory_date" class="bg-black border border-[#222] rounded-xl p-3 text-white">
-        <input type="file" name="photo[]" multiple accept="image/*" class="bg-black border border-[#222] rounded-xl p-3 text-white" required>
-        <textarea name="notes" class="md:col-span-5 bg-black border border-[#222] rounded-xl p-3 text-white" rows="2" placeholder="Notas"></textarea>
-        <button class="md:col-span-5 btn">Upload</button>
+        <input type="date" name="memory_date" id="memoryDate" class="bg-black border border-[#222] rounded-xl px-4 py-2 text-white" required>
+        <input type="file" name="photo[]" multiple accept="image/*" class="flex-1 bg-black border border-[#222] rounded-xl px-4 py-2 text-white" required>
+        <button class="btn">Upload</button>
       </form>
+      <script>
+        document.getElementById('memoryDate').value = new Date().toISOString().split('T')[0];
+      </script>
     </section>
 
     <!-- Galeria Masonry -->
@@ -94,13 +81,21 @@ $items = $pdo->query("SELECT * FROM nosso2026_memories ORDER BY memory_date DESC
       <div class="memory-card glass">
         <img src="<?= htmlspecialchars($it['image_path']) ?>" alt="<?= htmlspecialchars($it['title']) ?>" class="memory-img">
         <div class="p-4">
+          <div class="flex justify-between items-start mb-2">
+            <div class="flex-1">
           <?php if($it['title']): ?>
             <h3 class="font-bold text-lg mb-1"><?= htmlspecialchars($it['title']) ?></h3>
           <?php endif; ?>
           <p class="text-xs text-[#999] mb-2">
             <?= $it['memory_date'] ? date('d/m/Y', strtotime($it['memory_date'])) : '' ?>
-            <?= $it['owner'] ? ' • '.ucfirst($it['owner']) : '' ?>
           </p>
+            </div>
+            <form method="post">
+              <input type="hidden" name="delete" value="1">
+              <input type="hidden" name="id" value="<?= $it['id'] ?>">
+              <button class="text-red-400 hover:text-red-300 text-sm" onclick="return confirm('Apagar esta memória?')">🗑️</button>
+            </form>
+          </div>
           <?php if($it['notes']): ?>
             <p class="text-sm text-[#ccc]"><?= nl2br(htmlspecialchars($it['notes'])) ?></p>
           <?php endif; ?>

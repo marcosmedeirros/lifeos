@@ -10,6 +10,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $w = $pdo->prepare("SELECT done FROM nosso2026_workouts WHERE id=?")->execute([intval($_POST['id'])]);
         $w = $w->fetch();
         $pdo->prepare("UPDATE nosso2026_workouts SET done=? WHERE id=?")->execute([$w['done']?0:1, intval($_POST['id'])]);
+      } elseif (isset($_POST['edit'])) {
+        $stmt = $pdo->prepare("UPDATE nosso2026_workouts SET name=?, workout_date=?, month=?, year=? WHERE id=?");
+        $date = $_POST['workout_date'];
+        $stmt->execute([trim($_POST['name']), $date, intval(date('m', strtotime($date))), intval(date('Y', strtotime($date))), intval($_POST['id'])]);
+      } elseif (isset($_POST['delete'])) {
+        $stmt = $pdo->prepare("DELETE FROM nosso2026_workouts WHERE id=?");
+        $stmt->execute([intval($_POST['id'])]);
     }
     header('Location: ' . n26_link('workouts.php'));
     exit;
@@ -77,6 +84,7 @@ $doneWorkouts = count(array_filter($workouts, fn($w) => $w['done']));
         <a href="?month=<?= $prevMonth ?>&year=<?= $prevYear ?>" class="btn">← Anterior</a>
         <a href="?month=<?= date('m') ?>&year=<?= date('Y') ?>" class="btn">Hoje</a>
         <a href="?month=<?= $nextMonth ?>&year=<?= $nextYear ?>" class="btn">Próximo →</a>
+        <button onclick="openModal()" class="btn">+ Treino</button>
       </div>
     </div>
 
@@ -102,11 +110,7 @@ $doneWorkouts = count(array_filter($workouts, fn($w) => $w['done']));
             <?php if($hasWorkouts): ?>
               <div class="mt-1 space-y-1">
                 <?php foreach($workoutsByDay[$day] as $w): ?>
-                  <form method="post" class="text-xs rounded px-1 py-0.5 truncate cursor-pointer <?= $w['done'] ? 'bg-white text-black' : 'bg-[#333] text-[#999]' ?>" onclick="this.submit()">
-                    <input type="hidden" name="toggle" value="1">
-                    <input type="hidden" name="id" value="<?= $w['id'] ?>">
-                    <button type="submit" class="w-full text-left"><?= htmlspecialchars($w['name']) ?></button>
-                  </form>
+                  <div class="text-xs rounded px-1 py-0.5 truncate cursor-pointer <?= $w['done'] ? 'bg-white text-black' : 'bg-[#333] text-[#999]' ?>" onclick="openEdit(<?= htmlspecialchars(json_encode($w)) ?>)"><?= htmlspecialchars($w['name']) ?></div>
                 <?php endforeach; ?>
               </div>
             <?php endif; ?>
@@ -115,16 +119,65 @@ $doneWorkouts = count(array_filter($workouts, fn($w) => $w['done']));
       </div>
     </div>
 
-    <!-- Adicionar Treino -->
-    <section class="glass rounded-2xl p-6">
-      <h2 class="text-xl font-bold mb-4">Adicionar Treino</h2>
-      <form method="post" class="grid md:grid-cols-4 gap-3">
-        <input type="hidden" name="add" value="1">
-        <input name="name" class="md:col-span-2 bg-black border border-[#222] rounded-xl p-3 text-white" placeholder="Nome do treino" required>
-        <input name="workout_date" type="date" class="bg-black border border-[#222] rounded-xl p-3 text-white" required>
-        <button class="btn">Adicionar</button>
-      </form>
-    </section>
+    <!-- Modal de Treino -->
+    <div id="treinoModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:100;" onclick="closeModal()">
+      <div class="glass rounded-2xl p-6 max-w-md mx-auto mt-20" onclick="event.stopPropagation()">
+        <h2 class="text-2xl font-bold mb-4" id="modalTitle">Adicionar Treino</h2>
+        <form method="post" id="treinoForm">
+          <input type="hidden" name="add" id="formAction" value="1">
+          <input type="hidden" name="id" id="workoutId">
+          <div class="mb-4">
+            <label class="block text-sm font-bold mb-2">Nome do treino</label>
+            <input name="name" id="workoutName" class="w-full bg-black border border-[#222] rounded-xl p-3 text-white" required>
+          </div>
+          <div class="mb-4">
+            <label class="block text-sm font-bold mb-2">Data</label>
+            <input name="workout_date" id="workoutDate" type="date" class="w-full bg-black border border-[#222] rounded-xl p-3 text-white" required>
+          </div>
+          <div class="flex gap-3">
+            <button type="submit" class="btn flex-1">Salvar</button>
+            <button type="button" id="deleteBtn" style="display:none" onclick="deleteWorkout()" class="btn" style="background:#dc2626">Excluir</button>
+            <button type="button" onclick="closeModal()" class="btn" style="background:#333">Fechar</button>
+          </div>
+        </form>
+      </div>
+    </div>
   </main>
+
+  <script>
+      function openModal() {
+        document.getElementById('modalTitle').textContent = 'Adicionar Treino';
+        document.getElementById('treinoForm').reset();
+        document.getElementById('formAction').name = 'add';
+        document.getElementById('formAction').value = '1';
+        document.getElementById('workoutId').value = '';
+        document.getElementById('deleteBtn').style.display = 'none';
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('workoutDate').value = today;
+        document.getElementById('treinoModal').style.display = 'block';
+      }
+      function openEdit(workout) {
+        document.getElementById('modalTitle').textContent = 'Editar Treino';
+        document.getElementById('workoutId').value = workout.id;
+        document.getElementById('workoutName').value = workout.name;
+        document.getElementById('workoutDate').value = workout.workout_date.split(' ')[0];
+        document.getElementById('workoutDone').checked = workout.done == 1;
+        document.getElementById('formAction').name = 'edit';
+        document.getElementById('formAction').value = '1';
+        document.getElementById('deleteBtn').style.display = 'block';
+        document.getElementById('treinoModal').style.display = 'block';
+      }
+      function closeModal() {
+        document.getElementById('treinoModal').style.display = 'none';
+      }
+      function deleteWorkout() {
+        if(confirm('Remover treino?')) {
+          const form = document.getElementById('treinoForm');
+          const id = document.getElementById('workoutId').value;
+          form.innerHTML = '<input type="hidden" name="delete" value="1"><input type="hidden" name="id" value="' + id + '">';
+          form.submit();
+        }
+      }
+  </script>
 </body>
 </html>

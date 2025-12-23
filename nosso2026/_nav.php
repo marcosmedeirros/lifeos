@@ -11,10 +11,8 @@
       <a href="<?= n26_link('index.php') ?>" class="hover:text-gray-300">Dashboard</a>
       <a href="<?= n26_link('goals.php') ?>" class="hover:text-gray-300">Metas</a>
       <a href="<?= n26_link('calendar.php') ?>" class="hover:text-gray-300">Compromissos</a>
-      <a href="<?= n26_link('food.php') ?>" class="hover:text-gray-300">Alimentação</a>
       <a href="<?= n26_link('workouts.php') ?>" class="hover:text-gray-300">Treinos</a>
       <a href="<?= n26_link('finances.php') ?>" class="hover:text-gray-300">Finanças</a>
-      <a href="<?= n26_link('movies.php') ?>" class="hover:text-gray-300">Filmes</a>
       <a href="<?= n26_link('memories.php') ?>" class="hover:text-gray-300">Memórias</a>
     </nav>
     <div class="md:hidden">

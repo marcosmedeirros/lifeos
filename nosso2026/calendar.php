@@ -71,6 +71,7 @@ $monthNames = ['', 'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', '
         <a href="?month=<?= $prevMonth ?>&year=<?= $prevYear ?>" class="btn">← Anterior</a>
         <a href="?month=<?= date('m') ?>&year=<?= date('Y') ?>" class="btn">Hoje</a>
         <a href="?month=<?= $nextMonth ?>&year=<?= $nextYear ?>" class="btn">Próximo →</a>
+        <button onclick="openModal()" class="btn">+ Evento</button>
       </div>
     </div>
 
@@ -93,12 +94,12 @@ $monthNames = ['', 'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', '
           $isToday = ($day == date('j') && $currentMonth == date('m') && $currentYear == date('Y'));
           $hasEvents = isset($eventsByDay[$day]);
         ?>
-          <div class="day-cell rounded-lg p-2 <?= $isToday ? 'border-white' : '' ?>">
+          <div class="day-cell rounded-lg p-2 <?= $isToday ? 'border-white' : '' ?>" onclick="openDay(<?= $day ?>)">
             <div class="font-bold text-sm <?= $isToday ? 'text-white' : 'text-[#999]' ?>"><?= $day ?></div>
             <?php if($hasEvents): ?>
               <div class="mt-2 space-y-1">
                 <?php foreach($eventsByDay[$day] as $e): ?>
-                  <div class="text-xs bg-white text-black rounded px-1 py-0.5 truncate cursor-pointer" onclick="openEvent(<?= htmlspecialchars(json_encode($e)) ?>)">
+                  <div class="text-xs bg-white text-black rounded px-1 py-0.5 truncate cursor-pointer" onclick="event.stopPropagation(); openEvent(<?= htmlspecialchars(json_encode($e)) ?>)">
                     <?= htmlspecialchars($e['title']) ?>
                   </div>
                 <?php endforeach; ?>
@@ -124,7 +125,7 @@ $monthNames = ['', 'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', '
     <div id="eventModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:100;" onclick="closeModal()">
       <div class="glass rounded-2xl p-6 max-w-lg mx-auto mt-20" onclick="event.stopPropagation()">
         <form method="post" id="eventForm">
-          <input type="hidden" name="update" value="1">
+          <input type="hidden" id="eventAction" name="add" value="1">
           <input type="hidden" name="id" id="eventId">
           <div class="mb-4">
             <label class="block text-sm font-bold mb-2">Título</label>
@@ -140,7 +141,7 @@ $monthNames = ['', 'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', '
           </div>
           <div class="flex gap-3">
             <button type="submit" class="btn flex-1">Salvar</button>
-            <button type="button" onclick="deleteEvent()" class="btn" style="background:#dc2626">Excluir</button>
+            <button type="button" id="deleteBtn" style="display:none" onclick="deleteEvent()" class="btn" style="background:#dc2626">Excluir</button>
             <button type="button" onclick="closeModal()" class="btn" style="background:#333">Fechar</button>
           </div>
         </form>
@@ -149,11 +150,41 @@ $monthNames = ['', 'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', '
   </main>
 
   <script>
+    function openModal() {
+      document.getElementById('eventId').value = '';
+      document.getElementById('eventTitle').value = '';
+      document.getElementById('eventDesc').value = '';
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const day = String(now.getDate()).padStart(2, '0');
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      document.getElementById('eventDate').value = `${year}-${month}-${day}T${hours}:${minutes}`;
+      document.getElementById('eventAction').name = 'add';
+      document.getElementById('deleteBtn').style.display = 'none';
+      document.getElementById('eventModal').style.display = 'block';
+    }
     function openEvent(e) {
       document.getElementById('eventId').value = e.id;
       document.getElementById('eventTitle').value = e.title;
       document.getElementById('eventDate').value = e.start_date.replace(' ', 'T').substring(0, 16);
       document.getElementById('eventDesc').value = e.description || '';
+      document.getElementById('eventAction').name = 'update';
+      document.getElementById('deleteBtn').style.display = 'block';
+      document.getElementById('eventModal').style.display = 'block';
+    }
+    function openDay(day) {
+      const month = String(<?= $currentMonth ?>).padStart(2, '0');
+      const year = <?= $currentYear ?>;
+      const hours = '09';
+      const minutes = '00';
+      document.getElementById('eventId').value = '';
+      document.getElementById('eventTitle').value = '';
+      document.getElementById('eventDesc').value = '';
+      document.getElementById('eventDate').value = `${year}-${month}-${String(day).padStart(2,'0')}T${hours}:${minutes}`;
+      document.getElementById('eventAction').name = 'add';
+      document.getElementById('deleteBtn').style.display = 'none';
       document.getElementById('eventModal').style.display = 'block';
     }
     function closeModal() {
