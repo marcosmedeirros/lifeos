@@ -1,11 +1,9 @@
 <?php
 require_once __DIR__ . '/../includes/auth.php';
+require_login(); // Requer login obrigatório
 
-// Definir user_id padrão se não existir sessão
-if (!isset($_SESSION['user_id'])) {
-    $_SESSION['user_id'] = 1;
-    $_SESSION['user_name'] = 'Marcos Medeiros';
-}
+// Define user_id da sessão
+$user_id = $_SESSION['user_id'];
 
 $page = 'routine';
 

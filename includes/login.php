@@ -29,13 +29,13 @@
             <input type="hidden" name="login" value="1">
             <?php if (isset($GLOBALS['login_error']) && $GLOBALS['login_error']): ?>
                 <div class="bg-rose-500/20 text-rose-300 border border-rose-500 rounded-lg p-3 mb-4 text-sm font-medium">
-                    <?php echo $GLOBALS['login_error']; ?>
+                    <?php echo htmlspecialchars($GLOBALS['login_error']); ?>
                 </div>
             <?php endif; ?>
             
             <div class="space-y-4">
-                <input type="text" name="email" placeholder="Usuário (marcosmedeirros)" required>
-                <input type="password" name="password" placeholder="Senha (Gremio@13)" required>
+                <input type="text" name="username" placeholder="Usuário" required autocomplete="username">
+                <input type="password" name="password" placeholder="Senha" required autocomplete="current-password">
                 <button type="submit" class="w-full bg-purple-600 hover:bg-purple-700 text-white px-5 py-3 rounded-xl font-bold shadow-lg shadow-purple-500/30 transition transform hover:-translate-y-0.5">
                     Acessar Dashboard
                 </button>

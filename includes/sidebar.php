@@ -42,5 +42,21 @@
                 <i class="fas fa-trophy w-5 text-center text-yellow-500"></i> <span>Game</span>
             </a>
         </div>
+        
+        <!-- Área do usuário e logout -->
+        <div class="mt-6 pt-6 border-t border-white/10 hidden md:block">
+            <div class="flex items-center gap-3 px-4 py-3 bg-purple-500/10 rounded-xl mb-3">
+                <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-purple-600 to-blue-500 flex items-center justify-center shadow-lg">
+                    <i class="fas fa-user text-white text-sm"></i>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <p class="text-sm font-semibold text-white truncate"><?php echo $_SESSION['user_name'] ?? 'Usuário'; ?></p>
+                    <p class="text-xs text-slate-400">Autenticado</p>
+                </div>
+            </div>
+            <a href="<?php echo BASE_PATH; ?>/logout" class="nav-btn text-left px-4 py-3 flex items-center gap-3 hover:bg-red-500/10 hover:text-red-400 transition">
+                <i class="fas fa-sign-out-alt w-5 text-center"></i> <span>Sair</span>
+            </a>
+        </div>
     </div>
 </nav>

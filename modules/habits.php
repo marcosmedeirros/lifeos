@@ -1,8 +1,9 @@
 <?php
 // ARQUIVO: habits.php - Página completa de Hábitos
 require_once __DIR__ . '/../includes/auth.php';
-// require_login();
+require_login(); // Requer login obrigatório
 
+$user_id = $_SESSION['user_id'];
 // Definir user_id padrão se não existir sessão
 if (!isset($_SESSION['user_id'])) {
     $_SESSION['user_id'] = 1;

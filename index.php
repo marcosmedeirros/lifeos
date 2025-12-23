@@ -1,13 +1,9 @@
 <?php
 // ARQUIVO: index.php - Dashboard Principal
 require_once 'includes/auth.php';
-// require_login(); // Comentado - acesso direto
+require_login(); // Agora requer login obrigatório
 
-// Definir user_id padrão se não existir sessão
-if (!isset($_SESSION['user_id'])) {
-    $_SESSION['user_id'] = 1; // ID do usuário padrão (Marcos Medeiros)
-    $_SESSION['user_name'] = 'Marcos Medeiros';
-}
+// Define user_id da sessão
 $user_id = $_SESSION['user_id'];
 
 // Roteador da API para o Dashboard

@@ -3,15 +3,16 @@
 // Detecta automaticamente o base path da aplicação
 
 if (!defined('BASE_PATH')) {
-    // Detecta se está em /lifeos/ ou na raiz
-    $request_uri = $_SERVER['REQUEST_URI'];
+    // Detecta o host atual
+    $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
     
-    // Se a URI contém /lifeos/, o base path é /lifeos
-    // Caso contrário, é vazio (raiz do domínio)
-    if (strpos($request_uri, '/lifeos/') !== false || strpos($request_uri, '/lifeos') === 0) {
-        define('BASE_PATH', '/lifeos');
-    } else {
+    // Se for marcosmedeirros.io (produção), o base path é vazio (raiz)
+    // Se for localhost ou qualquer outro, usa /lifeos
+    if (strpos($host, 'marcosmedeirros.io') !== false) {
         define('BASE_PATH', '');
+    } else {
+        // Para localhost e desenvolvimento
+        define('BASE_PATH', '/lifeos');
     }
 }
 ?>
