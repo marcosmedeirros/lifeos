@@ -19,27 +19,47 @@ if (isset($_GET['api'])) {
         }
         
         if ($action === 'upload_photo') {
-            if (!empty($_FILES['photo']['name'])) {
-                $uploadDir = __DIR__ . '/../uploads';
-                $boardDir = $uploadDir . '/board';
-                
-                // Criar diretórios se não existirem
-                if (!is_dir($uploadDir)) @mkdir($uploadDir, 0777, true);
-                if (!is_dir($boardDir)) @mkdir($boardDir, 0777, true);
-                
-                $ext = strtolower(pathinfo($_FILES['photo']['name'], PATHINFO_EXTENSION));
-                $safe = 'board_' . time() . '_' . mt_rand(1000, 9999) . '.' . $ext;
-                $target = $boardDir . '/' . $safe;
-                
-                if (move_uploaded_file($_FILES['photo']['tmp_name'], $target)) {
-                    $rel = BASE_PATH . '/uploads/board/' . $safe;
-                    $stmt = $pdo->prepare("INSERT INTO board_photos (user_id, photo_date, image_path) VALUES (?,?,?)");
-                    $stmt->execute([$user_id, $_POST['photo_date'], $rel]);
-                    echo json_encode(['success' => true]);
-                    exit;
+            if (empty($_FILES['photo']['name'])) {
+                throw new Exception('Nenhum arquivo enviado');
+            }
+            
+            if ($_FILES['photo']['error'] !== UPLOAD_ERR_OK) {
+                throw new Exception('Erro no upload: ' . $_FILES['photo']['error']);
+            }
+            
+            $uploadDir = __DIR__ . '/../uploads';
+            $boardDir = $uploadDir . '/board';
+            
+            // Criar diretórios se não existirem
+            if (!is_dir($uploadDir)) {
+                if (!@mkdir($uploadDir, 0755, true)) {
+                    throw new Exception('Não foi possível criar diretório uploads');
                 }
             }
-            echo json_encode(['error' => 'Upload failed']);
+            if (!is_dir($boardDir)) {
+                if (!@mkdir($boardDir, 0755, true)) {
+                    throw new Exception('Não foi possível criar diretório board');
+                }
+            }
+            
+            $ext = strtolower(pathinfo($_FILES['photo']['name'], PATHINFO_EXTENSION));
+            $allowedExts = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+            if (!in_array($ext, $allowedExts)) {
+                throw new Exception('Formato de arquivo não permitido');
+            }
+            
+            $safe = 'board_' . time() . '_' . mt_rand(1000, 9999) . '.' . $ext;
+            $target = $boardDir . '/' . $safe;
+            
+            if (!move_uploaded_file($_FILES['photo']['tmp_name'], $target)) {
+                throw new Exception('Falha ao mover arquivo');
+            }
+            
+            $rel = BASE_PATH . '/uploads/board/' . $safe;
+            $stmt = $pdo->prepare("INSERT INTO board_photos (user_id, photo_date, image_path) VALUES (?,?,?)");
+            $stmt->execute([$user_id, $_POST['photo_date'], $rel]);
+            
+            echo json_encode(['success' => true]);
             exit;
         }
         
