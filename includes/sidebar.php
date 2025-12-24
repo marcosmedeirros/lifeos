@@ -1,5 +1,5 @@
 <!-- Hamburger Button (Mobile) - Always visible in standalone mode -->
-<button id="menu-toggle" class="md:hidden fixed top-4 left-4 z-50 bg-purple-600 hover:bg-purple-700 text-white p-3 rounded-xl shadow-lg transition touch-manipulation" aria-label="Menu" style="display: block !important;">
+<button id="menu-toggle" class="md:hidden fixed top-4 left-4 z-50 bg-gradient-to-r from-yellow-600 to-yellow-700 hover:from-yellow-500 hover:to-yellow-600 text-white p-3 rounded-xl shadow-lg shadow-yellow-600/30 transition-all duration-300 touch-manipulation" aria-label="Menu" style="display: block !important;">
     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
     </svg>
@@ -11,10 +11,19 @@
 <!-- Sidebar Navigation -->
 <nav id="sidebar" class="glass-sidebar fixed top-0 left-0 h-screen w-72 p-6 flex flex-col z-50 transform -translate-x-full md:translate-x-0 transition-transform duration-300 overflow-y-auto shadow-2xl">
     <div class="mb-10 flex items-center gap-3 px-2">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-purple-600 to-blue-500 flex items-center justify-center shadow-lg shadow-purple-500/20">
-            <i class="fas fa-biohazard text-white text-xl"></i>
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-yellow-600 to-yellow-700 flex items-center justify-center shadow-lg shadow-yellow-600/20">
+            <!-- Calendar Logo SVG -->
+            <svg class="w-7 h-7" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="3" y="4" width="18" height="18" rx="2" stroke="white" stroke-width="2"/>
+                <path d="M3 10h18" stroke="white" stroke-width="2"/>
+                <path d="M7 2v4M17 2v4" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                <!-- Checkmarks -->
+                <path d="M7 14l1.5 1.5L11 13" stroke="#d4af37" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M13 14l1.5 1.5L17 13" stroke="#d4af37" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M7 18l1.5 1.5L11 17" stroke="#d4af37" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
         </div>
-        <h1 class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-blue-400">LifeOS</h1>
+        <h1 class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-yellow-400 to-yellow-500">LifeOS</h1>
         <button id="menu-close" class="md:hidden ml-auto text-white/50 hover:text-white">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
@@ -64,8 +73,8 @@
         
         <!-- Área do usuário e logout -->
         <div class="mt-6 pt-6 border-t border-white/10">
-            <div class="flex items-center gap-3 px-4 py-3 bg-purple-500/10 rounded-xl mb-3">
-                <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-purple-600 to-blue-500 flex items-center justify-center shadow-lg">
+            <div class="flex items-center gap-3 px-4 py-3 bg-yellow-500/10 rounded-xl mb-3">
+                <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-yellow-600 to-yellow-700 flex items-center justify-center shadow-lg shadow-yellow-600/20">
                     <i class="fas fa-user text-white text-sm"></i>
                 </div>
                 <div class="flex-1 min-w-0">
