@@ -206,12 +206,12 @@ include 'includes/header.php';
                         </form>
                     </div>
                     
-                    <!-- Adicionar Hábito -->
+                    <!-- Adicionar Foto -->
                     <div class="glass-card p-4 rounded-xl">
-                        <form onsubmit="addHabitQuick(event)" class="space-y-2">
-                            <input type="text" id="quick-habit-name" placeholder="Nome do hábito" class="text-sm" required>
+                        <form onsubmit="addPhotoQuick(event)" enctype="multipart/form-data" class="space-y-2">
+                            <input type="file" id="quick-photo-file" accept="image/*" class="text-sm w-full text-white file:mr-2 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-yellow-600 file:text-white hover:file:bg-yellow-500" required>
                             <button type="submit" class="w-full bg-gradient-to-r from-yellow-600 to-yellow-700 hover:from-yellow-500 hover:to-yellow-600 text-white px-3 py-2 rounded-lg text-sm font-bold transition shadow-lg shadow-yellow-600/30">
-                                <i class="fas fa-plus mr-1"></i> Hábito
+                                <i class="fas fa-plus mr-1"></i> Foto
                             </button>
                         </form>
                     </div>
@@ -467,16 +467,32 @@ async function toggleHabitToday(id) {
     loadDashboard();
 }
 
-async function addHabitQuick(e) {
+async function addPhotoQuick(e) {
     e.preventDefault();
-    const name = document.getElementById('quick-habit-name').value;
+    const fileInput = document.getElementById('quick-photo-file');
+    const file = fileInput.files[0];
     
-    await api('save_habit', {
-        name: name
-    });
+    if (!file) return;
     
-    document.getElementById('quick-habit-name').value = '';
-    loadDashboard();
+    const formData = new FormData();
+    formData.append('photo', file);
+    
+    try {
+        const response = await fetch(`${BASE_PATH}/modules/board.php?api=upload`, {
+            method: 'POST',
+            body: formData
+        });
+        
+        if (response.ok) {
+            fileInput.value = '';
+            alert('✅ Foto adicionada ao Board!');
+        } else {
+            alert('❌ Erro ao fazer upload da foto');
+        }
+    } catch (error) {
+        console.error('Erro:', error);
+        alert('❌ Erro ao fazer upload da foto');
+    }
 }
 
 async function addGoalQuick(e) {
