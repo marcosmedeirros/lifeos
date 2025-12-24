@@ -5,20 +5,20 @@
   "start_url": "./index.php",
   "scope": "/lifeos/",
   "display": "standalone",
-  "background_color": "#0f172a",
-  "theme_color": "#a855f7",
+  "background_color": "#0a0a0a",
+  "theme_color": "#d4af37",
   "orientation": "portrait-primary",
   "icons": [
     {
-      "src": "icons/icon-192.png",
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect fill='%230a0a0a' width='192' height='192'/%3E%3Crect x='36' y='48' width='120' height='120' rx='16' stroke='%23d4af37' stroke-width='8' fill='none'/%3E%3Cpath d='M56 60v32M136 60v32' stroke='%23d4af37' stroke-width='8' stroke-linecap='round'/%3E%3Cpath d='M56 104l12 12L96 96M104 104l12 12L144 96' stroke='%23d4af37' stroke-width='8' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M56 140l12 12L96 130' stroke='%23d4af37' stroke-width='8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E",
       "sizes": "192x192",
-      "type": "image/png",
+      "type": "image/svg+xml",
       "purpose": "any maskable"
     },
     {
-      "src": "icons/icon-512.png",
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect fill='%230a0a0a' width='512' height='512'/%3E%3Crect x='96' y='128' width='320' height='320' rx='42' stroke='%23d4af37' stroke-width='20' fill='none'/%3E%3Cpath d='M150 160v85M362 160v85' stroke='%23d4af37' stroke-width='20' stroke-linecap='round'/%3E%3Cpath d='M150 280l32 32L280 256M280 280l32 32L410 256' stroke='%23d4af37' stroke-width='20' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M150 375l32 32L280 345' stroke='%23d4af37' stroke-width='20' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E",
       "sizes": "512x512",
-      "type": "image/png",
+      "type": "image/svg+xml",
       "purpose": "any maskable"
     }
   ],
