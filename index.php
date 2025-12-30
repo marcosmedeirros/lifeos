@@ -135,7 +135,7 @@ if (isset($_GET['api'])) {
 
             // Chamada para a API do Gemini
             $apiKey = 'AIzaSyBiastA_XyXdRuaozIhHNwpG97Fbfeqy8A';
-            $apiUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" . $apiKey;
+            $apiUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=" . $apiKey;
 
             $contents = [];
             foreach ($history as $msg) {
