@@ -173,10 +173,13 @@ include '../includes/header.php';
                         class="flex-1 bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-yellow-600"
                         onkeypress="if(event.key==='Enter') sendMessage()"
                     >
-                    <label class="bg-slate-800 hover:bg-slate-700 text-yellow-400 px-4 py-3 rounded-lg font-bold transition cursor-pointer flex items-center gap-2 border border-slate-700">
+                    <button 
+                        onclick="document.getElementById('photo-input').click()" 
+                        class="bg-slate-800 hover:bg-slate-700 text-yellow-400 px-4 py-3 rounded-lg font-bold transition flex items-center gap-2 border border-slate-700"
+                    >
                         <i class="fas fa-image"></i> Foto
-                        <input type="file" id="photo-input" accept="image/*" style="display: none;" onchange="uploadPhoto()">
-                    </label>
+                    </button>
+                    <input type="file" id="photo-input" accept="image/*" style="display: none;" onchange="uploadPhoto()">
                     <button 
                         onclick="sendMessage()" 
                         class="bg-yellow-600 hover:bg-yellow-500 text-white px-6 py-3 rounded-lg font-bold transition flex items-center gap-2"
