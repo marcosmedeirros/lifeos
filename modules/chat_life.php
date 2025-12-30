@@ -1,0 +1,245 @@
+<?php
+// ARQUIVO: modules/chat_life.php - Chat Life (Conversas Gerais)
+require_once '../includes/auth.php';
+require_login();
+
+$user_id = $_SESSION['user_id'];
+
+// Roteador de API para Chat Life
+if (isset($_GET['api'])) {
+    $action = $_GET['api'];
+    header('Content-Type: application/json');
+    $data = json_decode(file_get_contents('php://input'), true);
+    if (!$data) $data = $_POST;
+    
+    try {
+        // Obter histórico de Chat Life
+        if ($action === 'get_history') {
+            $stmt = $pdo->prepare("
+                SELECT role, content, created_at 
+                FROM chat_life_messages 
+                WHERE user_id = ? 
+                ORDER BY created_at ASC
+            ");
+            $stmt->execute([$user_id]);
+            echo json_encode($stmt->fetchAll(PDO::FETCH_ASSOC));
+            exit;
+        }
+
+        // Enviar mensagem para Gemini (Chat Life - sem contexto de stats)
+        if ($action === 'chat') {
+            $user_query = trim($data['message'] ?? '');
+
+            if ($user_query === '') {
+                echo json_encode(['response' => 'Envie uma mensagem para conversar.']);
+                exit;
+            }
+
+            // Histórico completo do Chat Life
+            $stmt = $pdo->prepare("SELECT role, content FROM chat_life_messages WHERE user_id = ? ORDER BY created_at ASC");
+            $stmt->execute([$user_id]);
+            $history = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            // Prompt de sistema simples - sem contexto de stats
+            $system_prompt = "Você é um assistente conversável amigável e atencioso. " .
+                "Converse naturalmente sobre qualquer assunto. Data: " . date('d/m/Y H:i') . ".";
+
+            // Chamada para o Gemini
+            $apiKey = 'AIzaSyBiastA_XyXdRuaozIhHNwpG97Fbfeqy8A';
+            $apiUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=" . $apiKey;
+
+            $contents = [];
+            foreach ($history as $msg) {
+                $role = $msg['role'] === 'user' ? 'user' : 'model';
+                $contents[] = ["role" => $role, "parts" => [["text" => $msg['content']]]];
+            }
+            $contents[] = [
+                "role" => "user",
+                "parts" => [["text" => $system_prompt . "\n\nMensagem: " . $user_query]]
+            ];
+
+            $ch = curl_init($apiUrl);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode(["contents" => $contents]));
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_TIMEOUT, 15);
+            $rawResponse = curl_exec($ch);
+            $httpStatus = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            $curlError = curl_error($ch);
+            curl_close($ch);
+            $response = json_decode($rawResponse, true);
+
+            if ($curlError) {
+                echo json_encode(['response' => 'Erro ao conectar.', 'error' => $curlError]);
+                exit;
+            }
+
+            if ($httpStatus >= 400 || !$response) {
+                $apiErrorMsg = $response['error']['message'] ?? '';
+                echo json_encode(['response' => 'Erro na resposta.', 'error' => $apiErrorMsg ?: 'HTTP ' . $httpStatus]);
+                exit;
+            }
+
+            $ai_text = $response['candidates'][0]['content']['parts'][0]['text'] ?? 'Sem resposta.';
+
+            // Salva no histórico de Chat Life
+            $ins = $pdo->prepare("INSERT INTO chat_life_messages (user_id, role, content) VALUES (?, ?, ?)");
+            $ins->execute([$user_id, 'user', $user_query]);
+            $ins->execute([$user_id, 'model', $ai_text]);
+
+            echo json_encode(['response' => $ai_text, 'timestamp' => date('H:i')]);
+            exit;
+        }
+
+    } catch (Exception $e) {
+        http_response_code(500);
+        echo json_encode(['error' => $e->getMessage()]);
+    }
+    exit;
+}
+
+// HTML da página
+$page = 'chat_life';
+$page_title = 'Chat Life - LifeOS';
+include '../includes/header.php';
+?>
+
+<?php include '../includes/sidebar.php'; ?>
+
+<div class="flex min-h-screen w-full">
+    <div class="flex-1 p-4 md:p-10 content-wrap transition-all duration-300">
+        <div class="main-shell">
+            <header class="mb-8">
+                <h2 class="text-3xl font-bold text-white">💬 Chat Life</h2>
+                <p class="text-slate-400">Converse livremente sobre qualquer assunto</p>
+            </header>
+            
+            <!-- Chat Container -->
+            <div class="glass-card p-6 rounded-2xl border border-yellow-600/30 h-[70vh] flex flex-col">
+                <!-- Messages Area -->
+                <div id="chat-messages" class="flex-1 overflow-y-auto mb-6 space-y-4 pr-2">
+                    <div class="text-center text-slate-500 mt-8">
+                        <i class="fas fa-comments text-4xl text-yellow-600/30 mb-2"></i>
+                        <p>Carregando histórico...</p>
+                    </div>
+                </div>
+
+                <!-- Input Area -->
+                <div class="flex gap-3 border-t border-slate-700 pt-4">
+                    <input 
+                        type="text" 
+                        id="chat-input" 
+                        placeholder="Converse sobre qualquer coisa (pressione Enter)..." 
+                        class="flex-1 bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-yellow-600"
+                        onkeypress="if(event.key==='Enter') sendMessage()"
+                    >
+                    <button 
+                        onclick="sendMessage()" 
+                        class="bg-yellow-600 hover:bg-yellow-500 text-white px-6 py-3 rounded-lg font-bold transition flex items-center gap-2"
+                    >
+                        <i class="fas fa-paper-plane"></i> Enviar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="<?php echo BASE_PATH; ?>/assets/js/common.js"></script>
+<script>
+function escapeHtml(str) {
+    return str.replace(/[&<>"']/g, function(m) {
+        return ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[m]);
+    });
+}
+
+async function loadChatHistory() {
+    try {
+        const response = await fetch('?api=get_history');
+        const messages = await response.json();
+        const container = document.getElementById('chat-messages');
+        
+        if (!messages || messages.length === 0) {
+            container.innerHTML = '<div class="text-center text-slate-500 mt-8"><p>Comece uma conversa...</p></div>';
+            return;
+        }
+
+        container.innerHTML = messages.map(msg => {
+            const isUser = msg.role === 'user';
+            const timestamp = new Date(msg.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+            
+            return `<div class="flex ${isUser ? 'justify-end' : 'justify-start'}">
+                <div class="${isUser ? 'bg-yellow-600/20 border-l-4 border-yellow-600' : 'bg-slate-800/50 border-l-4 border-slate-600'} rounded-lg p-3 max-w-xs">
+                    <p class="text-xs ${isUser ? 'text-yellow-300' : 'text-slate-400'} mb-1">${isUser ? 'Você' : 'Chat Life'}</p>
+                    <p class="text-white text-sm">${escapeHtml(msg.content)}</p>
+                    <p class="text-[11px] text-slate-500 mt-1">${timestamp}</p>
+                </div>
+            </div>`;
+        }).join('');
+
+        container.scrollTop = container.scrollHeight;
+    } catch (err) {
+        console.error('Erro ao carregar histórico:', err);
+    }
+}
+
+async function sendMessage() {
+    const input = document.getElementById('chat-input');
+    const msg = input.value.trim();
+    
+    if (!msg) return;
+
+    const container = document.getElementById('chat-messages');
+    
+    // Exibe mensagem do usuário
+    const timestamp = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    container.innerHTML += `<div class="flex justify-end">
+        <div class="bg-yellow-600/20 border-l-4 border-yellow-600 rounded-lg p-3 max-w-xs">
+            <p class="text-xs text-yellow-300 mb-1">Você</p>
+            <p class="text-white text-sm">${escapeHtml(msg)}</p>
+            <p class="text-[11px] text-slate-500 mt-1">${timestamp}</p>
+        </div>
+    </div>`;
+
+    input.value = '';
+    container.scrollTop = container.scrollHeight;
+
+    // Envia para IA
+    try {
+        const response = await fetch('?api=chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message: msg })
+        });
+
+        const data = await response.json();
+        const reply = data.response || 'Erro ao processar resposta.';
+        const replyTimestamp = data.timestamp || new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+
+        container.innerHTML += `<div class="flex justify-start">
+            <div class="bg-slate-800/50 border-l-4 border-slate-600 rounded-lg p-3 max-w-xs">
+                <p class="text-xs text-slate-400 mb-1">Chat Life</p>
+                <p class="text-white text-sm">${escapeHtml(reply)}</p>
+                <p class="text-[11px] text-slate-500 mt-1">${replyTimestamp}</p>
+            </div>
+        </div>`;
+
+        if (data.error) {
+            container.innerHTML += `<div class="text-center"><p class="text-red-400 text-xs">Detalhe: ${escapeHtml(String(data.error))}</p></div>`;
+        }
+
+        container.scrollTop = container.scrollHeight;
+    } catch (err) {
+        container.innerHTML += `<div class="text-center"><p class="text-red-500 text-xs">Erro ao conectar.</p></div>`;
+        container.scrollTop = container.scrollHeight;
+    }
+}
+
+// Inicializa ao carregar
+document.addEventListener('DOMContentLoaded', () => {
+    loadChatHistory();
+    document.getElementById('chat-input').focus();
+});
+</script>
+
+<?php include '../includes/footer.php'; ?>
