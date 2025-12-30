@@ -12,8 +12,6 @@ if (isset($_GET['api'])) {
     header('Content-Type: application/json');
     $data = json_decode(file_get_contents('php://input'), true);
     if (!$data) $data = $_POST;
-    $data = json_decode(file_get_contents('php://input'), true);
-    if (!$data) $data = $_POST;
     
     try {
         // API do Dashboard
@@ -70,6 +68,117 @@ if (isset($_GET['api'])) {
                 'events_week' => $events_list,
                 'activities_today' => $activities_today
             ]); 
+            exit;
+        }
+
+        // Chat com Gemini (usa os mesmos dados do dashboard para contexto)
+        if ($action === 'gemini_chat') {
+            $user_query = trim($data['message'] ?? '');
+
+            if ($user_query === '') {
+                echo json_encode(['response' => 'Envie uma pergunta para o Gemini.']);
+                exit;
+            }
+
+            $startOfWeek = date('Y-m-d', strtotime('monday this week'));
+            $endOfWeek = date('Y-m-d', strtotime('sunday this week'));
+
+            // Finanças da Semana
+            $fin_stmt = $pdo->prepare("
+                SELECT type, SUM(amount) as total 
+                FROM finances 
+                WHERE DATE(created_at) BETWEEN ? AND ? 
+                GROUP BY type
+            ");
+            $fin_stmt->execute([$startOfWeek, $endOfWeek]);
+            $fin = $fin_stmt->fetchAll();
+
+            $inc = 0; $out = 0; 
+            foreach($fin as $f) { 
+                if(in_array($f['type'], ['income', 'entrada'])) $inc = $f['total']; 
+                else $out = $f['total']; 
+            }
+
+            // XP Total
+            $xp_stmt = $pdo->prepare("SELECT total_xp FROM user_settings WHERE user_id = ?");
+            $xp_stmt->execute([$user_id]);
+            $xp_total = $xp_stmt->fetchColumn() ?: 0;
+
+            // Atividades de Hoje
+            $activities_count = $pdo->query("SELECT COUNT(*) FROM activities WHERE day_date = CURDATE() AND status = 0")->fetchColumn();
+
+            // Treinos do Strava (esta semana)
+            $strava_count = $pdo->prepare("
+                SELECT COUNT(*) FROM strava_activities 
+                WHERE DATE(start_date) BETWEEN ? AND ?
+            ");
+            $strava_count->execute([$startOfWeek, $endOfWeek]);
+            $strava_count = $strava_count->fetchColumn() ?: 0;
+
+            $stats = [
+                'xp' => $xp_total,
+                'atividades_pendentes' => $activities_count,
+                'treinos_semana' => $strava_count,
+                'financas' => ['ganhos' => $inc, 'gastos' => $out]
+            ];
+
+            // Histórico das últimas 5 mensagens
+            $stmt = $pdo->prepare("SELECT role, content FROM chat_messages WHERE user_id = ? ORDER BY created_at DESC LIMIT 5");
+            $stmt->execute([$user_id]);
+            $history = array_reverse($stmt->fetchAll(PDO::FETCH_ASSOC));
+
+            // Prompt de sistema com contexto do dashboard
+            $system_prompt = "Você é o assistente pessoal do LifeOS do Marcos. \n" .
+                "Dados atuais: XP: {$stats['xp']}, Atividades Pendentes: {$stats['atividades_pendentes']}, \n" .
+                "Treinos no Strava: {$stats['treinos_semana']}, Saldo Semanal: R$ " . ($inc - $out) . ".\n" .
+                "Responda de forma curta e motivadora.";
+
+            // Chamada para a API do Gemini
+            $apiKey = 'AIzaSyBiastA_XyXdRuaozIhHNwpG97Fbfeqy8A';
+            $apiUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" . $apiKey;
+
+            $contents = [];
+            foreach ($history as $msg) {
+                $role = $msg['role'] === 'user' ? 'user' : 'model';
+                $contents[] = ["role" => $role, "parts" => [["text" => $msg['content']]]];
+            }
+            $contents[] = [
+                "role" => "user",
+                "parts" => [["text" => $system_prompt . "\n\nPergunta do usuário: " . $user_query]]
+            ];
+
+            $ch = curl_init($apiUrl);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode(["contents" => $contents]));
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_TIMEOUT, 15);
+            $rawResponse = curl_exec($ch);
+            $httpStatus = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            $curlError = curl_error($ch);
+            curl_close($ch);
+            $response = json_decode($rawResponse, true);
+            $apiErrorMsg = $response['error']['message'] ?? '';
+
+            if ($curlError) {
+                $ai_text = 'Erro ao conectar com Gemini (cURL).';
+                echo json_encode(['response' => $ai_text, 'error' => $curlError]);
+                exit;
+            }
+
+            if ($httpStatus >= 400 || !$response) {
+                $ai_text = 'Erro ao conectar com Gemini (HTTP).';
+                echo json_encode(['response' => $ai_text, 'error' => $apiErrorMsg ?: 'HTTP ' . $httpStatus]);
+                exit;
+            }
+
+            $ai_text = $response['candidates'][0]['content']['parts'][0]['text'] ?? 'Sem resposta do modelo.';
+
+            // Salva histórico
+            $ins = $pdo->prepare("INSERT INTO chat_messages (user_id, role, content) VALUES (?, ?, ?)");
+            $ins->execute([$user_id, 'user', $user_query]);
+            $ins->execute([$user_id, 'model', $ai_text]);
+
+            echo json_encode(['response' => $ai_text]);
             exit;
         }
         
@@ -303,8 +412,27 @@ include 'includes/header.php';
         
 </div>
 
+<!-- Widget de Chat com Gemini -->
+<div id="chat-container" class="fixed bottom-5 right-5 w-80 glass-card p-4 hidden border border-yellow-600/50 shadow-2xl z-50">
+    <div id="chat-box" class="h-64 overflow-y-auto mb-2 text-xs text-white space-y-2"></div>
+    <div class="flex gap-2">
+        <input type="text" id="chat-input" class="text-xs bg-slate-900 border-none flex-1 rounded-lg px-2" placeholder="Pergunte algo...">
+        <button onclick="sendToGemini()" class="bg-yellow-600 p-2 rounded-lg"><i class="fas fa-paper-plane"></i></button>
+    </div>
+</div>
+<button onclick="document.getElementById('chat-container').classList.toggle('hidden')" class="fixed bottom-5 right-5 bg-yellow-600 w-12 h-12 rounded-full shadow-lg flex items-center justify-center z-50">
+    <i class="fas fa-robot text-white"></i>
+</button>
+
 <script src="<?php echo BASE_PATH; ?>/assets/js/common.js"></script>
 <script>
+// Sanitiza texto simples para evitar HTML indesejado no chat
+function escapeHtml(str) {
+    return str.replace(/[&<>"']/g, function(m) {
+        return ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[m]);
+    });
+}
+
 async function loadDashboard() { 
     const data = await api('dashboard_stats'); 
     
@@ -507,6 +635,35 @@ async function addGoalQuick(e) {
     
     document.getElementById('quick-goal-title').value = '';
     loadDashboard();
+}
+
+// Envia mensagem para o Gemini usando a rota PHP
+async function sendToGemini() {
+    const input = document.getElementById('chat-input');
+    const box = document.getElementById('chat-box');
+    const msg = input.value.trim();
+    if (!msg) return;
+
+    box.innerHTML += `<p class="text-blue-400"><b>Você:</b> ${escapeHtml(msg)}</p>`;
+    input.value = '';
+
+    try {
+        const res = await fetch('?api=gemini_chat', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ message: msg })
+        });
+        const data = await res.json();
+        const reply = data.response || 'Sem resposta do Gemini.';
+        box.innerHTML += `<p class="text-yellow-500"><b>Gemini:</b> ${escapeHtml(reply)}</p>`;
+        if (data.error) {
+            box.innerHTML += `<p class="text-red-400 text-[11px]">Detalhe: ${escapeHtml(String(data.error))}</p>`;
+        }
+    } catch (err) {
+        box.innerHTML += '<p class="text-red-500">Erro ao chamar o Gemini.</p>';
+    }
+
+    box.scrollTop = box.scrollHeight;
 }
 
 // Inicialização
