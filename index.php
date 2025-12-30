@@ -414,13 +414,17 @@ include 'includes/header.php';
 
 <!-- Widget de Chat com Gemini -->
 <div id="chat-container" class="fixed bottom-5 right-5 w-80 glass-card p-4 hidden border border-yellow-600/50 shadow-2xl z-50">
+    <div class="flex justify-between items-center mb-3">
+        <h3 class="text-yellow-500 font-bold text-sm">Gemini</h3>
+        <button onclick="toggleChatWidget()" class="text-yellow-500 hover:text-yellow-400"><i class="fas fa-times"></i></button>
+    </div>
     <div id="chat-box" class="h-64 overflow-y-auto mb-2 text-xs text-white space-y-2"></div>
     <div class="flex gap-2">
         <input type="text" id="chat-input" class="text-xs bg-slate-900 border-none flex-1 rounded-lg px-2" placeholder="Pergunte algo...">
         <button onclick="sendToGemini()" class="bg-yellow-600 p-2 rounded-lg"><i class="fas fa-paper-plane"></i></button>
     </div>
 </div>
-<button onclick="document.getElementById('chat-container').classList.toggle('hidden')" class="fixed bottom-5 right-5 bg-yellow-600 w-12 h-12 rounded-full shadow-lg flex items-center justify-center z-50">
+<button id="chat-btn" onclick="toggleChatWidget()" class="fixed bottom-5 right-5 bg-yellow-600 w-12 h-12 rounded-full shadow-lg flex items-center justify-center z-50">
     <i class="fas fa-robot text-white"></i>
 </button>
 
@@ -431,6 +435,14 @@ function escapeHtml(str) {
     return str.replace(/[&<>"']/g, function(m) {
         return ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[m]);
     });
+}
+
+// Toggle chat widget e botão
+function toggleChatWidget() {
+    const container = document.getElementById('chat-container');
+    const btn = document.getElementById('chat-btn');
+    container.classList.toggle('hidden');
+    btn.classList.toggle('hidden');
 }
 
 async function loadDashboard() { 
