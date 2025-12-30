@@ -72,9 +72,6 @@
             <a href="<?php echo BASE_PATH; ?>/modules/chat_life.php" class="nav-btn <?php echo ($page === 'chat_life') ? 'active' : ''; ?> text-left px-4 py-3 flex items-center gap-3">
                 <i class="fas fa-comments w-5 text-center text-cyan-400"></i> <span>Chat Life</span>
             </a>
-            <a href="<?php echo BASE_PATH; ?>/modules/ia_life.php" class="nav-btn <?php echo ($page === 'ia_life') ? 'active' : ''; ?> text-left px-4 py-3 flex items-center gap-3">
-                <i class="fas fa-robot w-5 text-center text-yellow-500"></i> <span>IA Life</span>
-            </a>
         </div>
         
         <!-- Área do usuário e logout -->
