@@ -89,7 +89,11 @@ if (isset($_GET['api'])) {
                 "Data: " . date('d/m/Y') . ". Responda de forma motivadora e construtiva.";
 
             // Chamada para o Gemini
-            $apiKey = 'AIzaSyBiastA_XyXdRuaozIhHNwpG97Fbfeqy8A';
+            $apiKey = getenv('GOOGLE_API_KEY');
+            if (!$apiKey) {
+                echo json_encode(['response' => 'Erro: Chave de API não configurada.']);
+                exit;
+            }
             $apiUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=" . $apiKey;
 
             $contents = [];

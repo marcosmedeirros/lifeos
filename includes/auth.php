@@ -2,6 +2,9 @@
 // ARQUIVO: includes/auth.php
 session_start();
 
+// Carregar variáveis de ambiente
+require_once __DIR__ . '/env.php';
+
 require_once __DIR__ . '/../config.php';
 
 // Credenciais hardcoded
