@@ -13,10 +13,18 @@ if (file_exists($envFile)) {
         
         list($key, $value) = explode('=', $line, 2);
         $key = trim($key);
-        $value = trim($value, '\'"');
+        $value = trim($value);
+        
+        // Remove aspas se existirem
+        if ((strpos($value, '"') === 0 && strrpos($value, '"') === strlen($value) - 1) ||
+            (strpos($value, "'") === 0 && strrpos($value, "'") === strlen($value) - 1)) {
+            $value = substr($value, 1, -1);
+        }
         
         // Definir como variável de ambiente
-        putenv("$key=$value");
+        if (!empty($key) && !empty($value)) {
+            putenv("$key=$value");
+        }
     }
 }
 ?>
