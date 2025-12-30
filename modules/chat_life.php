@@ -91,6 +91,46 @@ if (isset($_GET['api'])) {
             exit;
         }
 
+        // Upload de foto no chat
+        if ($action === 'upload_photo') {
+            if (!isset($_FILES['photo'])) {
+                echo json_encode(['error' => 'Nenhuma foto enviada']);
+                exit;
+            }
+
+            $file = $_FILES['photo'];
+            $allowed = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+            $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+
+            if (!in_array($ext, $allowed)) {
+                echo json_encode(['error' => 'Formato não permitido']);
+                exit;
+            }
+
+            // Cria pasta se não existir
+            $uploadDir = '../uploads/chat_life/';
+            if (!is_dir($uploadDir)) {
+                mkdir($uploadDir, 0755, true);
+            }
+
+            // Salva com nome único
+            $filename = uniqid() . '_' . time() . '.' . $ext;
+            $filepath = $uploadDir . $filename;
+
+            if (move_uploaded_file($file['tmp_name'], $filepath)) {
+                // Salva referência no banco
+                $publicPath = 'uploads/chat_life/' . $filename;
+                $ins = $pdo->prepare("INSERT INTO chat_life_messages (user_id, role, content) VALUES (?, ?, ?)");
+                $ins->execute([$user_id, 'user', '[IMAGEM: ' . $publicPath . ']']);
+
+                echo json_encode(['success' => true, 'path' => $publicPath, 'filename' => $filename]);
+                exit;
+            } else {
+                echo json_encode(['error' => 'Erro ao salvar arquivo']);
+                exit;
+            }
+        }
+
     } catch (Exception $e) {
         http_response_code(500);
         echo json_encode(['error' => $e->getMessage()]);
@@ -133,6 +173,10 @@ include '../includes/header.php';
                         class="flex-1 bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-yellow-600"
                         onkeypress="if(event.key==='Enter') sendMessage()"
                     >
+                    <label class="bg-slate-800 hover:bg-slate-700 text-yellow-400 px-4 py-3 rounded-lg font-bold transition cursor-pointer flex items-center gap-2 border border-slate-700">
+                        <i class="fas fa-image"></i> Foto
+                        <input type="file" id="photo-input" accept="image/*" style="display: none;" onchange="uploadPhoto()">
+                    </label>
                     <button 
                         onclick="sendMessage()" 
                         class="bg-yellow-600 hover:bg-yellow-500 text-white px-6 py-3 rounded-lg font-bold transition flex items-center gap-2"
@@ -168,10 +212,22 @@ async function loadChatHistory() {
             const isUser = msg.role === 'user';
             const timestamp = new Date(msg.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
             
+            // Detecta se é uma imagem
+            const isImage = msg.content.includes('[IMAGEM:');
+            const imagePath = isImage ? msg.content.match(/\[IMAGEM: (.+?)\]/)[1] : null;
+            const displayContent = isImage ? imagePath : escapeHtml(msg.content);
+            
+            let contentHtml = '';
+            if (isImage) {
+                contentHtml = `<img src="${displayContent}" class="rounded-lg max-w-xs h-auto mb-2">`;
+            } else {
+                contentHtml = `<p class="text-white text-sm">${displayContent}</p>`;
+            }
+            
             return `<div class="flex ${isUser ? 'justify-end' : 'justify-start'}">
                 <div class="${isUser ? 'bg-yellow-600/20 border-l-4 border-yellow-600' : 'bg-slate-800/50 border-l-4 border-slate-600'} rounded-lg p-3 max-w-xs">
                     <p class="text-xs ${isUser ? 'text-yellow-300' : 'text-slate-400'} mb-1">${isUser ? 'Você' : 'Chat Life'}</p>
-                    <p class="text-white text-sm">${escapeHtml(msg.content)}</p>
+                    ${contentHtml}
                     <p class="text-[11px] text-slate-500 mt-1">${timestamp}</p>
                 </div>
             </div>`;
@@ -240,6 +296,45 @@ document.addEventListener('DOMContentLoaded', () => {
     loadChatHistory();
     document.getElementById('chat-input').focus();
 });
+
+// Upload de foto
+async function uploadPhoto() {
+    const fileInput = document.getElementById('photo-input');
+    const file = fileInput.files[0];
+    
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append('photo', file);
+
+    try {
+        const response = await fetch('?api=upload_photo', {
+            method: 'POST',
+            body: formData
+        });
+
+        const data = await response.json();
+        if (data.success) {
+            // Exibe a imagem no chat
+            const container = document.getElementById('chat-messages');
+            const timestamp = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+            container.innerHTML += `<div class="flex justify-end">
+                <div class="bg-yellow-600/20 border-l-4 border-yellow-600 rounded-lg p-3 max-w-xs">
+                    <p class="text-xs text-yellow-300 mb-1">Você</p>
+                    <img src="${data.path}" class="rounded-lg max-w-xs h-auto mb-2">
+                    <p class="text-[11px] text-slate-500 mt-1">${timestamp}</p>
+                </div>
+            </div>`;
+            container.scrollTop = container.scrollHeight;
+            fileInput.value = '';
+        } else {
+            alert('❌ Erro ao enviar foto: ' + (data.error || 'Desconhecido'));
+        }
+    } catch (err) {
+        alert('❌ Erro ao enviar foto');
+        console.error(err);
+    }
+}
 </script>
 
 <?php include '../includes/footer.php'; ?>
