@@ -181,6 +181,17 @@ if ($action === 'delete_category') {
 require_once __DIR__ . '/../includes/header.php';
 ?>
 
+<style>
+/* Estilo para checkboxes de dias da semana */
+.day-checkbox:checked + label {
+    background: linear-gradient(135deg, rgb(202, 138, 4), rgb(234, 179, 8));
+    border-color: rgb(234, 179, 8);
+    color: #000;
+    font-weight: bold;
+    box-shadow: 0 0 12px rgba(234, 179, 8, 0.4);
+}
+</style>
+
 <div class="flex min-h-screen w-full">
     <?php require_once __DIR__ . '/../includes/sidebar.php'; ?>
     
