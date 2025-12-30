@@ -51,7 +51,8 @@ if ($action === 'get_activities') {
 
 if ($action === 'save_activity') { 
     $period = $data['period'] ?? 'morning';
-    $repeatDays = $data['repeat_days'] ?? [];
+    $repeatType = $data['repeat_type'] ?? 'none'; // none, monthly, weekly, daily
+    $repeatDays = $data['repeat_days'] ?? []; // array de dias da semana (0-6)
 
     if (!empty($data['id'])) {
         // UPDATE
@@ -59,18 +60,44 @@ if ($action === 'save_activity') {
         $stmt->execute([$data['title'], $data['category'], $data['date'], $period, $data['id'], $_SESSION['user_id']]);
     } else {
         // INSERT
-        $groupId = !empty($repeatDays) ? uniqid('act_') : null;
-        $stmt = $pdo->prepare("INSERT INTO activities (user_id, title, category, day_date, period, status, repeat_group) VALUES (?, ?, ?, ?, ?, 0, ?)"); 
-        $stmt->execute([$_SESSION['user_id'], $data['title'], $data['category'], $data['date'], $period, $groupId]); 
+        $groupId = ($repeatType !== 'none') ? uniqid('act_') : null;
+        $stmt = $pdo->prepare("INSERT INTO activities (user_id, title, category, day_date, period, status, repeat_group, repeat_type) VALUES (?, ?, ?, ?, ?, 0, ?, ?)"); 
+        $stmt->execute([$_SESSION['user_id'], $data['title'], $data['category'], $data['date'], $period, $groupId, $repeatType]); 
         
-        // Lógica de Repetição (Mantive sua lógica original)
-        if(!empty($repeatDays)) { 
+        // Lógica de Repetição
+        if($repeatType === 'monthly') {
+            // Repete todo mês no mesmo dia (ex: dia 5 de cada mês)
+            $baseDate = new DateTime($data['date']);
+            $dayOfMonth = (int)$baseDate->format('d');
+            
+            for($i=1; $i<=12; $i++) { // 12 meses
+                $nextDate = clone $baseDate;
+                $nextDate->modify("+{$i} month");
+                $nextDate->setDate((int)$nextDate->format('Y'), (int)$nextDate->format('m'), $dayOfMonth);
+                
+                // Validação se o dia existe no mês
+                if($nextDate->format('d') == $dayOfMonth) {
+                    $stmt->execute([$_SESSION['user_id'], $data['title'], $data['category'], $nextDate->format('Y-m-d'), $period, $groupId, $repeatType]); 
+                }
+            }
+        }
+        elseif($repeatType === 'weekly' && !empty($repeatDays)) {
+            // Repete semanalmente em dias específicos (ex: toda segunda e quarta)
             $b = new DateTime($data['date']); 
             $b->modify('+1 day'); 
-            for($i=0; $i<60; $i++) { 
+            for($i=0; $i<90; $i++) { // 90 dias ~3 meses
                 if(in_array($b->format('w'), $repeatDays)) {
-                    $stmt->execute([$_SESSION['user_id'], $data['title'], $data['category'], $b->format('Y-m-d'), $period, $groupId]); 
+                    $stmt->execute([$_SESSION['user_id'], $data['title'], $data['category'], $b->format('Y-m-d'), $period, $groupId, $repeatType]); 
                 }
+                $b->modify('+1 day'); 
+            }
+        }
+        elseif($repeatType === 'daily') {
+            // Repete todos os dias
+            $b = new DateTime($data['date']); 
+            $b->modify('+1 day'); 
+            for($i=0; $i<90; $i++) { // 90 dias
+                $stmt->execute([$_SESSION['user_id'], $data['title'], $data['category'], $b->format('Y-m-d'), $period, $groupId, $repeatType]); 
                 $b->modify('+1 day'); 
             }
         }
@@ -217,22 +244,33 @@ require_once __DIR__ . '/../includes/header.php';
                 </div>
                 <input type="date" name="date" id="activity-date" required>
                 <div class="bg-slate-800/50 p-4 rounded-xl border border-slate-700/50">
-                    <label class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 block">Repetir (Próx. 60 dias)</label>
-                    <div class="flex justify-between gap-1">
-                        <input type="checkbox" name="repeat_days[]" value="0" id="r0" class="hidden day-checkbox">
-                        <label for="r0" class="w-9 h-9 rounded-full border border-slate-600 flex items-center justify-center cursor-pointer text-xs font-bold hover:border-yellow-500 transition hover:bg-yellow-500/10">D</label>
-                        <input type="checkbox" name="repeat_days[]" value="1" id="r1" class="hidden day-checkbox">
-                        <label for="r1" class="w-9 h-9 rounded-full border border-slate-600 flex items-center justify-center cursor-pointer text-xs font-bold hover:border-yellow-500 transition hover:bg-yellow-500/10">S</label>
-                        <input type="checkbox" name="repeat_days[]" value="2" id="r2" class="hidden day-checkbox">
-                        <label for="r2" class="w-9 h-9 rounded-full border border-slate-600 flex items-center justify-center cursor-pointer text-xs font-bold hover:border-yellow-500 transition hover:bg-yellow-500/10">T</label>
-                        <input type="checkbox" name="repeat_days[]" value="3" id="r3" class="hidden day-checkbox">
-                        <label for="r3" class="w-9 h-9 rounded-full border border-slate-600 flex items-center justify-center cursor-pointer text-xs font-bold hover:border-yellow-500 transition hover:bg-yellow-500/10">Q</label>
-                        <input type="checkbox" name="repeat_days[]" value="4" id="r4" class="hidden day-checkbox">
-                        <label for="r4" class="w-9 h-9 rounded-full border border-slate-600 flex items-center justify-center cursor-pointer text-xs font-bold hover:border-yellow-500 transition hover:bg-yellow-500/10">Q</label>
-                        <input type="checkbox" name="repeat_days[]" value="5" id="r5" class="hidden day-checkbox">
-                        <label for="r5" class="w-9 h-9 rounded-full border border-slate-600 flex items-center justify-center cursor-pointer text-xs font-bold hover:border-yellow-500 transition hover:bg-yellow-500/10">S</label>
-                        <input type="checkbox" name="repeat_days[]" value="6" id="r6" class="hidden day-checkbox">
-                        <label for="r6" class="w-9 h-9 rounded-full border border-slate-600 flex items-center justify-center cursor-pointer text-xs font-bold hover:border-yellow-500 transition hover:bg-yellow-500/10">S</label>
+                    <label class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 block">Tipo de Repetição</label>
+                    <select id="repeat-type" class="mb-4" onchange="toggleRepeatOptions()">
+                        <option value="none">Não repetir</option>
+                        <option value="daily">Repetir todos os dias</option>
+                        <option value="weekly">Repetir semanalmente</option>
+                        <option value="monthly">Repetir mensalmente (mesmo dia)</option>
+                    </select>
+                    
+                    <!-- Opções de dias da semana (só aparece quando weekly) -->
+                    <div id="weekly-options" class="hidden mt-3">
+                        <label class="text-xs font-medium text-slate-400 mb-2 block">Dias da semana:</label>
+                        <div class="flex justify-between gap-1">
+                            <input type="checkbox" name="repeat_days[]" value="0" id="r0" class="hidden day-checkbox">
+                            <label for="r0" class="w-9 h-9 rounded-full border border-slate-600 flex items-center justify-center cursor-pointer text-xs font-bold hover:border-yellow-500 transition hover:bg-yellow-500/10">D</label>
+                            <input type="checkbox" name="repeat_days[]" value="1" id="r1" class="hidden day-checkbox">
+                            <label for="r1" class="w-9 h-9 rounded-full border border-slate-600 flex items-center justify-center cursor-pointer text-xs font-bold hover:border-yellow-500 transition hover:bg-yellow-500/10">S</label>
+                            <input type="checkbox" name="repeat_days[]" value="2" id="r2" class="hidden day-checkbox">
+                            <label for="r2" class="w-9 h-9 rounded-full border border-slate-600 flex items-center justify-center cursor-pointer text-xs font-bold hover:border-yellow-500 transition hover:bg-yellow-500/10">T</label>
+                            <input type="checkbox" name="repeat_days[]" value="3" id="r3" class="hidden day-checkbox">
+                            <label for="r3" class="w-9 h-9 rounded-full border border-slate-600 flex items-center justify-center cursor-pointer text-xs font-bold hover:border-yellow-500 transition hover:bg-yellow-500/10">Q</label>
+                            <input type="checkbox" name="repeat_days[]" value="4" id="r4" class="hidden day-checkbox">
+                            <label for="r4" class="w-9 h-9 rounded-full border border-slate-600 flex items-center justify-center cursor-pointer text-xs font-bold hover:border-yellow-500 transition hover:bg-yellow-500/10">Q</label>
+                            <input type="checkbox" name="repeat_days[]" value="5" id="r5" class="hidden day-checkbox">
+                            <label for="r5" class="w-9 h-9 rounded-full border border-slate-600 flex items-center justify-center cursor-pointer text-xs font-bold hover:border-yellow-500 transition hover:bg-yellow-500/10">S</label>
+                            <input type="checkbox" name="repeat_days[]" value="6" id="r6" class="hidden day-checkbox">
+                            <label for="r6" class="w-9 h-9 rounded-full border border-slate-600 flex items-center justify-center cursor-pointer text-xs font-bold hover:border-yellow-500 transition hover:bg-yellow-500/10">S</label>
+                        </div>
                     </div>
                 </div>
                 <div class="flex gap-3 pt-4">
@@ -277,7 +315,22 @@ function openActivityModal(formId, reset = true) {
             // Data atual
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('activity-date').value = today;
+            document.getElementById('repeat-type').value = 'none';
+            toggleRepeatOptions();
         }
+    }
+}
+
+function toggleRepeatOptions() {
+    const type = document.getElementById('repeat-type').value;
+    const weeklyOptions = document.getElementById('weekly-options');
+    
+    if (type === 'weekly') {
+        weeklyOptions.classList.remove('hidden');
+    } else {
+        weeklyOptions.classList.add('hidden');
+        // Desmarca checkboxes
+        document.querySelectorAll('#weekly-options input[type="checkbox"]').forEach(cb => cb.checked = false);
     }
 }
 
@@ -405,8 +458,11 @@ async function submitActivity(e) {
     e.preventDefault(); 
     const fd=new FormData(e.target); 
     const d=Object.fromEntries(fd); 
+    d.repeat_type = document.getElementById('repeat-type').value;
     d.repeat_days=[]; 
-    document.querySelectorAll('#modal-activity input[name="repeat_days[]"]:checked').forEach(cb=>d.repeat_days.push(cb.value)); 
+    if(d.repeat_type === 'weekly') {
+        document.querySelectorAll('#modal-activity input[name="repeat_days[]"]:checked').forEach(cb=>d.repeat_days.push(cb.value)); 
+    }
     await api('save_activity',d); 
     closeActivityModal(); 
     loadActivities(); 
