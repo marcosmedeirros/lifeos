@@ -200,6 +200,23 @@ function escapeHtml(str) {
     });
 }
 
+// Processa markdown básico para HTML
+function parseMarkdown(text) {
+    text = escapeHtml(text);
+    
+    // **negrito** → <strong>negrito</strong>
+    text = text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+    
+    // * item → quebra com bullet
+    text = text.replace(/\n\* /g, '<br>• ');
+    text = text.replace(/^\* /gm, '• ');
+    
+    // Quebras de linha simples
+    text = text.replace(/\n/g, '<br>');
+    
+    return text;
+}
+
 async function loadChatHistory() {
     try {
         const response = await fetch('?api=get_history');
@@ -218,17 +235,18 @@ async function loadChatHistory() {
             // Detecta se é uma imagem
             const isImage = msg.content.includes('[IMAGEM:');
             const imagePath = isImage ? msg.content.match(/\[IMAGEM: (.+?)\]/)[1] : null;
-            const displayContent = isImage ? imagePath : escapeHtml(msg.content);
             
             let contentHtml = '';
             if (isImage) {
-                contentHtml = `<img src="${displayContent}" class="rounded-lg max-w-xs h-auto mb-2">`;
+                contentHtml = `<img src="${imagePath}" class="rounded-lg max-w-xs h-auto mb-2">`;
             } else {
-                contentHtml = `<p class="text-white text-sm">${displayContent}</p>`;
+                // Processa markdown da resposta da IA
+                const displayContent = isUser ? escapeHtml(msg.content) : parseMarkdown(msg.content);
+                contentHtml = `<div class="text-white text-sm leading-relaxed">${displayContent}</div>`;
             }
             
             return `<div class="flex ${isUser ? 'justify-end' : 'justify-start'}">
-                <div class="${isUser ? 'bg-yellow-600/20 border-l-4 border-yellow-600' : 'bg-slate-800/50 border-l-4 border-slate-600'} rounded-lg p-3 max-w-xs">
+                <div class="${isUser ? 'bg-yellow-600/20 border-l-4 border-yellow-600' : 'bg-slate-800/50 border-l-4 border-slate-600'} rounded-lg p-3 max-w-2xl">
                     <p class="text-xs ${isUser ? 'text-yellow-300' : 'text-slate-400'} mb-1">${isUser ? 'Você' : 'Chat Life'}</p>
                     ${contentHtml}
                     <p class="text-[11px] text-slate-500 mt-1">${timestamp}</p>
@@ -275,10 +293,11 @@ async function sendMessage() {
         const reply = data.response || 'Erro ao processar resposta.';
         const replyTimestamp = data.timestamp || new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
 
+        const formattedReply = parseMarkdown(reply);
         container.innerHTML += `<div class="flex justify-start">
-            <div class="bg-slate-800/50 border-l-4 border-slate-600 rounded-lg p-3 max-w-xs">
+            <div class="bg-slate-800/50 border-l-4 border-slate-600 rounded-lg p-3 max-w-2xl">
                 <p class="text-xs text-slate-400 mb-1">Chat Life</p>
-                <p class="text-white text-sm">${escapeHtml(reply)}</p>
+                <div class="text-white text-sm leading-relaxed">${formattedReply}</div>
                 <p class="text-[11px] text-slate-500 mt-1">${replyTimestamp}</p>
             </div>
         </div>`;
