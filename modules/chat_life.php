@@ -22,7 +22,18 @@ if (isset($_GET['api'])) {
                 ORDER BY created_at ASC
             ");
             $stmt->execute([$user_id]);
-            echo json_encode($stmt->fetchAll(PDO::FETCH_ASSOC));
+            $messages = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            
+            // Corrige caminhos antigos de imagens se necessário
+            foreach ($messages as &$msg) {
+                if (strpos($msg['content'], '[IMAGEM:') !== false) {
+                    // Se o caminho ainda tem /modules/, remove
+                    $msg['content'] = str_replace('[IMAGEM: /modules/uploads/', '[IMAGEM: /uploads/', $msg['content']);
+                    $msg['content'] = str_replace('[IMAGEM: modules/uploads/', '[IMAGEM: /uploads/', $msg['content']);
+                }
+            }
+            
+            echo json_encode($messages);
             exit;
         }
 
@@ -241,7 +252,12 @@ async function loadChatHistory() {
             
             // Detecta se é uma imagem
             const isImage = msg.content.includes('[IMAGEM:');
-            const imagePath = isImage ? msg.content.match(/\[IMAGEM: (.+?)\]/)[1] : null;
+            let imagePath = isImage ? msg.content.match(/\[IMAGEM: (.+?)\]/)[1] : null;
+            
+            // Garante que o caminho é absoluto desde a raiz
+            if (imagePath && !imagePath.startsWith('http')) {
+                imagePath = imagePath.startsWith('/') ? imagePath : '/' + imagePath;
+            }
             
             let contentHtml = '';
             if (isImage) {
