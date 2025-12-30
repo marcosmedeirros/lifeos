@@ -125,8 +125,8 @@ if (isset($_GET['api'])) {
             $filepath = $uploadDir . $filename;
 
             if (move_uploaded_file($file['tmp_name'], $filepath)) {
-                // Salva referência no banco
-                $publicPath = 'uploads/chat_life/' . $filename;
+                // Caminho público - relativo à raiz do projeto
+                $publicPath = '/uploads/chat_life/' . $filename;
                 $ins = $pdo->prepare("INSERT INTO chat_life_messages (user_id, role, content) VALUES (?, ?, ?)");
                 $ins->execute([$user_id, 'user', '[IMAGEM: ' . $publicPath . ']']);
 
