@@ -41,8 +41,11 @@ if (isset($_GET['api'])) {
             $history = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
             // Prompt de sistema simples - sem contexto de stats
+            date_default_timezone_set('America/Sao_Paulo');
             $system_prompt = "Você é um assistente conversável amigável e atencioso. " .
-                "Converse naturalmente sobre qualquer assunto. Data: " . date('d/m/Y H:i') . ".";
+                "Converse naturalmente sobre qualquer assunto. " .
+                "Data e hora atual: " . date('d/m/Y H:i') . " (29 de dezembro de 2025, 21:53). " .
+                "Sempre use essa data/hora como referência atual.";
 
             // Chamada para o Gemini
             $apiKey = 'AIzaSyBiastA_XyXdRuaozIhHNwpG97Fbfeqy8A';
