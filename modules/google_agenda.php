@@ -141,6 +141,7 @@ if (isset($_GET['api'])) {
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($ch, CURLOPT_HTTPHEADER, ["Authorization: Bearer {$access_token}"]);
             $response = curl_exec($ch);
+            $http_status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
             curl_close($ch);
             
             $events_data = json_decode($response, true);
@@ -168,7 +169,11 @@ if (isset($_GET['api'])) {
                 }
                 echo json_encode(['success' => true, 'count' => count($events_data['items'])]);
             } else {
-                echo json_encode(['error' => 'Erro ao buscar eventos']);
+                echo json_encode([
+                    'error' => 'Erro ao buscar eventos',
+                    'http_status' => $http_status,
+                    'response' => substr($response ?: '', 0, 500)
+                ]);
             }
             exit;
         }
