@@ -438,21 +438,6 @@ include 'includes/header.php';
             <p class="text-3xl font-bold text-white" id="dash-strava-count">0</p>
         </div>
     </div>
-    
-        <!-- Mensagem do Dia -->
-        <div class="glass-card p-6 rounded-2xl mb-8">
-            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4">
-                <h3 class="text-xl font-bold text-yellow-500 flex items-center gap-2">
-                    <i class="fas fa-scroll"></i> Mensagem do Dia
-                </h3>
-                <div class="flex items-center gap-2 bg-slate-900 rounded-lg p-2 border border-slate-700/70">
-                    <button onclick="changeDailyMessage(-1)" class="w-9 h-9 flex items-center justify-center rounded hover:bg-slate-800 text-slate-400"><i class="fas fa-chevron-left"></i></button>
-                    <span id="daily-date-label" class="text-slate-200 font-semibold text-sm min-w-[140px] text-center">...</span>
-                    <button onclick="changeDailyMessage(1)" class="w-9 h-9 flex items-center justify-center rounded hover:bg-slate-800 text-slate-400"><i class="fas fa-chevron-right"></i></button>
-                </div>
-            </div>
-            <p id="daily-message" class="text-slate-200 whitespace-pre-line leading-relaxed"></p>
-        </div>
 
         <!-- Listas de Atividades, Eventos e Hábitos -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -481,6 +466,21 @@ include 'includes/header.php';
         </div>
         
 </div>
+
+    <!-- Mensagem do Dia (final do dashboard) -->
+    <div class="glass-card p-6 rounded-2xl mb-8">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4">
+            <h3 class="text-xl font-bold text-yellow-500 flex items-center gap-2">
+                <i class="fas fa-scroll"></i> Mensagem do Dia
+            </h3>
+            <div class="flex items-center gap-2 bg-slate-900 rounded-lg p-2 border border-slate-700/70">
+                <button onclick="changeDailyMessage(-1)" class="w-9 h-9 flex items-center justify-center rounded hover:bg-slate-800 text-slate-400"><i class="fas fa-chevron-left"></i></button>
+                <span id="daily-date-label" class="text-slate-200 font-semibold text-sm min-w-[140px] text-center">...</span>
+                <button onclick="changeDailyMessage(1)" class="w-9 h-9 flex items-center justify-center rounded hover:bg-slate-800 text-slate-400"><i class="fas fa-chevron-right"></i></button>
+            </div>
+        </div>
+        <p id="daily-message" class="text-slate-200 whitespace-pre-line leading-relaxed"></p>
+    </div>
 
 <!-- Widget de Chat com Gemini -->
 <div id="chat-container" class="fixed bottom-5 right-5 w-80 glass-card p-4 hidden border border-yellow-600/50 shadow-2xl z-50">
