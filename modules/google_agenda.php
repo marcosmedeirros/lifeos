@@ -652,6 +652,24 @@ document.addEventListener('DOMContentLoaded', async () => {
     await syncFromGoogle(true);
     await loadCalendarEvents();
     setInterval(() => syncFromGoogle(true), 10 * 60 * 1000); // auto a cada 10min
+    
+    // Verifica se vem do dashboard com novo evento
+    const urlParams = new URLSearchParams(window.location.search);
+    const newEventTitle = urlParams.get('new_event');
+    const newEventDate = urlParams.get('datetime');
+    
+    if (newEventTitle) {
+        document.getElementById('event-id').value = '';
+        document.getElementById('event-title').value = decodeURIComponent(newEventTitle);
+        document.getElementById('event-date').value = decodeURIComponent(newEventDate) || new Date().toISOString().slice(0, 16);
+        document.getElementById('modal-event-title').textContent = 'Novo Evento';
+        document.getElementById('btn-delete-event').classList.add('hidden');
+        document.getElementById('btn-save-event').textContent = 'Salvar';
+        openEventModal();
+        
+        // Remove os parâmetros da URL
+        window.history.replaceState({}, document.title, window.location.pathname);
+    }
 });
 <?php endif; ?>
 </script>
