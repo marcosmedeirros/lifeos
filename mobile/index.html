@@ -1,13 +1,239 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-    <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <link rel="manifest" href="/manifest.json" />
-        <title>LifeOS Mobile</title>
-    </head>
-    <body class="bg-base text-white">
-        <div id="root"></div>
-        <script type="module" src="/src/main.jsx"></script>
-    </body>
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="manifest" href="/manifest.json" />
+    <title>LifeOS Mobile</title>
+    <!-- React via CDN -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        :root { --bg:#050915; --card:#0b1020; --muted:#9fb1d1; --accent:#63c5ff; --text:#e8f0ff; --border:#14203a; }
+        *{box-sizing:border-box;} body{margin:0;font-family:'Inter',system-ui,sans-serif;background:radial-gradient(circle at 20% 20%,rgba(99,197,255,0.08),transparent 32%),radial-gradient(circle at 80% 10%,rgba(99,197,255,0.05),transparent 36%),linear-gradient(145deg,#040813 0%,#081024 50%,#0a1228 100%);min-height:100vh;color:var(--text);} a{text-decoration:none;color:inherit;}
+        .page{min-height:100vh;padding:16px 16px 32px;max-width:1100px;margin:0 auto;}
+        .topbar{position:sticky;top:0;z-index:20;backdrop-filter:blur(10px);background:rgba(5,5,5,0.8);border-bottom:1px solid var(--border);margin:-16px -16px 12px -16px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;}
+        .brand{font-weight:700;} .status{color:var(--muted);font-size:12px;}
+        .nav{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:12px;} @media(min-width:640px){.nav{grid-template-columns:repeat(4,1fr);} }
+        .nav button{border:1px solid var(--border);background:#0b0b0b;color:var(--muted);padding:12px;border-radius:12px;font-weight:700;font-size:14px;cursor:pointer;} .nav button.active{color:var(--accent);border-color:var(--accent);background:rgba(99,197,255,0.1);} 
+        .card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px;box-shadow:0 18px 50px rgba(0,0,0,0.45);} .card + .card{margin-top:12px;}
+        .input, select, button.action{width:100%;padding:12px;border-radius:12px;border:1px solid var(--border);background:#0c0c0c;color:var(--text);font-size:14px;}
+        button.action{cursor:pointer;font-weight:700;background:linear-gradient(135deg,#63c5ff,#8fd8ff);color:#081024;border:none;}
+        .label{font-size:13px;color:var(--muted);} .list{display:grid;gap:8px;margin-top:10px;} .item{border:1px solid var(--border);padding:10px;border-radius:12px;background:#0f0f0f;} .title{font-weight:700;font-size:14px;margin-bottom:4px;} .meta{color:var(--muted);font-size:12px;display:flex;gap:8px;align-items:center;} .badge{display:inline-flex;align-items:center;gap:4px;font-size:11px;padding:3px 8px;border-radius:999px;background:rgba(99,197,255,0.15);color:var(--accent);} 
+        .grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;}
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useMemo } = React;
+
+        const tabs = [
+            { id:'dashboard', label:'Dashboard' },
+            { id:'agenda', label:'Agenda' },
+            { id:'activities', label:'Atividades' },
+            { id:'habits', label:'Hábitos' }
+        ];
+
+        const api = async (url, options={}) => {
+            try {
+                const res = await fetch(url, { credentials:'same-origin', ...options });
+                const text = await res.text();
+                if (!res.ok) throw new Error(`${res.status} ${res.statusText} | ${text.slice(0,200)}`);
+                try { return JSON.parse(text); } catch (e) { throw new Error('Resposta inválida'); }
+            } catch (err) { console.error(err); return { error: err.message }; }
+        };
+
+        const nowLocal = () => { const n = new Date(); return new Date(n.getTime() - n.getTimezoneOffset()*60000); };
+        const fmtDateTime = dt => dt ? new Date(dt).toLocaleString('pt-BR') : '';
+
+        function App(){
+            const [tab, setTab] = useState('dashboard');
+            const [status, setStatus] = useState('Online');
+            return (
+                <div className="page">
+                    <header className="topbar">
+                        <div className="brand">LifeOS Mobile</div>
+                        <div className="status">{status}</div>
+                    </header>
+                    <nav className="nav">
+                        {tabs.map(t => (
+                            <button key={t.id} className={tab===t.id?'active':''} onClick={()=>setTab(t.id)}>{t.label}</button>
+                        ))}
+                    </nav>
+                    {tab==='dashboard' && <Dashboard setStatus={setStatus} />}
+                    {tab==='agenda' && <Agenda setStatus={setStatus} />}
+                    {tab==='activities' && <Activities setStatus={setStatus} />}
+                    {tab==='habits' && <Habits setStatus={setStatus} />}
+                </div>
+            );
+        }
+
+        function Dashboard({ setStatus }){
+            const [eventTitle,setEventTitle]=useState('');
+            const [eventDt,setEventDt]=useState(nowLocal().toISOString().slice(0,16));
+            const [actTitle,setActTitle]=useState('');
+            const [actDate,setActDate]=useState(nowLocal().toISOString().slice(0,10));
+            const [actPeriod,setActPeriod]=useState('morning');
+
+            const createEvent=async()=>{
+                if(!eventTitle||!eventDt) return;
+                const res=await api('../modules/google_agenda.php?api=create_event',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({title:eventTitle,start_date:eventDt})});
+                if(res&&!res.error){setStatus('Evento criado');setEventTitle('');} else setStatus(res?.error||'Erro');
+            };
+            const createActivity=async()=>{
+                if(!actTitle||!actDate) return;
+                const res=await api('../modules/activities.php?api=save_activity',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({title:actTitle,date:actDate,period:actPeriod})});
+                if(res&&!res.error){setStatus('Atividade criada');setActTitle('');} else setStatus(res?.error||'Erro');
+            };
+
+            return (
+                <div className="card">
+                    <h2 className="title" style={{fontSize:'16px'}}>Atalhos</h2>
+                    <div className="grid2">
+                        <div className="space-y-2">
+                            <div className="label">Evento rápido</div>
+                            <input className="input" placeholder="Título" value={eventTitle} onChange={e=>setEventTitle(e.target.value)} />
+                            <input className="input" type="datetime-local" value={eventDt} onChange={e=>setEventDt(e.target.value)} />
+                            <button className="action" onClick={createEvent}>Adicionar evento</button>
+                        </div>
+                        <div className="space-y-2">
+                            <div className="label">Atividade rápida</div>
+                            <input className="input" placeholder="Atividade" value={actTitle} onChange={e=>setActTitle(e.target.value)} />
+                            <input className="input" type="date" value={actDate} onChange={e=>setActDate(e.target.value)} />
+                            <select className="input" value={actPeriod} onChange={e=>setActPeriod(e.target.value)}>
+                                <option value="morning">Manhã</option><option value="afternoon">Tarde</option><option value="night">Noite</option>
+                            </select>
+                            <button className="action" onClick={createActivity}>Adicionar atividade</button>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        function Agenda({ setStatus }){
+            const [ym,setYm]=useState(nowLocal().toISOString().slice(0,7));
+            const [events,setEvents]=useState([]);
+            const [eventTitle,setEventTitle]=useState('');
+            const [eventDt,setEventDt]=useState(nowLocal().toISOString().slice(0,16));
+            const filtered=useMemo(()=>events.filter(e=>(e.start_date||'').startsWith(ym)),[events,ym]);
+            useEffect(()=>{load();},[]);
+
+            const load=async()=>{setStatus('Carregando...');const data=await api('../modules/google_agenda.php?api=list_events'); if(data&&!data.error){setEvents(data.events||[]);setStatus('Online');} else setStatus(data?.error||'Erro');};
+            const sync=async()=>{setStatus('Sincronizando...');await api('../modules/google_agenda.php?api=sync_from_google');await load();};
+            const createEvent=async()=>{if(!eventTitle||!eventDt)return;const res=await api('../modules/google_agenda.php?api=create_event',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({title:eventTitle,start_date:eventDt})}); if(res&&!res.error){setStatus('Evento criado');setEventTitle('');load();} else setStatus(res?.error||'Erro');};
+
+            return (
+                <div className="card">
+                    <div className="flex" style={{display:'flex',flexDirection:'column',gap:8}}>
+                        <div style={{display:'flex',flexWrap:'wrap',gap:8,justifyContent:'space-between',alignItems:'center'}}>
+                            <div>
+                                <div className="title" style={{fontSize:'16px'}}>Eventos</div>
+                                <div className="label">Sincronizado com Google</div>
+                            </div>
+                            <div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
+                                <input className="input" style={{width:160}} type="month" value={ym} onChange={e=>setYm(e.target.value)} />
+                                <button className="action" style={{width:'auto'}} onClick={sync}>Sincronizar</button>
+                            </div>
+                        </div>
+                        <div className="grid2">
+                            <div className="space-y-2">
+                                <div className="label">Novo evento</div>
+                                <input className="input" placeholder="Título" value={eventTitle} onChange={e=>setEventTitle(e.target.value)} />
+                                <input className="input" type="datetime-local" value={eventDt} onChange={e=>setEventDt(e.target.value)} />
+                                <button className="action" onClick={createEvent}>Adicionar</button>
+                            </div>
+                        </div>
+                        <div className="list" style={{maxHeight:'60vh',overflow:'auto',paddingRight:4}}>
+                            {!filtered.length && <div className="item">Sem eventos.</div>}
+                            {filtered.map(ev=>{const dt=ev.start_date?.replace(' ','T'); return (
+                                <div key={ev.id||ev.google_event_id} className="item">
+                                    <div className="title">{ev.title||'Sem título'}</div>
+                                    <div className="meta">{fmtDateTime(dt)}</div>
+                                </div>
+                            );})}
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        function Activities({ setStatus }){
+            const [date,setDate]=useState(nowLocal().toISOString().slice(0,10));
+            const [items,setItems]=useState([]);
+            const [title,setTitle]=useState('');
+            const [period,setPeriod]=useState('morning');
+            useEffect(()=>{load();},[date]);
+            const load=async()=>{setStatus('Carregando...');const data=await api(`../modules/activities.php?api=get_activities&start=${date}&end=${date}`); if(data&&!data.error){setItems(data||[]);setStatus('Online');} else setStatus(data?.error||'Erro');};
+            const create=async()=>{if(!title||!date)return;const res=await api('../modules/activities.php?api=save_activity',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({title,date,period})}); if(res&&!res.error){setStatus('Atividade criada');setTitle('');load();} else setStatus(res?.error||'Erro');};
+
+            return (
+                <div className="card">
+                    <div style={{display:'flex',flexDirection:'column',gap:8}}>
+                        <div style={{display:'flex',flexWrap:'wrap',gap:8,justifyContent:'space-between',alignItems:'center'}}>
+                            <div>
+                                <div className="title" style={{fontSize:'16px'}}>Atividades</div>
+                                <div className="label">Planejamento do dia</div>
+                            </div>
+                            <input className="input" style={{width:160}} type="date" value={date} onChange={e=>setDate(e.target.value)} />
+                        </div>
+                        <div className="grid2">
+                            <div className="space-y-2">
+                                <div className="label">Nova atividade</div>
+                                <input className="input" placeholder="Título" value={title} onChange={e=>setTitle(e.target.value)} />
+                                <select className="input" value={period} onChange={e=>setPeriod(e.target.value)}>
+                                    <option value="morning">Manhã</option><option value="afternoon">Tarde</option><option value="night">Noite</option>
+                                </select>
+                                <button className="action" onClick={create}>Adicionar</button>
+                            </div>
+                        </div>
+                        <div className="list" style={{maxHeight:'60vh',overflow:'auto',paddingRight:4}}>
+                            {!items.length && <div className="item">Sem atividades.</div>}
+                            {items.map(a=>(
+                                <div key={a.id} className="item">
+                                    <div className="title">{a.title}</div>
+                                    <div className="meta"><span>{a.day_date}</span><span className="badge">{a.period||'dia'}</span></div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        function Habits({ setStatus }){
+            const [ym,setYm]=useState(nowLocal().toISOString().slice(0,7));
+            const [items,setItems]=useState([]);
+            useEffect(()=>{load();},[ym]);
+            const load=async()=>{setStatus('Carregando...');const data=await api(`../modules/habits.php?api=get_habits&month=${ym}`); if(data&&!data.error){setItems(data||[]);setStatus('Online');} else setStatus(data?.error||'Erro');};
+            return (
+                <div className="card">
+                    <div style={{display:'flex',flexDirection:'column',gap:8}}>
+                        <div style={{display:'flex',flexWrap:'wrap',gap:8,justifyContent:'space-between',alignItems:'center'}}>
+                            <div>
+                                <div className="title" style={{fontSize:'16px'}}>Hábitos</div>
+                                <div className="label">Resumo mensal</div>
+                            </div>
+                            <input className="input" style={{width:160}} type="month" value={ym} onChange={e=>setYm(e.target.value)} />
+                        </div>
+                        <div className="grid2">
+                            {!items.length && <div className="item">Sem hábitos.</div>}
+                            {items.map(h=>{const checks=h.checked_dates?JSON.parse(h.checked_dates).length:0; return (
+                                <div key={h.id} className="item">
+                                    <div className="title">{h.name}</div>
+                                    <div className="meta">Check-ins: {checks}</div>
+                                </div>
+                            );})}
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
 </html>
