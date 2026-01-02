@@ -328,13 +328,7 @@ include __DIR__ . '/../includes/header.php';
                 </div>
             <?php else: ?>
                 <!-- Conectado -->
-                <div class="mb-6 flex flex-wrap gap-3 items-center">
-                    <button onclick="createEventModal()" class="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white px-6 py-3 rounded-xl font-bold shadow-lg transition">
-                        <i class="fas fa-plus mr-2"></i> Novo Evento
-                    </button>
-                </div>
-
-                <div class="glass-card p-6 rounded-2xl mt-6">
+                <div class="glass-card p-6 rounded-2xl">
                     <div id="calendar"></div>
                 </div>
             <?php endif; ?>
