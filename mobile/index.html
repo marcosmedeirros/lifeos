@@ -49,7 +49,7 @@
             { id:'finance', label:'Finanças', icon:'💰' },
             { id:'board', label:'Board', icon:'📸' },
             { id:'routine', label:'Rotina', icon:'📖' },
-            { id:'strava', label:'Strava', icon:'🚴' }
+            { id:'strava', label:'Treinos', icon:'🚴' }
         ];
 
         const api = async (url, options={}) => {
@@ -399,7 +399,6 @@
 
             const edit=(it)=>{setForm({id:it.id,type:it.type,amount:it.amount,desc:it.description,category_id:it.category_id||'',date:(it.created_at||'').replace(' ','T')});};
             const remove=async(id)=>{await api('../modules/finance.php?api=delete_finance',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id})});load();};
-            const toggle=async(id)=>{await api('../modules/finance.php?api=toggle_finance',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id})});load();};
 
             return (
                 <div className="card">
@@ -462,7 +461,6 @@
                                     <div style={{display:'flex',flexDirection:'column',alignItems:'flex-end',gap:6}}>
                                         <div className="title" style={{color:it.type==='income'?'#16a34a':'#dc2626'}}>{fmtMoney(it.amount)}</div>
                                         <div style={{display:'flex',gap:8}}>
-                                            <button onClick={()=>toggle(it.id)} style={{border:'none',background:'transparent',cursor:'pointer',color:'#0f172a'}}>{Number(it.status)===1?'✔️':'⏳'}</button>
                                             <button onClick={()=>edit(it)} style={{border:'none',background:'transparent',cursor:'pointer',color:'#64748b'}}>✏️</button>
                                             <button onClick={()=>remove(it.id)} style={{border:'none',background:'transparent',cursor:'pointer',color:'#ef4444'}}>🗑️</button>
                                         </div>
@@ -528,12 +526,13 @@
             const [mood,setMood]=useState('😊');
             const [content,setContent]=useState('');
             const [days,setDays]=useState([]);
+            const [lastLog,setLastLog]=useState(null);
 
             useEffect(()=>{loadMonth();},[ym]);
             useEffect(()=>{loadDay(selectedDay);},[selectedDay]);
 
             const loadMonth=async()=>{setStatus('Carregando...');const data=await api(`../modules/routine.php?api=get_routine_month&month=${ym}`); if(data&&!data.error){setDays(data||[]);setStatus('Online');} else setStatus(data?.error||'Erro');};
-            const loadDay=async(d)=>{const log=await api(`../modules/routine.php?api=get_routine_day&date=${d}`); if(log&&!log.error&&log.log_date){setMood(log.mood||'😊');setContent(log.content||'');} else {setMood('😊');setContent('');}}
+            const loadDay=async(d)=>{const log=await api(`../modules/routine.php?api=get_routine_day&date=${d}`); if(log&&!log.error&&log.log_date){setMood(log.mood||'😊');setContent(log.content||'');setLastLog(log);} else {setMood('😊');setContent('');setLastLog(null);} }
             const save=async()=>{await api('../modules/routine.php?api=save_routine',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({date:selectedDay,mood,content})});setStatus('Dia salvo');loadMonth();};
 
             const dayMood=(d)=>{const found=days.find(x=>x.log_date===d);return found?found.mood||'📝':'+';};
@@ -562,6 +561,13 @@
                                 ))}
                             </div>
                         </div>
+                        {lastLog && (
+                            <div className="item" style={{background:'#f9fbff',borderColor:'#e5e7f3'}}>
+                                <div className="title" style={{display:'flex',gap:8,alignItems:'center'}}><span>{lastLog.mood||'📝'}</span><span>Salvo</span></div>
+                                <div className="meta" style={{marginBottom:6}}>{new Date(lastLog.log_date+'T00:00:00').toLocaleDateString('pt-BR')}</div>
+                                <div style={{color:'#111827',whiteSpace:'pre-wrap'}}>{lastLog.content}</div>
+                            </div>
+                        )}
                         <textarea className="input" style={{height:140}} placeholder="Como foi seu dia?" value={content} onChange={e=>setContent(e.target.value)}></textarea>
                         <button className="action" onClick={save}>Salvar dia</button>
                     </div>
@@ -579,7 +585,7 @@
             if(!data) return <div className="card">Carregando...</div>;
             if(!data.connected) return (
                 <div className="card" style={{textAlign:'center'}}>
-                    <div className="title" style={{fontSize:'16px'}}>Conectar Strava</div>
+                    <div className="title" style={{fontSize:'16px'}}>Conectar Treinos</div>
                     <a className="action" href={data.auth_url} style={{display:'inline-block',marginTop:12}}>Autorizar</a>
                 </div>
             );
@@ -587,7 +593,7 @@
             return (
                 <div className="card">
                     <div style={{display:'flex',flexDirection:'column',gap:10}}>
-                        <div className="title" style={{fontSize:'16px'}}>Treinos Strava</div>
+                        <div className="title" style={{fontSize:'16px'}}>Treinos</div>
                         <div className="grid2">
                             <div className="item" style={{display:'flex',justifyContent:'space-between'}}>
                                 <span className="label">Km recentes</span><span className="title">{data.summary.total_km} km</span>
@@ -609,10 +615,9 @@
                                             <span className="badge">{act.type}</span>
                                             <span>{act.date}</span>
                                             <span>{act.distance} km</span>
-                                            <span>{act.time}</span>
                                         </div>
                                     </div>
-                                    <button onClick={()=>toggle(act.strava_id)} style={{border:'none',background:'transparent',fontSize:18,cursor:'pointer'}} aria-label="Marcar feito">{act.done?'✔️':'⬜'}</button>
+                                    <span className="badge" style={{background:'rgba(99,197,255,0.18)',color:'#0f172a'}}>{act.time}</span>
                                 </div>
                             ))}
                         </div>
