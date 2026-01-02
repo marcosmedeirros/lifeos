@@ -189,6 +189,13 @@ if (isset($_GET['api'])) {
             }
             exit;
         }
+
+        if ($action === 'list_events') {
+            $stmt = $pdo->prepare("SELECT * FROM events WHERE google_event_id IS NOT NULL AND user_id = ? ORDER BY start_date DESC LIMIT 200");
+            $stmt->execute([$user_id]);
+            echo json_encode(['success' => true, 'events' => $stmt->fetchAll(PDO::FETCH_ASSOC)]);
+            exit;
+        }
         
         if ($action === 'create_event') {
             if (!$access_token) {
@@ -323,14 +330,18 @@ include __DIR__ . '/../includes/header.php';
                     </div>
                 </div>
 
-                <div class="glass-card p-6 rounded-2xl">
-                    <h3 class="text-xl font-bold text-yellow-500 mb-4">Seus Eventos Sincronizados</h3>
-                    <div id="events-list" class="space-y-3"></div>
-                </div>
-
-                <div class="glass-card p-6 rounded-2xl mt-6">
-                    <h3 class="text-xl font-bold text-yellow-500 mb-4">Calendário</h3>
-                    <div id="calendar" class="bg-slate-900 rounded-xl p-2"></div>
+                <div class="glass-card p-6 rounded-2xl mt-6 bg-slate-900/60 border border-slate-800 shadow-lg shadow-yellow-600/20">
+                    <div class="flex flex-wrap items-center justify-between gap-4 mb-4">
+                        <div>
+                            <h3 class="text-2xl font-bold text-yellow-400">Calendário</h3>
+                            <p class="text-slate-400 text-sm">Eventos sincronizados direto do Google Calendar</p>
+                        </div>
+                        <div class="flex items-center gap-2 text-xs text-slate-300 bg-slate-800/70 px-3 py-2 rounded-full border border-slate-700">
+                            <span class="h-3 w-3 rounded-full bg-yellow-400 border border-yellow-200"></span>
+                            <span>Eventos ativos</span>
+                        </div>
+                    </div>
+                    <div id="calendar" class="bg-slate-950/60 rounded-2xl p-4 border border-slate-800 shadow-inner"></div>
                 </div>
             <?php endif; ?>
         </div>
@@ -367,7 +378,7 @@ async function syncFromGoogle(silent = false) {
         const result = await api('sync_from_google');
         if (result.success) {
             if (!silent) alert(`✅ ${result.count} eventos sincronizados com sucesso!`);
-            await loadEvents();
+            await loadCalendarEvents();
         } else if (!silent) {
             alert('❌ Erro ao sincronizar.');
             console.error('sync_from_google response (no success flag):', result);
@@ -378,45 +389,15 @@ async function syncFromGoogle(silent = false) {
     }
 }
 
-async function loadEvents() {
-    // Buscar eventos locais que vieram do Google
-    const events = <?php 
-        $stmt = $pdo->prepare("SELECT * FROM events WHERE google_event_id IS NOT NULL AND user_id = ? ORDER BY start_date DESC LIMIT 50");
-        $stmt->execute([$user_id]);
-        echo json_encode($stmt->fetchAll());
-    ?>;
-    
-    const list = document.getElementById('events-list');
-    if (events.length === 0) {
-        list.innerHTML = '<p class="text-slate-500 text-center italic">Nenhum evento sincronizado. Clique em "Sincronizar do Google"</p>';
-        return;
-    }
-    
-    list.innerHTML = events.map(ev => {
-        const date = new Date(ev.start_date);
-        const formatted = date.toLocaleString('pt-BR', { 
-            day: '2-digit', 
-            month: 'short', 
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-        });
-        
-        return `<div class="bg-slate-800/50 p-4 rounded-xl border-l-4 border-yellow-500">
-            <div class="flex items-start justify-between">
-                <div class="flex-1">
-                    <h4 class="text-white font-bold">${ev.title}</h4>
-                    <p class="text-slate-400 text-sm mt-1">${formatted}</p>
-                    ${ev.description ? `<p class="text-slate-300 text-sm mt-2">${ev.description}</p>` : ''}
-                </div>
-                <span class="text-green-400 text-xs">
-                    <i class="fab fa-google mr-1"></i>Sincronizado
-                </span>
-            </div>
-        </div>`;
-    }).join('');
-
+async function loadCalendarEvents() {
+    const events = await fetchEvents();
     renderCalendar(events);
+}
+
+async function fetchEvents() {
+    const result = await api('list_events');
+    if (result?.success) return result.events || [];
+    throw new Error(result?.error || 'Erro ao carregar eventos');
 }
 
 function renderCalendar(events) {
@@ -435,10 +416,24 @@ function renderCalendar(events) {
             locale: 'pt-br',
             height: 'auto',
             themeSystem: 'standard',
+            expandRows: true,
+            firstDay: 1,
             headerToolbar: {
-                start: 'title',
-                center: '',
-                end: 'prev,next today'
+                start: 'prev,next today',
+                center: 'title',
+                end: 'dayGridMonth,timeGridWeek,listWeek'
+            },
+            eventDisplay: 'block',
+            dayMaxEventRows: 3,
+            eventColor: '#facc15',
+            eventBorderColor: '#f59e0b',
+            eventTextColor: '#0f172a',
+            titleFormat: { year: 'numeric', month: 'long' },
+            buttonText: {
+                today: 'Hoje',
+                month: 'Mês',
+                week: 'Semana',
+                list: 'Lista'
             },
             events: fcEvents
         });
@@ -495,7 +490,7 @@ async function disconnect() {
 <?php if ($is_connected): ?>
 document.addEventListener('DOMContentLoaded', async () => {
     await syncFromGoogle(true);
-    await loadEvents();
+    await loadCalendarEvents();
 });
 <?php endif; ?>
 </script>
