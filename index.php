@@ -468,15 +468,13 @@ include 'includes/header.php';
 </div>
 
     <!-- Mensagem do Dia (final do dashboard) -->
-    <div class="glass-card p-6 rounded-2xl mb-8">
+    <div class="glass-card p-6 rounded-2xl mb-8 mt-8">
         <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4">
             <h3 class="text-xl font-bold text-yellow-500 flex items-center gap-2">
                 <i class="fas fa-scroll"></i> Mensagem do Dia
             </h3>
             <div class="flex items-center gap-2 bg-slate-900 rounded-lg p-2 border border-slate-700/70">
-                <button onclick="changeDailyMessage(-1)" class="w-9 h-9 flex items-center justify-center rounded hover:bg-slate-800 text-slate-400"><i class="fas fa-chevron-left"></i></button>
                 <span id="daily-date-label" class="text-slate-200 font-semibold text-sm min-w-[140px] text-center">...</span>
-                <button onclick="changeDailyMessage(1)" class="w-9 h-9 flex items-center justify-center rounded hover:bg-slate-800 text-slate-400"><i class="fas fa-chevron-right"></i></button>
             </div>
         </div>
         <p id="daily-message" class="text-slate-200 whitespace-pre-line leading-relaxed"></p>
@@ -745,22 +743,12 @@ async function addGoalQuick(e) {
 }
 
 // Mensagem do dia
-let dailyCurrentDate = new Date();
-
-function formatDateISO(d) {
-    return d.toISOString().slice(0, 10);
-}
-
-function changeDailyMessage(dir) {
-    dailyCurrentDate.setDate(dailyCurrentDate.getDate() + dir);
-    loadDailyMessage();
-}
-
 async function loadDailyMessage() {
-    const ds = formatDateISO(dailyCurrentDate);
+    const today = new Date();
+    const ds = today.toISOString().slice(0, 10);
     try {
         const res = await api(`get_daily_message&date=${ds}`);
-        const label = new Date(ds).toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'short' });
+        const label = today.toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'short' });
         document.getElementById('daily-date-label').innerText = label;
         document.getElementById('daily-message').innerText = res.text || 'Mensagem não encontrada';
     } catch (err) {
