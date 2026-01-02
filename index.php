@@ -262,6 +262,57 @@ if (isset($_GET['api'])) {
             exit;
         }
 
+        // Mensagem diária (baseada no JSON local)
+        if ($action === 'get_daily_message') {
+            $date = $_GET['date'] ?? date('Y-m-d');
+            $file = __DIR__ . '/mensagens_365.json';
+
+            if (!file_exists($file)) {
+                echo json_encode(['error' => 'Arquivo mensagens_365.json não encontrado']);
+                exit;
+            }
+
+            $json = json_decode(file_get_contents($file), true);
+            if (!is_array($json)) {
+                echo json_encode(['error' => 'Formato inválido do JSON de mensagens']);
+                exit;
+            }
+
+            $text = null;
+            $matchedDate = null;
+            $dayOfYear = (int)date('z', strtotime($date));
+
+            // Tenta por correspondência exata de data
+            foreach ($json as $item) {
+                $itemDate = $item['date'] ?? ($item['dia'] ?? null);
+                $itemText = $item['texto'] ?? ($item['mensagem'] ?? ($item['message'] ?? null));
+                if ($itemDate && $itemText && $itemDate === $date) {
+                    $text = $itemText;
+                    $matchedDate = $itemDate;
+                    break;
+                }
+            }
+
+            // Se não achou por data, tenta pelo índice (dia do ano)
+            if ($text === null && isset($json[$dayOfYear])) {
+                $item = $json[$dayOfYear];
+                $text = $item['texto'] ?? ($item['mensagem'] ?? ($item['message'] ?? (is_string($item) ? $item : null)));
+                $matchedDate = $item['date'] ?? ($item['dia'] ?? null);
+            }
+
+            if ($text === null) {
+                echo json_encode(['error' => 'Mensagem não encontrada para a data informada']);
+                exit;
+            }
+
+            echo json_encode([
+                'date' => $date,
+                'matched_date' => $matchedDate,
+                'text' => $text
+            ]);
+            exit;
+        }
+
         // Obter metas (via dashboard)
         if ($action === 'get_goals') {
             $type = $_GET['type'] ?? 'geral';
@@ -388,7 +439,22 @@ include 'includes/header.php';
         </div>
     </div>
     
-    <!-- Listas de Atividades, Eventos e Hábitos -->
+        <!-- Mensagem do Dia -->
+        <div class="glass-card p-6 rounded-2xl mb-8">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4">
+                <h3 class="text-xl font-bold text-yellow-500 flex items-center gap-2">
+                    <i class="fas fa-scroll"></i> Mensagem do Dia
+                </h3>
+                <div class="flex items-center gap-2 bg-slate-900 rounded-lg p-2 border border-slate-700/70">
+                    <button onclick="changeDailyMessage(-1)" class="w-9 h-9 flex items-center justify-center rounded hover:bg-slate-800 text-slate-400"><i class="fas fa-chevron-left"></i></button>
+                    <span id="daily-date-label" class="text-slate-200 font-semibold text-sm min-w-[140px] text-center">...</span>
+                    <button onclick="changeDailyMessage(1)" class="w-9 h-9 flex items-center justify-center rounded hover:bg-slate-800 text-slate-400"><i class="fas fa-chevron-right"></i></button>
+                </div>
+            </div>
+            <p id="daily-message" class="text-slate-200 whitespace-pre-line leading-relaxed"></p>
+        </div>
+
+        <!-- Listas de Atividades, Eventos e Hábitos -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <!-- Atividades de Hoje -->
         <div class="glass-card p-6 rounded-2xl">
@@ -678,6 +744,30 @@ async function addGoalQuick(e) {
     loadDashboard();
 }
 
+// Mensagem do dia
+let dailyCurrentDate = new Date();
+
+function formatDateISO(d) {
+    return d.toISOString().slice(0, 10);
+}
+
+function changeDailyMessage(dir) {
+    dailyCurrentDate.setDate(dailyCurrentDate.getDate() + dir);
+    loadDailyMessage();
+}
+
+async function loadDailyMessage() {
+    const ds = formatDateISO(dailyCurrentDate);
+    try {
+        const res = await api(`get_daily_message&date=${ds}`);
+        const label = new Date(ds).toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'short' });
+        document.getElementById('daily-date-label').innerText = label;
+        document.getElementById('daily-message').innerText = res.text || 'Mensagem não encontrada';
+    } catch (err) {
+        document.getElementById('daily-message').innerText = 'Não foi possível carregar a mensagem do dia.';
+    }
+}
+
 // Envia mensagem para o Gemini usando a rota PHP
 async function sendToGemini() {
     const input = document.getElementById('chat-input');
@@ -710,6 +800,7 @@ async function sendToGemini() {
 // Inicialização
 document.addEventListener('DOMContentLoaded', () => {
     loadDashboard();
+    loadDailyMessage();
 });
 </script>
 
