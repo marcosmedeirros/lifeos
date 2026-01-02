@@ -36,10 +36,10 @@
         const { useState, useEffect, useMemo } = React;
 
         const tabs = [
-            { id:'dashboard', label:'Dashboard' },
-            { id:'agenda', label:'Agenda' },
-            { id:'activities', label:'Atividades' },
-            { id:'habits', label:'Hábitos' }
+            { id:'dashboard', label:'Dashboard', icon:'🏠' },
+            { id:'agenda', label:'Agenda', icon:'📅' },
+            { id:'activities', label:'Atividades', icon:'✅' },
+            { id:'habits', label:'Hábitos', icon:'🎯' }
         ];
 
         const api = async (url, options={}) => {
@@ -53,6 +53,7 @@
 
         const nowLocal = () => { const n = new Date(); return new Date(n.getTime() - n.getTimezoneOffset()*60000); };
         const fmtDateTime = dt => dt ? new Date(dt).toLocaleString('pt-BR') : '';
+        const periodLabel = p => ({ morning:'Manhã', afternoon:'Tarde', night:'Noite' }[p] || 'Dia');
 
         function App(){
             const [tab, setTab] = useState('dashboard');
@@ -65,7 +66,7 @@
                     </header>
                     <nav className="nav">
                         {tabs.map(t => (
-                            <button key={t.id} className={tab===t.id?'active':''} onClick={()=>setTab(t.id)}>{t.label}</button>
+                            <button key={t.id} className={tab===t.id?'active':''} onClick={()=>setTab(t.id)}>{t.icon} {t.label}</button>
                         ))}
                     </nav>
                     {tab==='dashboard' && <Dashboard setStatus={setStatus} />}
@@ -153,10 +154,25 @@
                         </div>
                         <div className="list" style={{maxHeight:'60vh',overflow:'auto',paddingRight:4}}>
                             {!filtered.length && <div className="item">Sem eventos.</div>}
-                            {filtered.map(ev=>{const dt=ev.start_date?.replace(' ','T'); return (
-                                <div key={ev.id||ev.google_event_id} className="item">
-                                    <div className="title">{ev.title||'Sem título'}</div>
-                                    <div className="meta">{fmtDateTime(dt)}</div>
+                            {filtered.map(ev=>{const dt=ev.start_date?.replace(' ','T'); const dateObj = dt? new Date(dt):null; const day = dateObj? dateObj.toLocaleDateString('pt-BR',{day:'2-digit',month:'short'}) : ''; const hour = dateObj? dateObj.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}) : '';
+                                return (
+                                <div key={ev.id||ev.google_event_id} className="item" style={{display:'flex',gap:12,alignItems:'center'}}>
+                                    <div style={{minWidth:62,textAlign:'center'}}>
+                                        <div className="badge" style={{display:'flex',flexDirection:'column',gap:2,alignItems:'center',padding:'6px 8px',width:'100%'}}>
+                                            <span style={{fontSize:11,letterSpacing:0.5}}>Dia</span>
+                                            <span style={{fontWeight:800,fontSize:14,color:'#fff'}}>{day}</span>
+                                        </div>
+                                    </div>
+                                    <div style={{flex:1}}>
+                                        <div className="title" style={{display:'flex',alignItems:'center',gap:8}}>
+                                            <span>📌</span>
+                                            <span>{ev.title||'Sem título'}</span>
+                                        </div>
+                                        <div className="meta" style={{gap:6}}>
+                                            <span className="badge" style={{background:'rgba(99,197,255,0.15)',color:'var(--accent2)',borderColor:'rgba(99,197,255,0.3)'}}>{hour||'Horário'}</span>
+                                            <span>{fmtDateTime(dt)}</span>
+                                        </div>
+                                    </div>
                                 </div>
                             );})}
                         </div>
@@ -198,8 +214,11 @@
                             {!items.length && <div className="item">Sem atividades.</div>}
                             {items.map(a=>(
                                 <div key={a.id} className="item">
-                                    <div className="title">{a.title}</div>
-                                    <div className="meta"><span>{a.day_date}</span><span className="badge">{a.period||'dia'}</span></div>
+                                    <div className="title" style={{display:'flex',alignItems:'center',gap:8}}>
+                                        <span>📘</span>
+                                        <span>{a.title}</span>
+                                    </div>
+                                    <div className="meta"><span>{a.day_date}</span><span className="badge">{periodLabel(a.period)}</span></div>
                                 </div>
                             ))}
                         </div>
@@ -211,8 +230,10 @@
         function Habits({ setStatus }){
             const [ym,setYm]=useState(nowLocal().toISOString().slice(0,7));
             const [items,setItems]=useState([]);
+            const today = nowLocal().toISOString().slice(0,10);
             useEffect(()=>{load();},[ym]);
             const load=async()=>{setStatus('Carregando...');const data=await api(`../modules/habits.php?api=get_habits&month=${ym}`); if(data&&!data.error){setItems(data||[]);setStatus('Online');} else setStatus(data?.error||'Erro');};
+            const toggle=async(id)=>{setStatus('Atualizando...'); await api('../modules/habits.php?api=toggle_habit',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id,date:today})}); await load();};
             return (
                 <div className="card">
                     <div style={{display:'flex',flexDirection:'column',gap:8}}>
@@ -225,10 +246,17 @@
                         </div>
                         <div className="grid2">
                             {!items.length && <div className="item">Sem hábitos.</div>}
-                            {items.map(h=>{const checks=h.checked_dates?JSON.parse(h.checked_dates).length:0; return (
-                                <div key={h.id} className="item">
-                                    <div className="title">{h.name}</div>
-                                    <div className="meta">Check-ins: {checks}</div>
+                            {items.map(h=>{const parsed = h.checked_dates?JSON.parse(h.checked_dates):[]; const doneToday = parsed.includes(today); const checks=parsed.length; return (
+                                <div key={h.id} className="item" style={{display:'flex',flexDirection:'column',gap:10}}>
+                                    <div className="title" style={{display:'flex',alignItems:'center',gap:8}}>
+                                        <span>🔥</span>
+                                        <span>{h.name}</span>
+                                    </div>
+                                    <div className="meta" style={{justifyContent:'space-between',width:'100%'}}>
+                                        <span>Check-ins: {checks}</span>
+                                        <span className="badge" style={{background: doneToday?'rgba(76,175,80,0.2)':'rgba(156,123,255,0.18)',color: doneToday?'#5fe37c':'var(--accent)',borderColor: doneToday?'rgba(76,175,80,0.35)':'rgba(156,123,255,0.25)'}}>{doneToday?'Feito hoje':'Pendente'}</span>
+                                    </div>
+                                    <button className="action" onClick={()=>toggle(h.id)} style={{background:doneToday?'linear-gradient(135deg,#5fe37c,#4ccf9a)':undefined}}>Marcar hoje</button>
                                 </div>
                             );})}
                         </div>
