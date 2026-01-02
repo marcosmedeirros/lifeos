@@ -598,6 +598,23 @@ async function addFinanceQuick(e) {
 
 async function toggleHabitToday(id) {
     const today = new Date().toISOString().slice(0, 10);
+    
+    // Encontrar o botão clicado para atualização imediata
+    const button = event.target.closest('button');
+    if (button) {
+        const isChecked = button.classList.contains('bg-teal-500');
+        
+        if (isChecked) {
+            // Desmarcar
+            button.className = 'w-7 h-7 rounded-lg bg-slate-700/40 hover:bg-slate-700 text-transparent flex items-center justify-center';
+            button.innerHTML = '';
+        } else {
+            // Marcar
+            button.className = 'w-7 h-7 rounded-lg bg-teal-500 text-black shadow-[0_0_8px_rgba(20,184,166,0.35)] flex items-center justify-center';
+            button.innerHTML = '<i class="fas fa-check text-xs"></i>';
+        }
+    }
+    
     await api('toggle_habit', { id, date: today });
     loadDashboard();
 }

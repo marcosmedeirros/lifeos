@@ -209,7 +209,7 @@ require_once __DIR__ . '/../includes/header.php';
         <div class="main-shell">
             <div class="flex justify-between items-center mb-8">
                 <h2 class="text-3xl font-bold text-white flex items-center gap-3">
-                    <i class="fab fa-strava text-[#fc4c02]"></i> Atividades Strava
+                    <i class="fab fa-strava text-[#fc4c02]"></i> Treinos
                 </h2>
                 <div id="strava-connect-btn" class="hidden"></div>
             </div>

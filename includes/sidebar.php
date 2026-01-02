@@ -40,7 +40,7 @@
                 <i class="fas fa-check-circle w-5 text-center"></i> <span>Atividades</span>
             </a>
             <a href="<?php echo BASE_PATH; ?>/modules/events.php" class="nav-btn <?php echo ($page === 'events') ? 'active' : ''; ?> text-left px-4 py-3 flex items-center gap-3">
-                <i class="fas fa-calendar-alt w-5 text-center"></i> <span>Calendário</span>
+                <i class="fas fa-calendar-alt w-5 text-center"></i> <span>Eventos</span>
             </a>
             <a href="<?php echo BASE_PATH; ?>/modules/habits.php" class="nav-btn <?php echo ($page === 'habits') ? 'active' : ''; ?> text-left px-4 py-3 flex items-center gap-3">
                 <i class="fas fa-fire w-5 text-center"></i> <span>Hábitos</span>
