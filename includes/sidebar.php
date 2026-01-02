@@ -39,8 +39,8 @@
             <a href="<?php echo BASE_PATH; ?>/modules/activities.php" class="nav-btn <?php echo ($page === 'activities') ? 'active' : ''; ?> text-left px-4 py-3 flex items-center gap-3">
                 <i class="fas fa-check-circle w-5 text-center"></i> <span>Atividades</span>
             </a>
-            <a href="<?php echo BASE_PATH; ?>/modules/events.php" class="nav-btn <?php echo ($page === 'events') ? 'active' : ''; ?> text-left px-4 py-3 flex items-center gap-3">
-                <i class="fas fa-calendar-alt w-5 text-center"></i> <span>Eventos</span>
+            <a href="<?php echo BASE_PATH; ?>/modules/google_agenda.php" class="nav-btn <?php echo ($page === 'google_agenda') ? 'active' : ''; ?> text-left px-4 py-3 flex items-center gap-3">
+                <i class="fas fa-calendar-alt w-5 text-center"></i> <span>Calendário</span>
             </a>
             <a href="<?php echo BASE_PATH; ?>/modules/habits.php" class="nav-btn <?php echo ($page === 'habits') ? 'active' : ''; ?> text-left px-4 py-3 flex items-center gap-3">
                 <i class="fas fa-fire w-5 text-center"></i> <span>Hábitos</span>
@@ -62,9 +62,6 @@
             </a>
             <a href="<?php echo BASE_PATH; ?>/modules/notes.php" class="nav-btn <?php echo ($page === 'notes') ? 'active' : ''; ?> text-left px-4 py-3 flex items-center gap-3">
                 <i class="fas fa-sticky-note w-5 text-center"></i> <span>Notas</span>
-            </a>
-            <a href="<?php echo BASE_PATH; ?>/modules/google_agenda.php" class="nav-btn <?php echo ($page === 'google_agenda') ? 'active' : ''; ?> text-left px-4 py-3 flex items-center gap-3">
-                <i class="fab fa-google w-5 text-center"></i> <span>Google Agenda</span>
             </a>
         </div>
         
