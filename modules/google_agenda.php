@@ -331,11 +331,18 @@ include __DIR__ . '/../includes/header.php';
     
     <div class="flex-1 p-4 md:p-10 content-wrap transition-all duration-300">
         <div class="main-shell">
-            <header class="mb-8">
-                <h2 class="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-amber-400 to-yellow-500 drop-shadow-[0_4px_18px_rgba(250,204,21,0.25)]">
-                    📅 Calendário
-                </h2>
-                <p class="text-slate-300">Visual clean para seus eventos conectados</p>
+            <header class="mb-8 flex items-center justify-between">
+                <div>
+                    <h2 class="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-amber-400 to-yellow-500 drop-shadow-[0_4px_18px_rgba(250,204,21,0.25)]">
+                        📅 Calendário
+                    </h2>
+                    <p class="text-slate-300">Visual clean para seus eventos conectados</p>
+                </div>
+                <?php if ($is_connected): ?>
+                    <button onclick="createEventModal()" class="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white px-6 py-3 rounded-xl font-bold shadow-lg transition">
+                        <i class="fas fa-plus mr-2"></i> Adicionar
+                    </button>
+                <?php endif; ?>
             </header>
 
             <?php if (!$is_connected): ?>

@@ -373,6 +373,7 @@ include 'includes/header.php';
                     <div class="glass-card p-4 rounded-xl">
                         <form onsubmit="openQuickEventModal(event)" class="space-y-2">
                             <input type="text" id="quick-event-title" placeholder="Nome do evento" class="text-sm" required>
+                            <input type="datetime-local" id="quick-event-date" class="text-sm" required>
                             <button type="submit" class="w-full bg-gradient-to-r from-yellow-600 to-yellow-700 hover:from-yellow-500 hover:to-yellow-600 text-white px-3 py-2 rounded-lg text-sm font-bold transition shadow-lg shadow-yellow-600/30">
                                 <i class="fas fa-plus mr-1"></i> Evento
                             </button>
@@ -652,8 +653,7 @@ async function addActivityQuick(e) {
 function openQuickEventModal(e) {
     e.preventDefault();
     const title = document.getElementById('quick-event-title').value;
-    const now = new Date();
-    const dateTime = now.toISOString().slice(0, 16);
+    const dateTime = document.getElementById('quick-event-date').value;
     
     // Abre modal do google_agenda se estiver na página
     if (typeof openEventModal !== 'undefined') {
@@ -670,6 +670,7 @@ function openQuickEventModal(e) {
     }
     
     document.getElementById('quick-event-title').value = '';
+    document.getElementById('quick-event-date').value = '';
 }
 
 async function addFinanceQuick(e) {
