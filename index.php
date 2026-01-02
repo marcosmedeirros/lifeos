@@ -51,6 +51,18 @@ if (isset($_GET['api'])) {
             $activities_count = $pdo->query("SELECT COUNT(*) FROM activities WHERE day_date = CURDATE() AND status = 0")->fetchColumn();
             $activities_today = $pdo->query("SELECT * FROM activities WHERE day_date = CURDATE() ORDER BY status ASC LIMIT 5")->fetchAll();
             
+            // Hábitos concluídos na semana
+            $habits_week = 0;
+            $habitsData = $pdo->query("SELECT checked_dates FROM habits")->fetchAll(PDO::FETCH_ASSOC);
+            foreach ($habitsData as $hb) {
+                $checks = json_decode($hb['checked_dates'] ?? '[]', true) ?: [];
+                foreach ($checks as $d) {
+                    if ($d >= $startOfWeek && $d <= $endOfWeek) {
+                        $habits_week++;
+                    }
+                }
+            }
+            
             // Treinos do Strava (esta semana)
             $strava_count = $pdo->prepare("
                 SELECT COUNT(*) FROM strava_activities 
@@ -63,6 +75,7 @@ if (isset($_GET['api'])) {
                 'income_week' => $inc, 
                 'outcome_week' => $out, 
                 'xp_total' => $xp_total,
+                'habits_week' => $habits_week,
                 'activities_count' => $activities_count,
                 'strava_count' => $strava_count,
                 'events_week' => $events_list,
@@ -349,10 +362,10 @@ include 'includes/header.php';
             <p class="text-3xl font-bold text-white" id="dash-outcome">R$ 0,00</p>
         </div>
         
-        <!-- 3. Pontos (XP Total) -->
+        <!-- 3. Hábitos concluídos na semana -->
         <div class="glass-card p-6 rounded-2xl border-l-4 border-yellow-600">
-            <h3 class="text-yellow-500 text-sm font-bold uppercase tracking-wider mb-1">⭐ Pontos (XP Total)</h3>
-            <p class="text-3xl font-bold text-white" id="dash-xp-total">0 XP</p>
+            <h3 class="text-yellow-500 text-sm font-bold uppercase tracking-wider mb-1">🔥 Hábitos concluídos (Semana)</h3>
+            <p class="text-3xl font-bold text-white" id="dash-habits-week">0</p>
         </div>
         
         <!-- 4. Tarefas Pendentes Hoje -->
@@ -443,7 +456,7 @@ async function loadDashboard() {
     document.getElementById('dash-income').innerText = formatCurrency(data.income_week || 0);
     document.getElementById('dash-outcome').innerText = formatCurrency(data.outcome_week || 0);
     document.getElementById('dash-tasks-count').innerText = data.activities_count;
-    document.getElementById('dash-xp-total').innerText = `${data.xp_total} XP`;
+    document.getElementById('dash-habits-week').innerText = data.habits_week || 0;
     document.getElementById('dash-strava-count').innerText = data.strava_count || 0;
     
     // Próximo Evento

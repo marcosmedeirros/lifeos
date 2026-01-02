@@ -63,12 +63,6 @@
             <a href="<?php echo BASE_PATH; ?>/modules/notes.php" class="nav-btn <?php echo ($page === 'notes') ? 'active' : ''; ?> text-left px-4 py-3 flex items-center gap-3">
                 <i class="fas fa-sticky-note w-5 text-center"></i> <span>Notas</span>
             </a>
-            <a href="<?php echo BASE_PATH; ?>/modules/game.php" class="nav-btn <?php echo ($page === 'game') ? 'active' : ''; ?> text-left px-4 py-3 flex items-center gap-3">
-                <i class="fas fa-trophy w-5 text-center text-yellow-500"></i> <span>Game</span>
-            </a>
-            <a href="<?php echo BASE_PATH; ?>/modules/chat_life.php" class="nav-btn <?php echo ($page === 'chat_life') ? 'active' : ''; ?> text-left px-4 py-3 flex items-center gap-3">
-                <i class="fas fa-comments w-5 text-center text-cyan-400"></i> <span>Chat Life</span>
-            </a>
         </div>
         
         <!-- Área do usuário e logout -->
