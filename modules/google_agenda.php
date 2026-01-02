@@ -361,6 +361,12 @@ $page = 'google_agenda';
 $page_title = 'Calendário - LifeOS';
 include __DIR__ . '/../includes/header.php';
 ?>
+
+<div class="flex min-h-screen w-full">
+    <?php include __DIR__ . '/../includes/sidebar.php'; ?>
+
+    <div class="flex-1 p-4 md:p-10 content-wrap transition-all duration-300">
+        <div class="main-shell">
             <header class="mb-8 flex items-center justify-between">
                 <div>
                     <h2 class="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-amber-400 to-yellow-500 drop-shadow-[0_4px_18px_rgba(250,204,21,0.25)]">
