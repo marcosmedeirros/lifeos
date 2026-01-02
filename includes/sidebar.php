@@ -48,14 +48,14 @@
             <a href="<?php echo BASE_PATH; ?>/modules/routine.php" class="nav-btn <?php echo ($page === 'routine') ? 'active' : ''; ?> text-left px-4 py-3 flex items-center gap-3">
                 <i class="fas fa-sun w-5 text-center"></i> <span>Rotina</span>
             </a>
+            <a href="<?php echo BASE_PATH; ?>/modules/board.php" class="nav-btn <?php echo ($page === 'board') ? 'active' : ''; ?> text-left px-4 py-3 flex items-center gap-3">
+            <i class="fas fa-images w-5 text-center"></i> <span>Board</span>
+            </a>
             <a href="<?php echo BASE_PATH; ?>/modules/goals.php" class="nav-btn <?php echo ($page === 'goals') ? 'active' : ''; ?> text-left px-4 py-3 flex items-center gap-3">
                 <i class="fas fa-bullseye w-5 text-center"></i> <span>Metas</span>
             </a>
             <a href="<?php echo BASE_PATH; ?>/modules/strava.php" class="nav-btn <?php echo ($page === 'strava') ? 'active' : ''; ?> text-left px-4 py-3 flex items-center gap-3">
                 <i class="fab fa-strava w-5 text-center text-orange-500"></i> <span>Treinos</span>
-            </a>
-            <a href="<?php echo BASE_PATH; ?>/modules/board.php" class="nav-btn <?php echo ($page === 'board') ? 'active' : ''; ?> text-left px-4 py-3 flex items-center gap-3">
-                <i class="fas fa-images w-5 text-center"></i> <span>Board</span>
             </a>
             <a href="<?php echo BASE_PATH; ?>/modules/finance.php" class="nav-btn <?php echo ($page === 'finance') ? 'active' : ''; ?> text-left px-4 py-3 flex items-center gap-3">
                 <i class="fas fa-wallet w-5 text-center"></i> <span>Finanças</span>
