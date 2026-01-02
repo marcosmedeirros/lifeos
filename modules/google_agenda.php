@@ -360,6 +360,86 @@ include __DIR__ . '/../includes/header.php';
 
 <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
 <script src="<?php echo BASE_PATH; ?>/assets/js/common.js"></script>
+<style>
+/* Harmoniza o FullCalendar com o tema escuro/dourado do site */
+#calendar {
+    font-family: 'Outfit', sans-serif;
+}
+#calendar .fc {
+    --fc-border-color: rgba(255, 255, 255, 0.06);
+    --fc-button-text-color: #0f172a;
+    --fc-button-bg-color: #facc15;
+    --fc-button-border-color: #eab308;
+    --fc-button-hover-bg-color: #fde047;
+    --fc-button-hover-border-color: #facc15;
+    --fc-button-active-bg-color: #f59e0b;
+    --fc-button-active-border-color: #d97706;
+    --fc-page-bg-color: transparent;
+    --fc-neutral-bg-color: rgba(255, 255, 255, 0.02);
+    --fc-list-event-hover-bg-color: rgba(250, 204, 21, 0.12);
+}
+#calendar .fc-toolbar.fc-header-toolbar {
+    margin-bottom: 1.25rem;
+}
+#calendar .fc-toolbar-title {
+    color: #facc15;
+    text-shadow: 0 4px 16px rgba(250, 204, 21, 0.25);
+    letter-spacing: 0.02em;
+}
+#calendar .fc-button {
+    border-radius: 12px;
+    padding: 0.55rem 0.9rem;
+    font-weight: 700;
+    box-shadow: 0 10px 25px -12px rgba(250, 204, 21, 0.6);
+}
+#calendar .fc-button-primary:disabled {
+    background: #1f2937;
+    color: #9ca3af;
+    border-color: #1f2937;
+    box-shadow: none;
+}
+#calendar .fc-scrollgrid {
+    border-radius: 18px;
+    overflow: hidden;
+    border-color: rgba(255, 255, 255, 0.05);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+}
+#calendar .fc-col-header-cell {
+    background: rgba(255, 255, 255, 0.02);
+}
+#calendar .fc-col-header-cell-cushion {
+    color: #cbd5f5;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+}
+#calendar .fc-daygrid-day-number {
+    color: #e2e8f0;
+    font-weight: 600;
+}
+#calendar .fc-day-today {
+    background: linear-gradient(135deg, rgba(250, 204, 21, 0.08), rgba(234, 179, 8, 0.06));
+}
+#calendar .fc-daygrid-day-frame {
+    background: rgba(255, 255, 255, 0.01);
+}
+#calendar .fc-event {
+    background: linear-gradient(135deg, #fde047, #fbbf24);
+    border: none;
+    color: #0f172a;
+    font-weight: 700;
+    border-radius: 10px;
+    padding: 4px 8px;
+    box-shadow: 0 12px 30px -14px rgba(250, 204, 21, 0.8);
+}
+#calendar .fc-event-title { white-space: normal; }
+#calendar .fc-list-day-cushion {
+    background: rgba(255, 255, 255, 0.03);
+    color: #e2e8f0;
+}
+#calendar .fc-list-event-title a { color: #0f172a; }
+#calendar .fc-highlight { background: rgba(250, 204, 21, 0.12); }
+</style>
 <script>
 let calendarInstance = null;
 let isSyncing = false;
@@ -418,6 +498,8 @@ function renderCalendar(events) {
                 center: 'title',
                 end: 'dayGridMonth,timeGridWeek,listWeek'
             },
+            dayMaxEvents: true,
+            nowIndicator: true,
             eventDisplay: 'block',
             dayMaxEventRows: 3,
             eventColor: '#facc15',
