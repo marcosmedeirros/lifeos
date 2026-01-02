@@ -32,14 +32,17 @@ function setStatus(msg) { syncStatus.textContent = msg; }
 
 async function api(url, opts={}) {
   try {
-    const res = await fetch(url, opts);
-    if (!res.ok) throw new Error(`${res.status}`);
-    const data = await res.json();
-    return data;
+    const res = await fetch(url, { credentials: 'same-origin', ...opts });
+    const text = await res.text();
+    if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
+    try { return JSON.parse(text); } catch (err) {
+      console.error('Resposta não JSON:', text);
+      throw new Error('Resposta inválida');
+    }
   } catch (err) {
     setStatus('Erro');
     console.error(err);
-    return null;
+    return { error: err.message };
   }
 }
 
@@ -49,7 +52,7 @@ async function loadEvents() {
   const list = document.getElementById('events-list');
   list.innerHTML = 'Carregando...';
   const data = await api('../modules/google_agenda.php?api=list_events');
-  if (!data || !data.success) { list.innerHTML = 'Erro ao carregar.'; return; }
+  if (!data || data.error) { list.innerHTML = `<div class="item">Erro ao carregar${data?.error ? ': ' + data.error : ''}.</div>`; return; }
   const events = (data.events || []).filter(e => (e.start_date || '').startsWith(ym));
   renderEvents(events);
 }
@@ -98,7 +101,7 @@ async function loadActivities() {
   const end = date;
   const data = await api(`../modules/activities.php?api=get_activities&start=${start}&end=${end}`);
   const list = document.getElementById('activities-list');
-  if (!data) { list.innerHTML = '<div class="item">Erro ao carregar.</div>'; return; }
+  if (!data || data.error) { list.innerHTML = `<div class="item">Erro ao carregar${data?.error ? ': ' + data.error : ''}.</div>`; return; }
   if (!data.length) { list.innerHTML = '<div class="item">Sem atividades.</div>'; return; }
   list.innerHTML = data.map(a => `
     <div class="item">
@@ -132,7 +135,7 @@ async function loadHabits() {
   const ym = document.getElementById('habits-month').value || new Date().toISOString().slice(0,7);
   const data = await api(`../modules/habits.php?api=get_habits&month=${ym}`);
   const list = document.getElementById('habits-list');
-  if (!data) { list.innerHTML = '<div class="item">Erro ao carregar.</div>'; return; }
+  if (!data || data.error) { list.innerHTML = `<div class="item">Erro ao carregar${data?.error ? ': ' + data.error : ''}.</div>`; return; }
   if (!data.length) { list.innerHTML = '<div class="item">Sem hábitos.</div>'; return; }
   list.innerHTML = data.map(h => `
     <div class="item">
