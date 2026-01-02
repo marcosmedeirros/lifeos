@@ -34,6 +34,16 @@ async function api(url, opts={}) {
   try {
     const res = await fetch(url, { credentials: 'same-origin', ...opts });
     const text = await res.text();
+
+    // Se veio HTML (provável redirect para login), manda para login
+    const isHtml = /^\s*<!doctype html/i.test(text) || /^\s*<html/i.test(text);
+    if (isHtml) {
+      setStatus('Login necessário');
+      const redirect = encodeURIComponent(window.location.pathname + window.location.search);
+      window.location.href = `../login.php?redirect=${redirect}`;
+      return { error: 'login_required' };
+    }
+
     if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
     try { return JSON.parse(text); } catch (err) {
       console.error('Resposta não JSON:', text);
