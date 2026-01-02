@@ -45,7 +45,11 @@
             { id:'dashboard', label:'Dashboard', icon:'🏠' },
             { id:'agenda', label:'Agenda', icon:'📅' },
             { id:'activities', label:'Atividades', icon:'✅' },
-            { id:'habits', label:'Hábitos', icon:'🎯' }
+            { id:'habits', label:'Hábitos', icon:'🎯' },
+            { id:'finance', label:'Finanças', icon:'💰' },
+            { id:'board', label:'Board', icon:'📸' },
+            { id:'routine', label:'Rotina', icon:'📖' },
+            { id:'strava', label:'Strava', icon:'🚴' }
         ];
 
         const api = async (url, options={}) => {
@@ -71,6 +75,7 @@
             return '📌';
         };
         const habitColors = ['#e8f1ff','#ffeef5','#e8fff2','#fff5e5','#f1e8ff'];
+        const fmtMoney = v => (Number(v)||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
 
         function App(){
             const [tab, setTab] = useState('dashboard');
@@ -90,6 +95,10 @@
                     {tab==='agenda' && <Agenda setStatus={setStatus} />}
                     {tab==='activities' && <Activities setStatus={setStatus} />}
                     {tab==='habits' && <Habits setStatus={setStatus} />}
+                    {tab==='finance' && <Finance setStatus={setStatus} />}
+                    {tab==='board' && <Board setStatus={setStatus} />}
+                    {tab==='routine' && <Routine setStatus={setStatus} />}
+                    {tab==='strava' && <Strava setStatus={setStatus} />}
                 </div>
             );
         }
@@ -355,6 +364,257 @@
                                     </div>
                                 </div>
                             );})}
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        function Finance({ setStatus }){
+            const [ym,setYm]=useState(nowLocal().toISOString().slice(0,7));
+            const [list,setList]=useState([]);
+            const [cats,setCats]=useState([]);
+            const [summary,setSummary]=useState({income:0,outcome:0,balance:0,total_balance:0});
+            const [form,setForm]=useState({id:null,type:'expense',amount:'',desc:'',category_id:'',date:nowLocal().toISOString().slice(0,16)});
+
+            useEffect(()=>{load();},[ym]);
+
+            const load=async()=>{
+                setStatus('Carregando...');
+                const [catData,finData] = await Promise.all([
+                    api(`../modules/finance.php?api=get_finance_categories`),
+                    api(`../modules/finance.php?api=get_finances&month=${ym}`)
+                ]);
+                if(catData&&!catData.error) setCats(catData||[]);
+                if(finData&&!finData.error){setList(finData.list||[]);setSummary(finData.summary||{});setStatus('Online');}
+                else setStatus(finData?.error||'Erro');
+            };
+
+            const save=async()=>{
+                if(!form.amount||!form.desc||!form.date) return;
+                await api('../modules/finance.php?api=save_finance',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(form)});
+                setForm({id:null,type:'expense',amount:'',desc:'',category_id:'',date:nowLocal().toISOString().slice(0,16)});
+                load();
+            };
+
+            const edit=(it)=>{setForm({id:it.id,type:it.type,amount:it.amount,desc:it.description,category_id:it.category_id||'',date:(it.created_at||'').replace(' ','T')});};
+            const remove=async(id)=>{await api('../modules/finance.php?api=delete_finance',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id})});load();};
+            const toggle=async(id)=>{await api('../modules/finance.php?api=toggle_finance',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id})});load();};
+
+            return (
+                <div className="card">
+                    <div style={{display:'flex',flexDirection:'column',gap:12}}>
+                        <div style={{display:'flex',flexWrap:'wrap',gap:8,justifyContent:'space-between',alignItems:'center'}}>
+                            <div>
+                                <div className="title" style={{fontSize:'16px'}}>Finanças</div>
+                                <div className="label">Resumo mensal</div>
+                            </div>
+                            <input className="input" style={{width:150}} type="month" value={ym} onChange={e=>setYm(e.target.value)} />
+                        </div>
+                        <div className="grid2">
+                            <div className="item" style={{display:'flex',justifyContent:'space-between'}}>
+                                <div className="label">Entradas</div>
+                                <div className="title" style={{color:'#16a34a'}}>{fmtMoney(summary.income||0)}</div>
+                            </div>
+                            <div className="item" style={{display:'flex',justifyContent:'space-between'}}>
+                                <div className="label">Saídas</div>
+                                <div className="title" style={{color:'#dc2626'}}>{fmtMoney(summary.outcome||0)}</div>
+                            </div>
+                            <div className="item" style={{display:'flex',justifyContent:'space-between'}}>
+                                <div className="label">Balanço mês</div>
+                                <div className="title">{fmtMoney(summary.balance||0)}</div>
+                            </div>
+                            <div className="item" style={{display:'flex',justifyContent:'space-between'}}>
+                                <div className="label">Saldo geral</div>
+                                <div className="title">{fmtMoney(summary.total_balance||0)}</div>
+                            </div>
+                        </div>
+                        <div className="grid2">
+                            <div className="space-y-2">
+                                <div className="label">Lançamento rápido</div>
+                                <select className="input" value={form.type} onChange={e=>setForm({...form,type:e.target.value})}>
+                                    <option value="expense">Saída</option><option value="income">Entrada</option>
+                                </select>
+                                <input className="input" type="number" step="0.01" placeholder="Valor" value={form.amount} onChange={e=>setForm({...form,amount:e.target.value})} />
+                                <input className="input" placeholder="Descrição" value={form.desc} onChange={e=>setForm({...form,desc:e.target.value})} />
+                                <select className="input" value={form.category_id} onChange={e=>setForm({...form,category_id:e.target.value})}>
+                                    <option value="">Sem categoria</option>
+                                    {cats.map(c=>(<option key={c.id} value={c.id}>{c.name}</option>))}
+                                </select>
+                                <input className="input" type="datetime-local" value={form.date} onChange={e=>setForm({...form,date:e.target.value})} />
+                                <button className="action" onClick={save}>{form.id?'Salvar edição':'Adicionar'}</button>
+                            </div>
+                        </div>
+                        <div className="list" style={{maxHeight:'55vh',overflow:'auto',paddingRight:4}}>
+                            {!list.length && <div className="item">Sem lançamentos.</div>}
+                            {list.map(it=>(
+                                <div key={it.id} className="item" style={{display:'flex',justifyContent:'space-between',alignItems:'center',gap:10}}>
+                                    <div style={{display:'flex',gap:10,alignItems:'center'}}>
+                                        <span>{it.type==='income'?'⬆️':'⬇️'}</span>
+                                        <div>
+                                            <div className="title" style={{marginBottom:2}}>{it.description||'Sem descrição'}</div>
+                                            <div className="meta" style={{gap:6}}>
+                                                <span>{new Date(it.created_at.replace(' ','T')).toLocaleString('pt-BR')}</span>
+                                                {it.cat_name && <span className="badge">{it.cat_name}</span>}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div style={{display:'flex',flexDirection:'column',alignItems:'flex-end',gap:6}}>
+                                        <div className="title" style={{color:it.type==='income'?'#16a34a':'#dc2626'}}>{fmtMoney(it.amount)}</div>
+                                        <div style={{display:'flex',gap:8}}>
+                                            <button onClick={()=>toggle(it.id)} style={{border:'none',background:'transparent',cursor:'pointer',color:'#0f172a'}}>{Number(it.status)===1?'✔️':'⏳'}</button>
+                                            <button onClick={()=>edit(it)} style={{border:'none',background:'transparent',cursor:'pointer',color:'#64748b'}}>✏️</button>
+                                            <button onClick={()=>remove(it.id)} style={{border:'none',background:'transparent',cursor:'pointer',color:'#ef4444'}}>🗑️</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        function Board({ setStatus }){
+            const [photos,setPhotos]=useState([]);
+            const [date,setDate]=useState(nowLocal().toISOString().slice(0,10));
+            const [file,setFile]=useState(null);
+
+            useEffect(()=>{load();},[]);
+            const load=async()=>{setStatus('Carregando...');const data=await api('../modules/board.php?api=get_photos'); if(data&&!data.error){setPhotos(data||[]);setStatus('Online');} else setStatus(data?.error||'Erro');};
+
+            const upload=async()=>{
+                if(!file) return;
+                const fd=new FormData(); fd.append('photo',file); fd.append('photo_date',date);
+                await fetch('../modules/board.php?api=upload_photo',{method:'POST',body:fd,credentials:'same-origin'});
+                setFile(null); load(); setStatus('Foto enviada');
+            };
+            const remove=async(id)=>{await api('../modules/board.php?api=delete_photo',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id})});load();};
+
+            return (
+                <div className="card">
+                    <div style={{display:'flex',flexDirection:'column',gap:10}}>
+                        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',flexWrap:'wrap',gap:8}}>
+                            <div className="title" style={{fontSize:'16px'}}>Board diário</div>
+                            <input className="input" style={{width:150}} type="date" value={date} onChange={e=>setDate(e.target.value)} />
+                        </div>
+                        <div className="grid2">
+                            <div className="space-y-2">
+                                <div className="label">Foto do dia</div>
+                                <input className="input" type="file" accept="image/*" onChange={e=>setFile(e.target.files[0])} />
+                                <button className="action" onClick={upload}>Enviar</button>
+                            </div>
+                        </div>
+                        <div className="grid2">
+                            {!photos.length && <div className="item">Sem fotos.</div>}
+                            {photos.map(p=>(
+                                <div key={p.id} className="item" style={{padding:10}}>
+                                    <div style={{position:'relative'}}>
+                                        <img src={p.image_path} alt="foto" style={{width:'100%',borderRadius:12,objectFit:'cover'}} />
+                                        <button onClick={()=>remove(p.id)} style={{position:'absolute',top:6,right:6,border:'none',background:'rgba(0,0,0,0.5)',color:'#fff',borderRadius:'50%',width:32,height:32,cursor:'pointer'}}>🗑️</button>
+                                    </div>
+                                    <div className="meta" style={{marginTop:6}}>{new Date(p.photo_date+'T00:00:00').toLocaleDateString('pt-BR')}</div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        function Routine({ setStatus }){
+            const [ym,setYm]=useState(nowLocal().toISOString().slice(0,7));
+            const [selectedDay,setSelectedDay]=useState(nowLocal().toISOString().slice(0,10));
+            const [mood,setMood]=useState('😊');
+            const [content,setContent]=useState('');
+            const [days,setDays]=useState([]);
+
+            useEffect(()=>{loadMonth();},[ym]);
+            useEffect(()=>{loadDay(selectedDay);},[selectedDay]);
+
+            const loadMonth=async()=>{setStatus('Carregando...');const data=await api(`../modules/routine.php?api=get_routine_month&month=${ym}`); if(data&&!data.error){setDays(data||[]);setStatus('Online');} else setStatus(data?.error||'Erro');};
+            const loadDay=async(d)=>{const log=await api(`../modules/routine.php?api=get_routine_day&date=${d}`); if(log&&!log.error&&log.log_date){setMood(log.mood||'😊');setContent(log.content||'');} else {setMood('😊');setContent('');}}
+            const save=async()=>{await api('../modules/routine.php?api=save_routine',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({date:selectedDay,mood,content})});setStatus('Dia salvo');loadMonth();};
+
+            const dayMood=(d)=>{const found=days.find(x=>x.log_date===d);return found?found.mood||'📝':'+';};
+
+            return (
+                <div className="card">
+                    <div style={{display:'flex',flexDirection:'column',gap:10}}>
+                        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',flexWrap:'wrap',gap:8}}>
+                            <div className="title" style={{fontSize:'16px'}}>Rotina</div>
+                            <input className="input" style={{width:150}} type="month" value={ym} onChange={e=>setYm(e.target.value)} />
+                        </div>
+                        <div className="day-row">
+                            {[...Array(7).keys()].map(i=>{const d=new Date();d.setDate(d.getDate()+i);const ds=d.toISOString().slice(0,10);return (
+                                <div key={i} className={`day-chip ${ds===selectedDay?'active':''}`} onClick={()=>setSelectedDay(ds)}>
+                                    <div style={{fontSize:12,color:'#6b7280'}}>{d.toLocaleDateString('pt-BR',{weekday:'short'})}</div>
+                                    <div style={{fontWeight:800}}>{d.getDate()}</div>
+                                    <div style={{fontSize:16}}>{dayMood(ds)}</div>
+                                </div>
+                            );})}
+                        </div>
+                        <div className="item" style={{display:'flex',gap:8,alignItems:'center',justifyContent:'space-between'}}>
+                            <div className="label">Humor</div>
+                            <div style={{display:'flex',gap:8}}>
+                                {['🤩','😊','😐','😟','😭'].map(m=>(
+                                    <button key={m} onClick={()=>setMood(m)} style={{border:'none',background:'transparent',fontSize:22,opacity:mood===m?1:0.4,cursor:'pointer'}}>{m}</button>
+                                ))}
+                            </div>
+                        </div>
+                        <textarea className="input" style={{height:140}} placeholder="Como foi seu dia?" value={content} onChange={e=>setContent(e.target.value)}></textarea>
+                        <button className="action" onClick={save}>Salvar dia</button>
+                    </div>
+                </div>
+            );
+        }
+
+        function Strava({ setStatus }){
+            const [data,setData]=useState(null);
+
+            useEffect(()=>{load();},[]);
+            const load=async()=>{setStatus('Carregando...');const res=await api('../modules/strava.php?api=get_strava_data'); if(res&&!res.error){setData(res);setStatus('Online');} else setStatus(res?.error||'Erro');};
+            const toggle=async(id)=>{await api('../modules/strava.php?api=toggle_strava_done',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({strava_id:id}).toString()});load();};
+
+            if(!data) return <div className="card">Carregando...</div>;
+            if(!data.connected) return (
+                <div className="card" style={{textAlign:'center'}}>
+                    <div className="title" style={{fontSize:'16px'}}>Conectar Strava</div>
+                    <a className="action" href={data.auth_url} style={{display:'inline-block',marginTop:12}}>Autorizar</a>
+                </div>
+            );
+
+            return (
+                <div className="card">
+                    <div style={{display:'flex',flexDirection:'column',gap:10}}>
+                        <div className="title" style={{fontSize:'16px'}}>Treinos Strava</div>
+                        <div className="grid2">
+                            <div className="item" style={{display:'flex',justifyContent:'space-between'}}>
+                                <span className="label">Km recentes</span><span className="title">{data.summary.total_km} km</span>
+                            </div>
+                            <div className="item" style={{display:'flex',justifyContent:'space-between'}}>
+                                <span className="label">Tempo</span><span className="title">{data.summary.total_time}</span>
+                            </div>
+                            <div className="item" style={{display:'flex',justifyContent:'space-between'}}>
+                                <span className="label">Atividades</span><span className="title">{data.summary.total_activities}</span>
+                            </div>
+                        </div>
+                        <div className="list" style={{maxHeight:'55vh',overflow:'auto',paddingRight:4}}>
+                            {!data.list?.length && <div className="item">Sem atividades.</div>}
+                            {data.list?.map(act=>(
+                                <div key={act.strava_id} className="item" style={{display:'flex',justifyContent:'space-between',alignItems:'center',gap:10}}>
+                                    <div>
+                                        <div className="title" style={{marginBottom:4}}>{act.name}</div>
+                                        <div className="meta" style={{gap:6}}>
+                                            <span className="badge">{act.type}</span>
+                                            <span>{act.date}</span>
+                                            <span>{act.distance} km</span>
+                                            <span>{act.time}</span>
+                                        </div>
+                                    </div>
+                                    <button onClick={()=>toggle(act.strava_id)} style={{border:'none',background:'transparent',fontSize:18,cursor:'pointer'}} aria-label="Marcar feito">{act.done?'✔️':'⬜'}</button>
+                                </div>
+                            ))}
                         </div>
                     </div>
                 </div>
