@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LifeOS Mobile - Atividades</title>
+  <link rel="manifest" href="../manifest.json">
+  <link rel="stylesheet" href="style.css">
+  <script defer src="common.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">LifeOS Mobile</div>
+    <div id="status" class="status">Online</div>
+  </header>
+
+  <main class="shell">
+    <nav class="nav">
+      <a href="dashboard.html" data-page="dashboard">Dashboard</a>
+      <a href="agenda.html" data-page="agenda">Agenda</a>
+      <a href="activities.html" data-page="activities" class="active">Atividades</a>
+      <a href="habits.html" data-page="habits">Hábitos</a>
+    </nav>
+
+    <section class="card">
+      <div class="card-header">
+        <h2>Atividades</h2>
+        <input type="date" id="activities-date" class="auto-today">
+      </div>
+      <div class="quick-grid">
+        <div>
+          <label>Nova atividade</label>
+          <input type="text" id="quick-activity-title" placeholder="Título">
+          <input type="date" id="quick-activity-date" class="auto-today">
+          <select id="quick-activity-period">
+            <option value="morning">Manhã</option>
+            <option value="afternoon">Tarde</option>
+            <option value="night">Noite</option>
+          </select>
+          <button id="quick-add-activity">Adicionar</button>
+        </div>
+      </div>
+      <div id="activities-list" class="list" style="margin-top:0.75rem"></div>
+    </section>
+  </main>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      initNav('activities');
+      fillDefaultInputs();
+      bind();
+      loadActivities();
+    });
+
+    function bind(){
+      document.getElementById('activities-date').addEventListener('change', loadActivities);
+      document.getElementById('quick-add-activity').addEventListener('click', quickAddActivity);
+    }
+
+    async function loadActivities(){
+      const date = document.getElementById('activities-date').value || new Date().toISOString().slice(0,10);
+      const list = document.getElementById('activities-list');
+      list.innerHTML = '<div class="item">Carregando...</div>';
+      const data = await api(`../modules/activities.php?api=get_activities&start=${date}&end=${date}`);
+      if (!data || data.error) { list.innerHTML = `<div class="item">Erro ao carregar${data?.error ? ': ' + data.error : ''}.</div>`; return; }
+      if (!data.length) { list.innerHTML = '<div class="item">Sem atividades.</div>'; return; }
+      list.innerHTML = data.map(a => `
+        <div class="item">
+          <div class="title">${a.title}</div>
+          <div class="meta">
+            <span>${a.day_date}</span>
+            <span class="badge">${a.period || 'dia'}</span>
+          </div>
+        </div>`).join('');
+    }
+
+    async function quickAddActivity(){
+      const title = document.getElementById('quick-activity-title').value.trim();
+      const date = document.getElementById('quick-activity-date').value;
+      const period = document.getElementById('quick-activity-period').value;
+      if (!title || !date) return;
+      const res = await api('../modules/activities.php?api=save_activity', {
+        method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ title, date, period })
+      });
+      if (res && !res.error){ setStatus('Atividade criada'); document.getElementById('quick-activity-title').value=''; loadActivities(); }
+      else setStatus(res?.error || 'Erro');
+    }
+  </script>
+</body>
+</html>

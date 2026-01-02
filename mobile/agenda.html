@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LifeOS Mobile - Agenda</title>
+  <link rel="manifest" href="../manifest.json">
+  <link rel="stylesheet" href="style.css">
+  <script defer src="common.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">LifeOS Mobile</div>
+    <div id="status" class="status">Online</div>
+  </header>
+
+  <main class="shell">
+    <nav class="nav">
+      <a href="dashboard.html" data-page="dashboard">Dashboard</a>
+      <a href="agenda.html" data-page="agenda" class="active">Agenda</a>
+      <a href="activities.html" data-page="activities">Atividades</a>
+      <a href="habits.html" data-page="habits">Hábitos</a>
+    </nav>
+
+    <section class="card">
+      <div class="card-header">
+        <h2>Eventos</h2>
+        <div class="filters">
+          <input type="month" id="events-month" class="auto-month">
+          <button id="sync-events">Sincronizar</button>
+        </div>
+      </div>
+      <div class="quick-grid">
+        <div>
+          <label>Novo evento</label>
+          <input type="text" id="quick-title" placeholder="Título">
+          <input type="datetime-local" id="quick-datetime" class="auto-now">
+          <button id="quick-add-event">Adicionar</button>
+        </div>
+      </div>
+      <div id="events-list" class="list" style="margin-top:0.75rem"></div>
+    </section>
+  </main>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      initNav('agenda');
+      fillDefaultInputs();
+      bindEvents();
+      loadEvents();
+    });
+
+    function bindEvents(){
+      document.getElementById('events-month').addEventListener('change', loadEvents);
+      document.getElementById('sync-events').addEventListener('click', syncEvents);
+      document.getElementById('quick-add-event').addEventListener('click', quickAddEvent);
+    }
+
+    async function loadEvents(){
+      const ym = document.getElementById('events-month').value || new Date().toISOString().slice(0,7);
+      const list = document.getElementById('events-list');
+      list.innerHTML = '<div class="item">Carregando...</div>';
+      const data = await api('../modules/google_agenda.php?api=list_events');
+      if (!data || data.error) { list.innerHTML = `<div class="item">Erro ao carregar${data?.error ? ': ' + data.error : ''}.</div>`; return; }
+      const events = (data.events || []).filter(e => (e.start_date || '').startsWith(ym));
+      if (!events.length) { list.innerHTML = '<div class="item">Sem eventos.</div>'; return; }
+      list.innerHTML = events.map(ev => {
+        const dt = ev.start_date?.replace(' ','T');
+        return `<div class="item">
+          <div class="title">${ev.title || 'Sem título'}</div>
+          <div class="meta">${dt ? new Date(dt).toLocaleString('pt-BR') : ''}</div>
+        </div>`;
+      }).join('');
+    }
+
+    async function syncEvents(){
+      setStatus('Sincronizando...');
+      await api('../modules/google_agenda.php?api=sync_from_google');
+      await loadEvents();
+      setStatus('Online');
+    }
+
+    async function quickAddEvent(){
+      const title = document.getElementById('quick-title').value.trim();
+      const dt = document.getElementById('quick-datetime').value;
+      if (!title || !dt) return;
+      const res = await api('../modules/google_agenda.php?api=create_event', {
+        method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ title, start_date: dt })
+      });
+      if (res && !res.error){ setStatus('Evento criado'); document.getElementById('quick-title').value=''; loadEvents(); }
+      else setStatus(res?.error || 'Erro');
+    }
+  </script>
+</body>
+</html>

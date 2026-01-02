@@ -41,10 +41,14 @@ async function api(url, opts={}) {
       setStatus('Login necessário');
       const redirect = encodeURIComponent(window.location.pathname + window.location.search);
       window.location.href = `../login.php?redirect=${redirect}`;
-      return { error: 'login_required' };
+      return { error: 'login_required', body: text.slice(0,200) };
     }
 
-    if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
+    if (!res.ok) {
+      const snippet = text.slice(0, 200);
+      throw new Error(`${res.status} ${res.statusText} | ${snippet}`);
+    }
+
     try { return JSON.parse(text); } catch (err) {
       console.error('Resposta não JSON:', text);
       throw new Error('Resposta inválida');
