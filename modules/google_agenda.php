@@ -10,6 +10,20 @@ $GOOGLE_CLIENT_ID = getenv('GOOGLE_CLIENT_ID') ?: '';
 $GOOGLE_CLIENT_SECRET = getenv('GOOGLE_CLIENT_SECRET') ?: '';
 $REDIRECT_URI = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]" . strtok($_SERVER["REQUEST_URI"], '?') . "?callback=1";
 
+function ensureGoogleCalendarSchema(PDO $pdo) {
+    // Tokens table
+    $pdo->exec("CREATE TABLE IF NOT EXISTS google_calendar_tokens (\n        id INT AUTO_INCREMENT PRIMARY KEY,\n        user_id INT NOT NULL UNIQUE,\n        access_token TEXT NOT NULL,\n        refresh_token TEXT NULL,\n        expires_at DATETIME NOT NULL,\n        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP\n    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
+
+    // Ensure events has google_event_id column/index
+    $col = $pdo->query("SHOW COLUMNS FROM events LIKE 'google_event_id'")->fetch();
+    if (!$col) {
+        $pdo->exec("ALTER TABLE events ADD COLUMN google_event_id VARCHAR(255) DEFAULT NULL");
+        $pdo->exec("CREATE UNIQUE INDEX idx_events_google_event_id ON events (google_event_id)");
+    }
+}
+
+ensureGoogleCalendarSchema($pdo);
+
 // Callback do OAuth2
 if (isset($_GET['callback']) && isset($_GET['code'])) {
     $token_url = "https://oauth2.googleapis.com/token";
