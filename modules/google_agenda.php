@@ -367,6 +367,9 @@ let isSyncing = false;
 async function syncFromGoogle(silent = false) {
     if (isSyncing) return;
     isSyncing = true;
+    const syncBtn = document.getElementById('sync-calendar-btn');
+    if (syncBtn) syncBtn.classList.add('animate-spin');
+    
     try {
         const result = await api('sync_from_google');
         if (result.success) {
@@ -381,6 +384,7 @@ async function syncFromGoogle(silent = false) {
         if (!silent) alert('❌ Erro ao sincronizar: ' + (e?.message || e));
     } finally {
         isSyncing = false;
+        if (syncBtn) syncBtn.classList.remove('animate-spin');
     }
 }
 
@@ -400,24 +404,37 @@ function renderCalendarGrid(events) {
     const monthNavDiv = document.createElement('div');
     monthNavDiv.className = 'flex items-center justify-between mb-6 gap-3';
     
+    const leftDiv = document.createElement('div');
+    leftDiv.className = 'flex items-center gap-3';
+    
     const prevBtn = document.createElement('button');
     prevBtn.className = 'w-8 h-8 hover:bg-slate-700 rounded text-slate-400 hover:text-white transition';
     prevBtn.innerHTML = '<i class="fas fa-chevron-left"></i>';
     prevBtn.onclick = () => changeMonth(-1);
+    leftDiv.appendChild(prevBtn);
     
     const monthLabel = document.createElement('span');
     monthLabel.className = 'px-4 font-medium text-sm min-w-[140px] text-center capitalize text-slate-300';
     monthLabel.id = 'month-label';
     monthLabel.textContent = currentMonth.toLocaleString('pt-BR', { month: 'long', year: 'numeric' });
+    leftDiv.appendChild(monthLabel);
     
     const nextBtn = document.createElement('button');
     nextBtn.className = 'w-8 h-8 hover:bg-slate-700 rounded text-slate-400 hover:text-white transition';
     nextBtn.innerHTML = '<i class="fas fa-chevron-right"></i>';
     nextBtn.onclick = () => changeMonth(1);
+    leftDiv.appendChild(nextBtn);
     
-    monthNavDiv.appendChild(prevBtn);
-    monthNavDiv.appendChild(monthLabel);
-    monthNavDiv.appendChild(nextBtn);
+    monthNavDiv.appendChild(leftDiv);
+    
+    const syncBtn = document.createElement('button');
+    syncBtn.className = 'w-9 h-9 hover:bg-slate-700 rounded text-yellow-400 hover:text-yellow-300 transition';
+    syncBtn.innerHTML = '<i class="fas fa-sync-alt"></i>';
+    syncBtn.id = 'sync-calendar-btn';
+    syncBtn.onclick = () => syncFromGoogle(false);
+    syncBtn.title = 'Sincronizar calendário';
+    monthNavDiv.appendChild(syncBtn);
+    
     cal.appendChild(monthNavDiv);
 
     // Header com dias da semana
