@@ -246,6 +246,20 @@ if (isset($_GET['api'])) {
             exit;
         }
         
+        if ($action === 'update_event') {
+            $stmt = $pdo->prepare("UPDATE events SET title = ?, start_date = ? WHERE id = ? AND user_id = ?");
+            $stmt->execute([$data['title'], $data['start_date'], $data['id'], $user_id]);
+            echo json_encode(['success' => true]);
+            exit;
+        }
+        
+        if ($action === 'delete_event') {
+            $stmt = $pdo->prepare("DELETE FROM events WHERE id = ? AND user_id = ?");
+            $stmt->execute([$data['id'], $user_id]);
+            echo json_encode(['success' => true]);
+            exit;
+        }
+        
         if ($action === 'disconnect') {
             $stmt = $pdo->prepare("DELETE FROM google_calendar_tokens WHERE user_id = ?");
             $stmt->execute([$user_id]);
@@ -328,19 +342,22 @@ include __DIR__ . '/../includes/header.php';
     </div>
 </div>
 
-<!-- Modal para criar evento -->
-<div id="modal-create-event" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
+<!-- Modal para criar/editar evento -->
+<div id="modal-event-overlay" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
     <div class="modal-glass rounded-2xl p-8 w-full max-w-md">
-        <h3 class="text-2xl font-bold mb-6 text-yellow-500">Novo Evento</h3>
+        <h3 class="text-2xl font-bold mb-6 text-yellow-400" id="modal-event-title">Novo Evento</h3>
         <form onsubmit="submitEvent(event)" class="space-y-4">
+            <input type="hidden" id="event-id">
             <input type="text" id="event-title" placeholder="Título do evento" required class="w-full">
             <input type="datetime-local" id="event-date" required class="w-full">
-            <textarea id="event-description" placeholder="Descrição (opcional)" rows="3" class="w-full"></textarea>
             <div class="flex gap-3">
-                <button type="submit" class="flex-1 bg-yellow-600 hover:bg-yellow-500 text-white py-3 rounded-xl font-bold">
-                    Criar no Google Calendar
+                <button type="submit" class="flex-1 bg-yellow-600 hover:bg-yellow-500 text-white py-3 rounded-xl font-bold" id="btn-save-event">
+                    Salvar
                 </button>
-                <button type="button" onclick="closeCreateModal()" class="px-6 bg-slate-700 hover:bg-slate-600 text-white py-3 rounded-xl">
+                <button type="button" id="btn-delete-event" onclick="deleteEvent()" class="hidden px-6 bg-red-600 hover:bg-red-500 text-white py-3 rounded-xl font-bold">
+                    <i class="fas fa-trash mr-1"></i> Excluir
+                </button>
+                <button type="button" onclick="closeEventModal()" class="px-6 bg-slate-700 hover:bg-slate-600 text-white py-3 rounded-xl">
                     Cancelar
                 </button>
             </div>
@@ -432,6 +449,10 @@ function renderCalendarGrid(events) {
             eventEl.className = 'cursor-pointer text-xs px-2 py-1 rounded-md bg-yellow-500/20 text-yellow-100 border-l-2 border-yellow-500 hover:bg-yellow-500/30 transition truncate mb-1';
             eventEl.title = `${time} - ${ev.title}`;
             eventEl.innerHTML = `<span class="opacity-70 text-[10px] mr-1">${time}</span>${ev.title}`;
+            eventEl.onclick = (e) => {
+                e.stopPropagation();
+                editEvent(ev);
+            };
             cell.querySelector('.space-y-1').appendChild(eventEl);
         });
 
@@ -452,46 +473,79 @@ function renderCalendar(events) {
     renderCalendarGrid(events);
 }
 
-function createEventModal() {
-    document.getElementById('modal-create-event').classList.remove('hidden');
-    const now = new Date();
-    now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-    document.getElementById('event-date').value = now.toISOString().slice(0, 16);
+function openEventModal() {
+    document.getElementById('modal-event-overlay').classList.remove('hidden');
 }
 
-function closeCreateModal() {
-    document.getElementById('modal-create-event').classList.add('hidden');
+function closeEventModal() {
+    document.getElementById('modal-event-overlay').classList.add('hidden');
+    document.getElementById('event-id').value = '';
+    document.getElementById('btn-delete-event').classList.add('hidden');
+    document.getElementById('modal-event-title').textContent = 'Novo Evento';
+    document.getElementById('btn-save-event').textContent = 'Salvar';
+}
+
+function editEvent(ev) {
+    document.getElementById('event-id').value = ev.id;
+    document.getElementById('event-title').value = ev.title;
+    document.getElementById('event-date').value = ev.start_date.replace(' ', 'T');
+    document.getElementById('modal-event-title').textContent = 'Editar Evento';
+    document.getElementById('btn-delete-event').classList.remove('hidden');
+    document.getElementById('btn-save-event').textContent = 'Atualizar';
+    openEventModal();
+}
+
+function createEventModal() {
+    document.getElementById('event-id').value = '';
+    document.getElementById('event-title').value = '';
+    document.getElementById('event-date').value = new Date().toISOString().slice(0, 16);
+    document.getElementById('modal-event-title').textContent = 'Novo Evento';
+    document.getElementById('btn-delete-event').classList.add('hidden');
+    document.getElementById('btn-save-event').textContent = 'Salvar';
+    openEventModal();
 }
 
 async function submitEvent(e) {
     e.preventDefault();
     
+    const eventId = document.getElementById('event-id').value;
     const data = {
         title: document.getElementById('event-title').value,
-        start_date: document.getElementById('event-date').value,
-        description: document.getElementById('event-description').value
+        start_date: document.getElementById('event-date').value
     };
     
     try {
-        const result = await api('create_event', data);
-        if (result.success) {
-            alert('✅ Evento criado no Google Calendar!');
-            closeCreateModal();
-            location.reload();
+        if (eventId) {
+            data.id = eventId;
+            const result = await api('update_event', data);
+            if (result.success) {
+                closeEventModal();
+                await loadCalendarEvents();
+            }
+        } else {
+            const result = await api('create_event', data);
+            if (result.success) {
+                closeEventModal();
+                await loadCalendarEvents();
+            }
         }
     } catch (e) {
-        alert('❌ Erro ao criar evento: ' + e.message);
+        alert('❌ Erro: ' + e.message);
     }
 }
 
-async function disconnect() {
-    if (!confirm('Deseja realmente desconectar do Google Calendar?')) return;
+async function deleteEvent() {
+    if (!confirm('Tem certeza que deseja excluir este evento?')) return;
     
+    const eventId = document.getElementById('event-id').value;
     try {
-        await api('disconnect');
-        location.reload();
+        const result = await api('delete_event', { id: eventId });
+        if (result.success) {
+            closeEventModal();
+            await loadCalendarEvents();
+        }
     } catch (e) {
-        alert('❌ Erro ao desconectar: ' + e.message);
+        alert('❌ Erro ao excluir: ' + e.message);
     }
 }
 
