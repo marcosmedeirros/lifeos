@@ -147,14 +147,19 @@
             const [eventTitle,setEventTitle]=useState('');
             const [eventDt,setEventDt]=useState(nowLocal().toISOString().slice(0,16));
             const [scope,setScope]=useState('month');
+            const [selectedDay,setSelectedDay]=useState(nowLocal().toISOString().slice(0,10));
             const filtered=useMemo(()=>{
                 const list=events.filter(e=>(e.start_date||'').startsWith(ym));
                 if(scope==='today'){
                     const today=nowLocal().toISOString().slice(0,10);
                     return list.filter(e=>(e.start_date||'').startsWith(today));
                 }
+                if(scope==='day'){
+                    return list.filter(e=>(e.start_date||'').startsWith(selectedDay));
+                }
                 return list;
-            },[events,ym,scope]);
+            },[events,ym,scope,selectedDay]);
+            const sorted = useMemo(()=>filtered.slice().sort((a,b)=>new Date(a.start_date||0)-new Date(b.start_date||0)),[filtered]);
             useEffect(()=>{load();},[]);
 
             const load=async()=>{setStatus('Carregando...');const data=await api('../modules/google_agenda.php?api=list_events'); if(data&&!data.error){setEvents(data.events||[]);setStatus('Online');} else setStatus(data?.error||'Erro');};
@@ -183,7 +188,7 @@
                         </div>
                         <div className="day-row">
                             {[...Array(7).keys()].map(i=>{const d=new Date();d.setDate(d.getDate()+i);const ds=d.toISOString().slice(0,10);return (
-                                <div key={i} className={`day-chip ${ds===nowLocal().toISOString().slice(0,10)?'active':''}`}>
+                                <div key={i} className={`day-chip ${ds===selectedDay?'active':''}`} onClick={()=>{setSelectedDay(ds);setScope('day');}}>
                                     <div style={{fontSize:12,color:'#6b7280'}}>{d.toLocaleDateString('pt-BR',{weekday:'short'})}</div>
                                     <div style={{fontWeight:800}}>{d.getDate()}</div>
                                 </div>
@@ -198,8 +203,8 @@
                             </div>
                         </div>
                         <div className="list" style={{maxHeight:'60vh',overflow:'auto',paddingRight:4}}>
-                            {!filtered.length && <div className="item">Sem eventos.</div>}
-                            {filtered.map(ev=>{const dt=ev.start_date?.replace(' ','T'); const dateObj = dt? new Date(dt):null; const day = dateObj? dateObj.toLocaleDateString('pt-BR',{day:'2-digit',month:'short'}) : ''; const hour = dateObj? dateObj.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}) : '';
+                            {!sorted.length && <div className="item">Sem eventos.</div>}
+                            {sorted.map(ev=>{const dt=ev.start_date?.replace(' ','T'); const dateObj = dt? new Date(dt):null; const day = dateObj? dateObj.toLocaleDateString('pt-BR',{day:'2-digit',month:'short'}) : ''; const hour = dateObj? dateObj.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}) : '';
                                 return (
                                 <div key={ev.id||ev.google_event_id} className="item" style={{display:'flex',gap:12,alignItems:'center',background:'#ffffff',borderColor:'#e5e7f3',boxShadow:'0 16px 34px rgba(17,24,39,0.08)'}}>
                                     <div style={{minWidth:58,textAlign:'center'}}>
@@ -231,10 +236,13 @@
             const [items,setItems]=useState([]);
             const [title,setTitle]=useState('');
             const [period,setPeriod]=useState('morning');
+            const [editingId,setEditingId]=useState(null);
             useEffect(()=>{load();},[date]);
             const load=async()=>{setStatus('Carregando...');const data=await api(`../modules/activities.php?api=get_activities&start=${date}&end=${date}`); if(data&&!data.error){setItems(data||[]);setStatus('Online');} else setStatus(data?.error||'Erro');};
-            const create=async()=>{if(!title||!date)return;const res=await api('../modules/activities.php?api=save_activity',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({title,date,period})}); if(res&&!res.error){setStatus('Atividade criada');setTitle('');load();} else setStatus(res?.error||'Erro');};
+            const save=async()=>{if(!title||!date)return;const payload={title,date,period}; if(editingId) payload.id=editingId; const res=await api('../modules/activities.php?api=save_activity',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}); if(res&&!res.error){setStatus(editingId?'Atividade atualizada':'Atividade criada');setTitle('');setEditingId(null);load();} else setStatus(res?.error||'Erro');};
             const toggle=async(id)=>{setStatus('Atualizando...');await api('../modules/activities.php?api=toggle_activity',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id})});await load();};
+            const remove=async(id)=>{setStatus('Removendo...');await api('../modules/activities.php?api=delete_activity',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id})});await load();};
+            const startEdit=(a)=>{setTitle(a.title||'');setPeriod(a.period||'morning');setDate(a.day_date||date);setEditingId(a.id);setStatus('Editando atividade');};
 
             return (
                 <div className="card">
@@ -256,7 +264,7 @@
                                 <select className="input" value={period} onChange={e=>setPeriod(e.target.value)}>
                                     <option value="morning">Manhã</option><option value="afternoon">Tarde</option><option value="night">Noite</option>
                                 </select>
-                                <button className="action" onClick={create}>Adicionar</button>
+                                <button className="action" onClick={save}>{editingId?'Salvar edição':'Adicionar'}</button>
                             </div>
                         </div>
                         <div className="list" style={{maxHeight:'60vh',overflow:'auto',paddingRight:4}}>
@@ -270,9 +278,13 @@
                                             <div className="meta"><span>{a.day_date}</span><span className="badge">{periodLabel(a.period)}</span></div>
                                         </div>
                                     </div>
-                                    <button onClick={()=>toggle(a.id)} style={{border:'none',background:'transparent',fontSize:18,cursor:'pointer'}} aria-label="Marcar feito">
-                                        {Number(a.status)===1?'☑️':'⬜'}
-                                    </button>
+                                    <div style={{display:'flex',alignItems:'center',gap:8}}>
+                                        <button onClick={()=>toggle(a.id)} style={{border:'none',background:'transparent',fontSize:18,cursor:'pointer'}} aria-label="Marcar feito">
+                                            {Number(a.status)===1?'☑️':'⬜'}
+                                        </button>
+                                        <button onClick={()=>startEdit(a)} style={{border:'none',background:'transparent',fontSize:15,cursor:'pointer',color:'#64748b'}} aria-label="Editar">✏️</button>
+                                        <button onClick={()=>remove(a.id)} style={{border:'none',background:'transparent',fontSize:15,cursor:'pointer',color:'#ef4444'}} aria-label="Excluir">🗑️</button>
+                                    </div>
                                 </div>
                             ))}
                         </div>
