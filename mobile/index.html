@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LifeOS Mobile</title>
+    <link rel="manifest" href="../manifest.json">
+    <link rel="stylesheet" href="style.css">
+    <script defer src="app.js"></script>
+</head>
+<body>
+    <header class="topbar">
+        <div class="brand">LifeOS Mobile</div>
+        <div class="status" id="sync-status">Online</div>
+    </header>
+
+    <main class="shell">
+        <nav class="tabs" id="tab-bar">
+            <button data-tab="dashboard" class="tab active">Dashboard</button>
+            <button data-tab="events" class="tab">Agenda</button>
+            <button data-tab="activities" class="tab">Atividades</button>
+            <button data-tab="habits" class="tab">Hábitos</button>
+        </nav>
+
+        <section id="dashboard" class="tab-panel active">
+            <div class="card">
+                <h2>Visão Geral</h2>
+                <div class="quick-grid">
+                    <div>
+                        <label>Evento rápido</label>
+                        <input type="text" id="quick-title" placeholder="Título">
+                        <input type="datetime-local" id="quick-datetime">
+                        <button id="quick-add-event">Adicionar</button>
+                    </div>
+                    <div>
+                        <label>Atividade rápida</label>
+                        <input type="text" id="quick-activity-title" placeholder="Atividade">
+                        <input type="date" id="quick-activity-date">
+                        <select id="quick-activity-period">
+                            <option value="morning">Manhã</option>
+                            <option value="afternoon">Tarde</option>
+                            <option value="night">Noite</option>
+                        </select>
+                        <button id="quick-add-activity">Adicionar</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="events" class="tab-panel">
+            <div class="card">
+                <div class="card-header">
+                    <h2>Eventos</h2>
+                    <div class="filters">
+                        <input type="month" id="events-month">
+                        <button id="sync-events">Sincronizar</button>
+                    </div>
+                </div>
+                <div id="events-list" class="list"></div>
+            </div>
+        </section>
+
+        <section id="activities" class="tab-panel">
+            <div class="card">
+                <div class="card-header">
+                    <h2>Atividades</h2>
+                    <input type="date" id="activities-date">
+                </div>
+                <div id="activities-list" class="list"></div>
+            </div>
+        </section>
+
+        <section id="habits" class="tab-panel">
+            <div class="card">
+                <div class="card-header">
+                    <h2>Hábitos</h2>
+                    <input type="month" id="habits-month">
+                </div>
+                <div id="habits-list" class="list grid"></div>
+            </div>
+        </section>
+    </main>
+</body>
+</html>

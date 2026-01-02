@@ -157,6 +157,13 @@ input:focus, select:focus, textarea:focus {
     .grid.grid-cols-3 {
         grid-template-columns: 1fr !important;
     }
+
+    /* Calendários e grids de 7 colunas ficam fluidos em telas menores */
+    .grid.grid-cols-7,
+    .calendar-grid {
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)) !important;
+        gap: 0.5rem !important;
+    }
     
     /* Formulários em coluna */
     form.flex { flex-direction: column; }
