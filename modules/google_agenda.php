@@ -8,7 +8,8 @@ $user_id = $_SESSION['user_id'];
 // Configurações do Google Calendar API
 $GOOGLE_CLIENT_ID = getenv('GOOGLE_CLIENT_ID') ?: '';
 $GOOGLE_CLIENT_SECRET = getenv('GOOGLE_CLIENT_SECRET') ?: '';
-$REDIRECT_URI = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]" . strtok($_SERVER["REQUEST_URI"], '?') . "?callback=1";
+$GOOGLE_REDIRECT_URI_ENV = getenv('GOOGLE_REDIRECT_URI') ?: '';
+$REDIRECT_URI = $GOOGLE_REDIRECT_URI_ENV ?: ((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://" . $_SERVER['HTTP_HOST'] . strtok($_SERVER["REQUEST_URI"], '?') . "?callback=1");
 
 function ensureGoogleCalendarSchema(PDO $pdo) {
     // Tokens table

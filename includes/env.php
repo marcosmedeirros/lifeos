@@ -21,9 +21,11 @@ if (file_exists($envFile)) {
             $value = substr($value, 1, -1);
         }
         
-        // Definir como variável de ambiente
-        if (!empty($key) && !empty($value)) {
+        // Definir como variável de ambiente (compatível com hosts que não propagam putenv)
+        if (!empty($key) && $value !== '') {
             putenv("$key=$value");
+            $_ENV[$key] = $value;
+            $_SERVER[$key] = $value;
         }
     }
 }
