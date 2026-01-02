@@ -249,12 +249,10 @@ require_once __DIR__ . '/../includes/header.php';
                                 <th class="p-5 text-center">Tipo</th>
                                 <th class="p-5 text-center">Distância</th>
                                 <th class="p-5 text-center">Tempo</th>
-                                <th class="p-5 text-center">Kudos</th>
-                                <th class="p-5 text-center">Status</th>
                             </tr>
                         </thead>
                         <tbody id="strava-list" class="divide-y divide-slate-700/50 text-sm font-medium">
-                            <tr><td colspan="7" class="p-8 text-center text-slate-500">Carregando dados...</td></tr>
+                            <tr><td colspan="5" class="p-8 text-center text-slate-500">Carregando dados...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -303,7 +301,7 @@ async function loadStrava() {
         btnContainer.classList.remove('hidden');
         
         document.getElementById('strava-stats').classList.add('hidden');
-        document.getElementById('strava-list').innerHTML = '<tr><td colspan="7" class="p-10 text-center text-slate-500 flex flex-col items-center gap-2"><i class="fab fa-strava text-4xl text-slate-700"></i><span>Conecte sua conta para ver suas atividades recentes.</span></td></tr>';
+        document.getElementById('strava-list').innerHTML = '<tr><td colspan="5" class="p-10 text-center text-slate-500 flex flex-col items-center gap-2"><i class="fab fa-strava text-4xl text-slate-700"></i><span>Conecte sua conta para ver suas atividades recentes.</span></td></tr>';
     } else {
         document.getElementById('strava-connect-btn').classList.add('hidden');
         document.getElementById('strava-stats').classList.remove('hidden');
@@ -325,9 +323,9 @@ async function loadStrava() {
                     <div class="glass-card p-5 rounded-xl border border-slate-700/50 hover:border-[#fc4c02]/50 transition">
                         <div class="flex justify-between items-start mb-3">
                             <h4 class="font-bold text-white text-lg">${month.label}</h4>
-                            <span class="bg-[#fc4c02]/20 text-[#fc4c02] px-2 py-1 rounded text-xs font-bold">${month.count} atividades</span>
+                            <span class="bg-[#fc4c02]/20 text-[#fc4c02] px-2 py-1 rounded text-sm font-bold">${month.total_dist_fmt} km</span>
                         </div>
-                        <p class="text-3xl font-bold text-white mb-3">${month.total_dist_fmt} <span class="text-sm text-slate-400">km</span></p>
+                        <p class="text-3xl font-bold text-white mb-3">${month.count} <span class="text-sm text-slate-400">atividades</span></p>
                         <div class="flex flex-wrap gap-1">${typesList}</div>
                     </div>
                 `;
@@ -341,12 +339,6 @@ async function loadStrava() {
                 <td class="p-5 text-center"><span class="px-2 py-1 rounded border border-slate-600 text-[10px] uppercase font-bold bg-slate-800 text-slate-300">${a.type}</span></td>
                 <td class="p-5 text-center font-mono text-[#fc4c02] font-bold">${a.distance} km</td>
                 <td class="p-5 text-center text-slate-300 font-mono">${a.time}</td>
-                <td class="p-5 text-center text-slate-400"><i class="fas fa-thumbs-up text-[#fc4c02] mr-1"></i> ${a.kudos}</td>
-                <td class="p-5 text-center">
-                    <button onclick="toggleDone(${a.strava_id}, this)" class="px-3 py-1.5 rounded-lg transition font-bold text-xs ${a.done ? 'bg-green-600 hover:bg-green-700' : 'bg-slate-700 hover:bg-green-600'} text-white">
-                        <i class="fas ${a.done ? 'fa-check-circle' : 'fa-circle'} mr-1"></i> ${a.done ? 'Feito' : 'Fazer'}
-                    </button>
-                </td>
             </tr>
         `).join('');
     }
