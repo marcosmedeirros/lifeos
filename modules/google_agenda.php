@@ -45,6 +45,7 @@ if (isset($_GET['callback']) && isset($_GET['code'])) {
         curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($post_data));
         $response = curl_exec($ch);
         $curl_error = curl_error($ch);
+        $http_status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
 
         $token_data = json_decode($response, true);
@@ -68,7 +69,11 @@ if (isset($_GET['callback']) && isset($_GET['code'])) {
             header('Location: ' . strtok($_SERVER["REQUEST_URI"], '?'));
             exit;
         } else {
-            $callback_error = $token_data['error_description'] ?? $token_data['error'] ?? ($curl_error ?: 'Falha ao trocar o código por token.');
+            $raw_error = $token_data['error_description'] ?? $token_data['error'] ?? ($curl_error ?: 'Falha ao trocar o código por token.');
+            $callback_error = "HTTP {$http_status}: {$raw_error}";
+            if ($response) {
+                $callback_error .= "\nResposta: " . substr($response, 0, 500);
+            }
         }
     }
 }
@@ -340,9 +345,11 @@ async function syncFromGoogle(silent = false) {
             await loadEvents();
         } else if (!silent) {
             alert('❌ Erro ao sincronizar.');
+            console.error('sync_from_google response (no success flag):', result);
         }
     } catch (e) {
-        if (!silent) alert('❌ Erro ao sincronizar: ' + e.message);
+        console.error('sync_from_google error:', e);
+        if (!silent) alert('❌ Erro ao sincronizar: ' + (e?.message || e));
     }
 }
 
