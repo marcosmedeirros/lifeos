@@ -4,6 +4,7 @@ require_once __DIR__ . '/../includes/auth.php';
 require_login();
 
 $user_id = $_SESSION['user_id'];
+$callback_error = null;
 
 // Configurações do Google Calendar API
 $GOOGLE_CLIENT_ID = getenv('GOOGLE_CLIENT_ID') ?: '';
@@ -27,41 +28,48 @@ ensureGoogleCalendarSchema($pdo);
 
 // Callback do OAuth2
 if (isset($_GET['callback']) && isset($_GET['code'])) {
-    $token_url = "https://oauth2.googleapis.com/token";
-    $post_data = [
-        'code' => $_GET['code'],
-        'client_id' => $GOOGLE_CLIENT_ID,
-        'client_secret' => $GOOGLE_CLIENT_SECRET,
-        'redirect_uri' => $REDIRECT_URI,
-        'grant_type' => 'authorization_code'
-    ];
+    if (empty($GOOGLE_CLIENT_ID) || empty($GOOGLE_CLIENT_SECRET)) {
+        $callback_error = 'CLIENT_ID ou CLIENT_SECRET não configurados.';
+    } else {
+        $token_url = "https://oauth2.googleapis.com/token";
+        $post_data = [
+            'code' => $_GET['code'],
+            'client_id' => $GOOGLE_CLIENT_ID,
+            'client_secret' => $GOOGLE_CLIENT_SECRET,
+            'redirect_uri' => $REDIRECT_URI,
+            'grant_type' => 'authorization_code'
+        ];
 
-    $ch = curl_init($token_url);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($post_data));
-    $response = curl_exec($ch);
-    curl_close($ch);
+        $ch = curl_init($token_url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($post_data));
+        $response = curl_exec($ch);
+        $curl_error = curl_error($ch);
+        curl_close($ch);
 
-    $token_data = json_decode($response, true);
-    
-    if (isset($token_data['access_token'])) {
-        // Salvar tokens no banco
-        $stmt = $pdo->prepare("INSERT INTO google_calendar_tokens (user_id, access_token, refresh_token, expires_at) 
-                               VALUES (?, ?, ?, ?) 
-                               ON DUPLICATE KEY UPDATE 
-                               access_token = VALUES(access_token), 
-                               refresh_token = VALUES(refresh_token), 
-                               expires_at = VALUES(expires_at)");
-        $expires_at = date('Y-m-d H:i:s', time() + $token_data['expires_in']);
-        $stmt->execute([
-            $user_id, 
-            $token_data['access_token'], 
-            $token_data['refresh_token'] ?? null, 
-            $expires_at
-        ]);
+        $token_data = json_decode($response, true);
         
-        header('Location: ' . strtok($_SERVER["REQUEST_URI"], '?'));
-        exit;
+        if (isset($token_data['access_token'])) {
+            // Salvar tokens no banco
+            $stmt = $pdo->prepare("INSERT INTO google_calendar_tokens (user_id, access_token, refresh_token, expires_at) 
+                                   VALUES (?, ?, ?, ?) 
+                                   ON DUPLICATE KEY UPDATE 
+                                   access_token = VALUES(access_token), 
+                                   refresh_token = VALUES(refresh_token), 
+                                   expires_at = VALUES(expires_at)");
+            $expires_at = date('Y-m-d H:i:s', time() + $token_data['expires_in']);
+            $stmt->execute([
+                $user_id, 
+                $token_data['access_token'], 
+                $token_data['refresh_token'] ?? null, 
+                $expires_at
+            ]);
+            
+            header('Location: ' . strtok($_SERVER["REQUEST_URI"], '?'));
+            exit;
+        } else {
+            $callback_error = $token_data['error_description'] ?? $token_data['error'] ?? ($curl_error ?: 'Falha ao trocar o código por token.');
+        }
     }
 }
 
@@ -252,6 +260,13 @@ include __DIR__ . '/../includes/header.php';
                     <i class="fas fa-calendar-alt text-6xl text-yellow-500 mb-4"></i>
                     <h3 class="text-2xl font-bold text-white mb-4">Conecte sua Google Agenda</h3>
                     <p class="text-slate-300 mb-6">Sincronize seus eventos automaticamente entre o LifeOS e o Google Calendar</p>
+
+                    <?php if (!empty($callback_error)): ?>
+                        <div class="bg-red-900/40 border border-red-600 rounded-lg p-4 mb-4 text-left">
+                            <p class="text-red-200 text-sm font-semibold mb-1">Erro ao conectar:</p>
+                            <p class="text-red-100 text-xs whitespace-pre-line"><?php echo htmlspecialchars($callback_error); ?></p>
+                        </div>
+                    <?php endif; ?>
                     
                     <?php if (empty($GOOGLE_CLIENT_ID) || empty($GOOGLE_CLIENT_SECRET)): ?>
                         <div class="bg-red-900/30 border border-red-600 rounded-lg p-4 mb-6">
