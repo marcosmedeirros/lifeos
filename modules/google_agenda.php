@@ -320,18 +320,8 @@ include __DIR__ . '/../includes/header.php';
                     </button>
                 </div>
 
-                <div class="glass-card p-6 rounded-2xl mt-6 bg-gradient-to-br from-slate-900/70 via-slate-900 to-slate-950 border border-slate-800 shadow-2xl shadow-yellow-600/20">
-                    <div class="flex flex-wrap items-center justify-between gap-4 mb-4">
-                        <div>
-                            <h3 class="text-2xl font-bold text-yellow-300 drop-shadow">Calendário</h3>
-                            <p class="text-slate-400 text-sm">Visão mensal, semanal e lista em um lugar só</p>
-                        </div>
-                        <div class="flex items-center gap-2 text-xs text-slate-200 bg-slate-800/80 px-3 py-2 rounded-full border border-slate-700 shadow">
-                            <span class="h-3 w-3 rounded-full bg-yellow-400 border border-yellow-200 shadow-sm"></span>
-                            <span>Atualizado automaticamente</span>
-                        </div>
-                    </div>
-                    <div id="calendar" class="bg-slate-950/70 rounded-2xl p-4 border border-slate-800 shadow-inner"></div>
+                <div class="glass-card p-6 rounded-2xl mt-6">
+                    <div id="calendar"></div>
                 </div>
             <?php endif; ?>
         </div>
@@ -358,89 +348,7 @@ include __DIR__ . '/../includes/header.php';
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
 <script src="<?php echo BASE_PATH; ?>/assets/js/common.js"></script>
-<style>
-/* Harmoniza o FullCalendar com o tema escuro/dourado do site */
-#calendar {
-    font-family: 'Outfit', sans-serif;
-}
-#calendar .fc {
-    --fc-border-color: rgba(255, 255, 255, 0.06);
-    --fc-button-text-color: #0f172a;
-    --fc-button-bg-color: #facc15;
-    --fc-button-border-color: #eab308;
-    --fc-button-hover-bg-color: #fde047;
-    --fc-button-hover-border-color: #facc15;
-    --fc-button-active-bg-color: #f59e0b;
-    --fc-button-active-border-color: #d97706;
-    --fc-page-bg-color: transparent;
-    --fc-neutral-bg-color: rgba(255, 255, 255, 0.02);
-    --fc-list-event-hover-bg-color: rgba(250, 204, 21, 0.12);
-}
-#calendar .fc-toolbar.fc-header-toolbar {
-    margin-bottom: 1.25rem;
-}
-#calendar .fc-toolbar-title {
-    color: #facc15;
-    text-shadow: 0 4px 16px rgba(250, 204, 21, 0.25);
-    letter-spacing: 0.02em;
-}
-#calendar .fc-button {
-    border-radius: 12px;
-    padding: 0.55rem 0.9rem;
-    font-weight: 700;
-    box-shadow: 0 10px 25px -12px rgba(250, 204, 21, 0.6);
-}
-#calendar .fc-button-primary:disabled {
-    background: #1f2937;
-    color: #9ca3af;
-    border-color: #1f2937;
-    box-shadow: none;
-}
-#calendar .fc-scrollgrid {
-    border-radius: 18px;
-    overflow: hidden;
-    border-color: rgba(255, 255, 255, 0.05);
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
-}
-#calendar .fc-col-header-cell {
-    background: #0f172a;
-    border-color: rgba(255, 255, 255, 0.06);
-}
-#calendar .fc-col-header-cell-cushion {
-    color: #e2e8f0;
-    font-weight: 700;
-    letter-spacing: 0.02em;
-    text-transform: uppercase;
-}
-#calendar .fc-daygrid-day-number {
-    color: #e5e7eb;
-    font-weight: 600;
-}
-#calendar .fc-day-today {
-    background: linear-gradient(135deg, rgba(245, 158, 11, 0.12), rgba(15, 23, 42, 0.9));
-}
-#calendar .fc-daygrid-day-frame {
-    background: #0b1120;
-}
-#calendar .fc-event {
-    background: linear-gradient(135deg, rgba(251, 191, 36, 0.18), rgba(251, 191, 36, 0.12));
-    border: 1px solid rgba(251, 191, 36, 0.85);
-    color: #fefce8;
-    font-weight: 700;
-    border-radius: 10px;
-    padding: 4px 10px;
-    box-shadow: 0 12px 30px -14px rgba(251, 191, 36, 0.7);
-}
-#calendar .fc-event-title { white-space: normal; }
-#calendar .fc-list-day-cushion {
-    background: rgba(255, 255, 255, 0.03);
-    color: #e2e8f0;
-}
-#calendar .fc-list-event-title a { color: #0f172a; }
-#calendar .fc-highlight { background: rgba(250, 204, 21, 0.12); }
-</style>
 <script>
 let calendarInstance = null;
 let isSyncing = false;
@@ -467,7 +375,71 @@ async function syncFromGoogle(silent = false) {
 
 async function loadCalendarEvents() {
     const events = await fetchEvents();
-    renderCalendar(events);
+    renderCalendarGrid(events);
+}
+
+function renderCalendarGrid(events) {
+    const cal = document.getElementById('calendar');
+    cal.innerHTML = '';
+
+    // Header com dias da semana
+    const header = document.createElement('div');
+    header.className = 'grid grid-cols-7 gap-2 mb-4 text-center text-slate-400 font-bold uppercase text-xs tracking-widest';
+    const weekDays = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+    weekDays.forEach(day => {
+        const div = document.createElement('div');
+        div.textContent = day;
+        header.appendChild(div);
+    });
+    cal.appendChild(header);
+
+    // Grid de dias
+    const grid = document.createElement('div');
+    grid.className = 'grid grid-cols-7 gap-2';
+
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = now.getMonth();
+    const firstDay = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+    // Preencher células vazias no início
+    for (let i = 0; i < firstDay; i++) {
+        const emptyCell = document.createElement('div');
+        emptyCell.className = 'bg-slate-800/10 h-28 rounded-xl border border-transparent';
+        grid.appendChild(emptyCell);
+    }
+
+    // Adicionar dias do mês
+    for (let day = 1; day <= daysInMonth; day++) {
+        const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        const isToday = dateStr === now.toISOString().split('T')[0];
+        const dayEvents = events.filter(e => e.start_date.startsWith(dateStr));
+
+        const cell = document.createElement('div');
+        const cellClass = isToday 
+            ? 'bg-yellow-500/10 border-yellow-500/50 ring-1 ring-yellow-500/30' 
+            : 'bg-slate-800/40 border-slate-700/50 hover:bg-slate-800 hover:border-slate-600';
+        const numClass = isToday ? 'text-yellow-400 font-bold' : 'text-slate-400 font-medium';
+
+        cell.className = `${cellClass} h-28 rounded-xl border p-2 cursor-pointer transition group relative flex flex-col`;
+        cell.innerHTML = `<span class="${numClass} text-sm mb-1 ml-1">${day}</span>
+                          <div class="flex-1 overflow-y-auto no-scrollbar space-y-1">`;
+
+        dayEvents.forEach(ev => {
+            const time = new Date(ev.start_date).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+            const eventEl = document.createElement('div');
+            eventEl.className = 'cursor-pointer text-xs px-2 py-1 rounded-md bg-yellow-500/20 text-yellow-100 border-l-2 border-yellow-500 hover:bg-yellow-500/30 transition truncate mb-1';
+            eventEl.title = `${time} - ${ev.title}`;
+            eventEl.innerHTML = `<span class="opacity-70 text-[10px] mr-1">${time}</span>${ev.title}`;
+            cell.querySelector('.space-y-1').appendChild(eventEl);
+        });
+
+        cell.innerHTML += `</div><div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"><i class="fas fa-plus text-xs text-slate-500 hover:text-white cursor-pointer"></i></div>`;
+        grid.appendChild(cell);
+    }
+
+    cal.appendChild(grid);
 }
 
 async function fetchEvents() {
@@ -477,49 +449,7 @@ async function fetchEvents() {
 }
 
 function renderCalendar(events) {
-    const calendarEl = document.getElementById('calendar');
-    if (!calendarEl) return;
-
-    const fcEvents = Array.isArray(events) ? events.map(ev => ({
-        title: ev.title || 'Sem título',
-        start: ev.start_date,
-        allDay: (ev.start_date && ev.start_date.length === 10)
-    })) : [];
-
-    if (!calendarInstance) {
-        calendarInstance = new FullCalendar.Calendar(calendarEl, {
-            initialView: 'dayGridMonth',
-            locale: 'pt-br',
-            height: 'auto',
-            themeSystem: 'standard',
-            expandRows: true,
-            firstDay: 1,
-            headerToolbar: {
-                start: 'prev,next today',
-                center: 'title',
-                end: 'dayGridMonth,timeGridWeek,listWeek'
-            },
-            dayMaxEvents: true,
-            nowIndicator: true,
-            eventDisplay: 'block',
-            dayMaxEventRows: 3,
-            eventColor: '#f59e0b',
-            eventBorderColor: '#fbbf24',
-            eventTextColor: '#fefce8',
-            titleFormat: { year: 'numeric', month: 'long' },
-            buttonText: {
-                today: 'Hoje',
-                month: 'Mês',
-                week: 'Semana',
-                list: 'Lista'
-            },
-            events: fcEvents
-        });
-        calendarInstance.render();
-    } else {
-        calendarInstance.removeAllEvents();
-        calendarInstance.addEventSource(fcEvents);
-    }
+    renderCalendarGrid(events);
 }
 
 function createEventModal() {
