@@ -99,7 +99,7 @@ include __DIR__ . '/../includes/header.php';
                 </div>
             </div>
             
-            <div class="glass-card rounded-2xl p-2 md:p-4 overflow-x-auto shadow-xl max-h-[calc(100vh-280px)]">
+            <div class="glass-card rounded-2xl p-2 md:p-4 overflow-x-auto shadow-xl">
                 <table class="w-full border-collapse" id="habits-table">
                     <thead>
                         <tr id="habits-header-row"></tr>
