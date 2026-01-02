@@ -650,6 +650,25 @@ async function addActivityQuick(e) {
     loadDashboard();
 }
 
+// Função para obter data/hora local no formato datetime-local (YYYY-MM-DDTHH:mm)
+function getLocalDateTimeValue(date = null) {
+    if (!date) date = new Date();
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
+}
+
+// Inicializa data padrão do card ao carregar
+document.addEventListener('DOMContentLoaded', () => {
+    const quickEventDateInput = document.getElementById('quick-event-date');
+    if (quickEventDateInput) {
+        quickEventDateInput.value = getLocalDateTimeValue();
+    }
+});
+
 function openQuickEventModal(e) {
     e.preventDefault();
     const title = document.getElementById('quick-event-title').value;
@@ -670,7 +689,7 @@ function openQuickEventModal(e) {
     }
     
     document.getElementById('quick-event-title').value = '';
-    document.getElementById('quick-event-date').value = '';
+    document.getElementById('quick-event-date').value = getLocalDateTimeValue();
 }
 
 async function addFinanceQuick(e) {

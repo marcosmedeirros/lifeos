@@ -602,10 +602,20 @@ function changeMonth(dir) {
     renderCalendarGrid(window.currentEvents || []);
 }
 
+function getLocalDateTimeValue(date = null) {
+    if (!date) date = new Date();
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
+}
+
 function createEventModal() {
     document.getElementById('event-id').value = '';
     document.getElementById('event-title').value = '';
-    document.getElementById('event-date').value = new Date().toISOString().slice(0, 16);
+    document.getElementById('event-date').value = getLocalDateTimeValue();
     document.getElementById('modal-event-title').textContent = 'Novo Evento';
     document.getElementById('btn-delete-event').classList.add('hidden');
     document.getElementById('btn-save-event').textContent = 'Salvar';
@@ -681,7 +691,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (newEventTitle) {
         document.getElementById('event-id').value = '';
         document.getElementById('event-title').value = decodeURIComponent(newEventTitle);
-        document.getElementById('event-date').value = decodeURIComponent(newEventDate) || new Date().toISOString().slice(0, 16);
+        document.getElementById('event-date').value = decodeURIComponent(newEventDate) || getLocalDateTimeValue();
         document.getElementById('modal-event-title').textContent = 'Novo Evento';
         document.getElementById('btn-delete-event').classList.add('hidden');
         document.getElementById('btn-save-event').textContent = 'Salvar';
