@@ -226,7 +226,8 @@ if (isset($_GET['api'])) {
 // Verificar se está conectado
 $stmt = $pdo->prepare("SELECT * FROM google_calendar_tokens WHERE user_id = ?");
 $stmt->execute([$user_id]);
-$is_connected = $stmt->fetch() ? true : false;
+$google_token = $stmt->fetch();
+$is_connected = $google_token && !empty($google_token['access_token']);
 
 $page = 'google_agenda';
 $page_title = 'Google Agenda - LifeOS';
@@ -268,7 +269,7 @@ include __DIR__ . '/../includes/header.php';
                 </div>
             <?php else: ?>
                 <!-- Conectado -->
-                <div class="mb-6 flex flex-wrap gap-3">
+                <div class="mb-6 flex flex-wrap gap-3 items-center">
                     <button onclick="syncFromGoogle()" class="bg-gradient-to-r from-yellow-600 to-yellow-700 hover:from-yellow-500 hover:to-yellow-600 text-white px-6 py-3 rounded-xl font-bold shadow-lg shadow-yellow-600/30 transition">
                         <i class="fas fa-sync-alt mr-2"></i> Sincronizar do Google
                     </button>
@@ -278,6 +279,10 @@ include __DIR__ . '/../includes/header.php';
                     <button onclick="disconnect()" class="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white px-6 py-3 rounded-xl font-bold shadow-lg transition">
                         <i class="fas fa-unlink mr-2"></i> Desconectar
                     </button>
+                    <div class="text-green-300 text-sm font-semibold ml-2 flex items-center gap-2">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Conectado ao Google Calendar<?php if (!empty($google_token['updated_at'])) { echo ' • token atualizado em ' . $google_token['updated_at']; } ?></span>
+                    </div>
                 </div>
 
                 <div class="glass-card p-6 rounded-2xl">
