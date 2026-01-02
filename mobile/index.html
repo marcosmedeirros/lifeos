@@ -114,8 +114,8 @@
                 today:{events:0,activities:0,doneActivities:0,habitsDone:0},
                 week:{events:0,activities:0},
                 finance:{income:0,outcome:0,balance:0,total_balance:0},
-                routine:{mood:'📝',content:''},
-                strava:{km:0,time:'0h',activities:0}
+                routine:{mood:'📝',content:'Sem anotação'},
+                strava:{km:0,time:'0h',activities:0,trainedToday:false}
             });
 
             const getWeekRange=()=>{
@@ -159,7 +159,14 @@
 
                     const finSummary = finData?.summary||{income:0,outcome:0,balance:0,total_balance:0};
                     const routine = routineData && !routineData.error && routineData.log_date ? { mood:routineData.mood||'📝', content:routineData.content||'' } : { mood:'📝', content:'Nenhum registro hoje' };
-                    const strava = stravaData && stravaData.connected ? { km:stravaData.summary?.total_km||0, time:stravaData.summary?.total_time||'0h', activities:stravaData.summary?.total_activities||0 } : { km:0,time:'0h',activities:0 };
+                    const stravaList = (stravaData && stravaData.connected && Array.isArray(stravaData.list)) ? stravaData.list : [];
+                    const todayPt = new Date().toLocaleDateString('pt-BR');
+                    const todayIso = today;
+                    const trainedToday = stravaList.some(act=>{
+                        const d = act.date || '';
+                        return d.includes(todayIso) || d.includes(todayPt);
+                    });
+                    const strava = stravaData && stravaData.connected ? { km:stravaData.summary?.total_km||0, time:stravaData.summary?.total_time||'0h', activities:stravaData.summary?.total_activities||0, trainedToday } : { km:0,time:'0h',activities:0,trainedToday:false };
 
                     setSummary({
                         today:{events:todayEvents.length,activities:todayActs.length,doneActivities:doneToday,habitsDone:habitsDone},
@@ -177,12 +184,12 @@
 
             const createEvent=async()=>{
                 if(!eventTitle||!eventDt) return;
-                const res=await api('../modules/google_agenda.php?api=create_event',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({title:eventTitle,start_date:eventDt})});
+                const res=await api('../modules/google_agenda.php?api=create_event',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({title:eventTitle,start_date:eventDt,source:'mobile'})});
                 if(res&&!res.error){setStatus('Evento criado');setEventTitle('');loadSummary();} else setStatus(res?.error||'Erro');
             };
             const createActivity=async()=>{
                 if(!actTitle||!actDate) return;
-                const res=await api('../modules/activities.php?api=save_activity',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({title:actTitle,date:actDate,period:actPeriod})});
+                const res=await api('../modules/activities.php?api=save_activity',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({title:actTitle,date:actDate,period:actPeriod,source:'mobile'})});
                 if(res&&!res.error){setStatus('Atividade criada');setActTitle('');loadSummary();} else setStatus(res?.error||'Erro');
             };
 
@@ -230,7 +237,7 @@
                         </div>
                         <div className="item" style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
                             <div>
-                                <div className="label">Rotina de hoje</div>
+                                <div className="label">Rotina</div>
                                 <div className="title" style={{fontSize:18}}>{summary.routine.mood}</div>
                                 <div className="meta" style={{maxWidth:240,whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>{summary.routine.content||'Sem anotação'}</div>
                             </div>
@@ -238,36 +245,14 @@
                         </div>
                         <div className="item" style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
                             <div>
-                                <div className="label">Treinos</div>
-                                <div className="title" style={{fontSize:18}}>{summary.strava.km} km</div>
+                                <div className="label">Treinou hoje?</div>
+                                <div className="title" style={{fontSize:18}}>{summary.strava.trainedToday?'Sim':'Não'}</div>
                                 <div className="meta" style={{gap:6}}>
                                     <span>{summary.strava.time}</span>
                                     <span className="badge">{summary.strava.activities} atividades</span>
                                 </div>
                             </div>
                             <span style={{fontSize:18}}>🚴</span>
-                        </div>
-                    </div>
-
-                    <div style={{borderTop:`1px solid ${'var(--border)'}`,paddingTop:8,display:'flex',alignItems:'center',gap:8}}>
-                        <span className="label">Atalhos rápidos</span>
-                        <span className="badge" style={{background:'rgba(93,211,255,0.12)'}}>Criar</span>
-                    </div>
-                    <div className="grid2">
-                        <div className="space-y-2">
-                            <div className="label">Evento rápido</div>
-                            <input className="input" placeholder="Título" value={eventTitle} onChange={e=>setEventTitle(e.target.value)} />
-                            <input className="input" type="datetime-local" value={eventDt} onChange={e=>setEventDt(e.target.value)} />
-                            <button className="action" onClick={createEvent}>Adicionar evento</button>
-                        </div>
-                        <div className="space-y-2">
-                            <div className="label">Atividade rápida</div>
-                            <input className="input" placeholder="Atividade" value={actTitle} onChange={e=>setActTitle(e.target.value)} />
-                            <input className="input" type="date" value={actDate} onChange={e=>setActDate(e.target.value)} />
-                            <select className="input" value={actPeriod} onChange={e=>setActPeriod(e.target.value)}>
-                                <option value="morning">Manhã</option><option value="afternoon">Tarde</option><option value="night">Noite</option>
-                            </select>
-                            <button className="action" onClick={createActivity}>Adicionar atividade</button>
                         </div>
                     </div>
                 </div>
@@ -656,7 +641,18 @@
             useEffect(()=>{loadDay(selectedDay);},[selectedDay]);
 
             const loadMonth=async()=>{setStatus('Carregando...');const data=await api(`../modules/routine.php?api=get_routine_month&month=${ym}`); if(data&&!data.error){setDays(data||[]);setStatus('Online');} else setStatus(data?.error||'Erro');};
-            const loadDay=async(d)=>{const log=await api(`../modules/routine.php?api=get_routine_day&date=${d}`); if(log&&!log.error&&log.log_date){setMood(log.mood||'😊');setContent(log.content||'');setLastLog(log);} else {setMood('😊');setContent('');setLastLog(null);} }
+            const loadDay=async(d)=>{
+                const log=await api(`../modules/routine.php?api=get_routine_day&date=${d}`);
+                if(log&&!log.error&&log.log_date){
+                    setMood(log.mood||'😊');
+                    setContent(log.content||'');
+                    setLastLog(log);
+                } else {
+                    setMood('😊');
+                    setContent('');
+                    setLastLog({log_date:d,mood:'📝',content:'Sem registro para este dia'});
+                }
+            }
             const save=async()=>{await api('../modules/routine.php?api=save_routine',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({date:selectedDay,mood,content})});setStatus('Dia salvo');loadMonth();};
 
             const dayMood=(d)=>{const found=days.find(x=>x.log_date===d);return found?found.mood||'📝':'+';};
@@ -687,9 +683,9 @@
                         </div>
                         {lastLog && (
                             <div className="item" style={{background:'linear-gradient(180deg,rgba(20,26,46,0.9),rgba(16,22,39,0.95))',borderColor:'var(--border)'}}>
-                                <div className="title" style={{display:'flex',gap:8,alignItems:'center'}}><span>{lastLog.mood||'📝'}</span><span>Salvo</span></div>
+                                <div className="title" style={{display:'flex',gap:8,alignItems:'center'}}><span>{lastLog.mood||'📝'}</span><span>{lastLog.content?'Salvo':'Sem registro'}</span></div>
                                 <div className="meta" style={{marginBottom:6}}>{new Date(lastLog.log_date+'T00:00:00').toLocaleDateString('pt-BR')}</div>
-                                <div style={{color:'var(--text)',whiteSpace:'pre-wrap'}}>{lastLog.content}</div>
+                                <div style={{color:'var(--text)',whiteSpace:'pre-wrap'}}>{lastLog.content||'Sem registro para este dia'}</div>
                             </div>
                         )}
                         <textarea className="input" style={{height:140}} placeholder="Como foi seu dia?" value={content} onChange={e=>setContent(e.target.value)}></textarea>
