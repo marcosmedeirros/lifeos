@@ -265,6 +265,7 @@ include __DIR__ . '/../includes/header.php';
                            class="inline-block bg-gradient-to-r from-yellow-600 to-yellow-700 hover:from-yellow-500 hover:to-yellow-600 text-white px-8 py-4 rounded-xl font-bold text-lg shadow-lg shadow-yellow-600/30 transition">
                             <i class="fab fa-google mr-2"></i> Conectar com Google
                         </a>
+                        <p class="text-slate-400 text-xs mt-3">Redirecionamento: <?php echo htmlspecialchars($REDIRECT_URI); ?></p>
                     <?php endif; ?>
                 </div>
             <?php else: ?>
@@ -316,15 +317,17 @@ include __DIR__ . '/../includes/header.php';
 
 <script src="<?php echo BASE_PATH; ?>/assets/js/common.js"></script>
 <script>
-async function syncFromGoogle() {
+async function syncFromGoogle(silent = false) {
     try {
         const result = await api('sync_from_google');
         if (result.success) {
-            alert(`✅ ${result.count} eventos sincronizados com sucesso!`);
-            loadEvents();
+            if (!silent) alert(`✅ ${result.count} eventos sincronizados com sucesso!`);
+            await loadEvents();
+        } else if (!silent) {
+            alert('❌ Erro ao sincronizar.');
         }
     } catch (e) {
-        alert('❌ Erro ao sincronizar: ' + e.message);
+        if (!silent) alert('❌ Erro ao sincronizar: ' + e.message);
     }
 }
 
@@ -411,7 +414,10 @@ async function disconnect() {
 }
 
 <?php if ($is_connected): ?>
-document.addEventListener('DOMContentLoaded', loadEvents);
+document.addEventListener('DOMContentLoaded', async () => {
+    await syncFromGoogle(true);
+    await loadEvents();
+});
 <?php endif; ?>
 </script>
 
