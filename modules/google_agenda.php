@@ -405,32 +405,33 @@ include __DIR__ . '/../includes/header.php';
     box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
 }
 #calendar .fc-col-header-cell {
-    background: rgba(255, 255, 255, 0.05);
+    background: #0f172a;
+    border-color: rgba(255, 255, 255, 0.06);
 }
 #calendar .fc-col-header-cell-cushion {
-    color: #f8fafc;
+    color: #e2e8f0;
     font-weight: 700;
     letter-spacing: 0.02em;
     text-transform: uppercase;
 }
 #calendar .fc-daygrid-day-number {
-    color: #e2e8f0;
+    color: #e5e7eb;
     font-weight: 600;
 }
 #calendar .fc-day-today {
-    background: linear-gradient(135deg, rgba(250, 204, 21, 0.08), rgba(234, 179, 8, 0.06));
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.12), rgba(15, 23, 42, 0.9));
 }
 #calendar .fc-daygrid-day-frame {
-    background: rgba(255, 255, 255, 0.02);
+    background: #0b1120;
 }
 #calendar .fc-event {
-    background: linear-gradient(135deg, #38bdf8, #6366f1);
-    border: none;
-    color: #e5e7eb;
+    background: linear-gradient(135deg, rgba(251, 191, 36, 0.18), rgba(251, 191, 36, 0.12));
+    border: 1px solid rgba(251, 191, 36, 0.85);
+    color: #fefce8;
     font-weight: 700;
     border-radius: 10px;
-    padding: 4px 8px;
-    box-shadow: 0 12px 30px -14px rgba(56, 189, 248, 0.8);
+    padding: 4px 10px;
+    box-shadow: 0 12px 30px -14px rgba(251, 191, 36, 0.7);
 }
 #calendar .fc-event-title { white-space: normal; }
 #calendar .fc-list-day-cushion {
@@ -502,9 +503,9 @@ function renderCalendar(events) {
             nowIndicator: true,
             eventDisplay: 'block',
             dayMaxEventRows: 3,
-            eventColor: '#38bdf8',
-            eventBorderColor: '#6366f1',
-            eventTextColor: '#e5e7eb',
+            eventColor: '#f59e0b',
+            eventBorderColor: '#fbbf24',
+            eventTextColor: '#fefce8',
             titleFormat: { year: 'numeric', month: 'long' },
             buttonText: {
                 today: 'Hoje',
