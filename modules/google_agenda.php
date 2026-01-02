@@ -315,14 +315,8 @@ include __DIR__ . '/../includes/header.php';
             <?php else: ?>
                 <!-- Conectado -->
                 <div class="mb-6 flex flex-wrap gap-3 items-center">
-                    <button onclick="syncFromGoogle()" class="bg-gradient-to-r from-yellow-600 to-yellow-700 hover:from-yellow-500 hover:to-yellow-600 text-white px-6 py-3 rounded-xl font-bold shadow-lg shadow-yellow-600/30 transition">
-                        <i class="fas fa-sync-alt mr-2"></i> Sincronizar do Google
-                    </button>
                     <button onclick="createEventModal()" class="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white px-6 py-3 rounded-xl font-bold shadow-lg transition">
                         <i class="fas fa-plus mr-2"></i> Novo Evento
-                    </button>
-                    <button onclick="disconnect()" class="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white px-6 py-3 rounded-xl font-bold shadow-lg transition">
-                        <i class="fas fa-unlink mr-2"></i> Desconectar
                     </button>
                     <div class="text-green-300 text-sm font-semibold ml-2 flex items-center gap-2">
                         <i class="fas fa-check-circle"></i>
@@ -372,8 +366,11 @@ include __DIR__ . '/../includes/header.php';
 <script src="<?php echo BASE_PATH; ?>/assets/js/common.js"></script>
 <script>
 let calendarInstance = null;
+let isSyncing = false;
 
 async function syncFromGoogle(silent = false) {
+    if (isSyncing) return;
+    isSyncing = true;
     try {
         const result = await api('sync_from_google');
         if (result.success) {
@@ -386,6 +383,8 @@ async function syncFromGoogle(silent = false) {
     } catch (e) {
         console.error('sync_from_google error:', e);
         if (!silent) alert('❌ Erro ao sincronizar: ' + (e?.message || e));
+    } finally {
+        isSyncing = false;
     }
 }
 
@@ -491,6 +490,7 @@ async function disconnect() {
 document.addEventListener('DOMContentLoaded', async () => {
     await syncFromGoogle(true);
     await loadCalendarEvents();
+    setInterval(() => syncFromGoogle(true), 10 * 60 * 1000); // auto a cada 10min
 });
 <?php endif; ?>
 </script>
