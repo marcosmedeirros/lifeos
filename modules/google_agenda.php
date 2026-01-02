@@ -155,8 +155,10 @@ if (isset($_GET['api'])) {
             $events_data = json_decode($response, true);
             
             if (isset($events_data['items'])) {
+                $google_ids = [];
                 foreach ($events_data['items'] as $event) {
                     $google_id = $event['id'];
+                    $google_ids[] = $google_id;
                     $title = $event['summary'] ?? 'Sem título';
                     $start = $event['start']['dateTime'] ?? $event['start']['date'];
                     $description = $event['description'] ?? '';
@@ -175,6 +177,14 @@ if (isset($_GET['api'])) {
                         $stmt->execute([$user_id, $title, $start, $description, $google_id]);
                     }
                 }
+                
+                // Deletar eventos locais que não existem mais no Google
+                if (!empty($google_ids)) {
+                    $placeholders = implode(',', array_fill(0, count($google_ids), '?'));
+                    $deleteStmt = $pdo->prepare("DELETE FROM events WHERE user_id = ? AND google_event_id IS NOT NULL AND google_event_id NOT IN ($placeholders)");
+                    $deleteStmt->execute(array_merge([$user_id], $google_ids));
+                }
+                
                 echo json_encode(['success' => true, 'count' => count($events_data['items'])]);
             } else {
                 $google_error = $events_data['error']['errors'][0]['message'] ?? ($events_data['error']['message'] ?? '');
@@ -435,6 +445,13 @@ function renderCalendarGrid(events) {
     syncBtn.title = 'Sincronizar calendário';
     monthNavDiv.appendChild(syncBtn);
     
+    const disconnectBtn = document.createElement('button');
+    disconnectBtn.className = 'w-9 h-9 hover:bg-red-900/30 rounded text-red-400 hover:text-red-300 transition ml-2';
+    disconnectBtn.innerHTML = '<i class="fas fa-sign-out-alt"></i>';
+    disconnectBtn.onclick = () => disconnect();
+    disconnectBtn.title = 'Desconectar Google Calendar';
+    monthNavDiv.appendChild(disconnectBtn);
+    
     cal.appendChild(monthNavDiv);
 
     // Header com dias da semana
@@ -605,6 +622,17 @@ async function deleteEvent() {
         }
     } catch (e) {
         alert('❌ Erro ao excluir: ' + e.message);
+    }
+}
+
+async function disconnect() {
+    if (!confirm('Deseja realmente desconectar do Google Calendar? Você precisará reconectar para sincronizar novamente.')) return;
+    
+    try {
+        await api('disconnect');
+        location.reload();
+    } catch (e) {
+        alert('❌ Erro ao desconectar: ' + e.message);
     }
 }
 
