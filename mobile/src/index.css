@@ -1,0 +1,34 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  background: radial-gradient(circle at 20% 20%, rgba(99,197,255,0.08), transparent 32%),
+    radial-gradient(circle at 80% 10%, rgba(99,197,255,0.05), transparent 36%),
+    linear-gradient(145deg, #040813 0%, #081024 50%, #0a1228 100%);
+  min-height: 100vh;
+}
+
+.card {
+  @apply bg-card border border-border rounded-2xl shadow-card p-4;
+}
+
+.btn {
+  @apply w-full rounded-xl font-semibold text-sm px-4 py-3 bg-gradient-to-r from-sky-400 to-sky-500 text-slate-900 hover:from-sky-300 hover:to-sky-400 transition;
+}
+
+.input {
+  @apply w-full rounded-xl border border-border bg-[#0c0c0c] text-white text-sm px-3 py-3 focus:outline-none focus:ring-2 focus:ring-sky-400/60;
+}
+
+.badge {
+  @apply inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full bg-sky-500/15 text-sky-200;
+}
+
+.nav-link {
+  @apply text-center border border-border bg-[#0b0b0b] text-muted px-4 py-3 rounded-xl font-bold text-sm;
+}
+
+.nav-link-active {
+  @apply text-sky-200 border-sky-400 bg-sky-500/10;
+}

@@ -1,24 +1,13 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>LifeOS Mobile</title>
-      <link rel="manifest" href="../manifest.json">
-      <link rel="stylesheet" href="style.css">
-</head>
-<body>
-        <div class="shell" style="padding-top:2rem;">
-            <div class="card">
-                <h2>LifeOS Mobile</h2>
-                <p>Escolha uma seção:</p>
-                <div class="nav" style="grid-template-columns: repeat(2, 1fr);">
-                    <a href="dashboard.html" data-page="dashboard">Dashboard</a>
-                    <a href="agenda.html" data-page="agenda">Agenda</a>
-                    <a href="activities.html" data-page="activities">Atividades</a>
-                    <a href="habits.html" data-page="habits">Hábitos</a>
-                </div>
-            </div>
-        </div>
-</body>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link rel="manifest" href="/manifest.json" />
+        <title>LifeOS Mobile</title>
+    </head>
+    <body class="bg-base text-white">
+        <div id="root"></div>
+        <script type="module" src="/src/main.jsx"></script>
+    </body>
 </html>
