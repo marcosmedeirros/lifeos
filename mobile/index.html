@@ -218,10 +218,6 @@
                                             <span>{fmtDateTime(dt)}</span>
                                         </div>
                                     </div>
-                                    <div style={{display:'flex',flexDirection:'column',alignItems:'flex-end',gap:6}}>
-                                        <span style={{fontSize:18}}>🔔</span>
-                                        <span style={{fontSize:18}}>📄</span>
-                                    </div>
                                 </div>
                             );})}
                         </div>
@@ -238,6 +234,7 @@
             useEffect(()=>{load();},[date]);
             const load=async()=>{setStatus('Carregando...');const data=await api(`../modules/activities.php?api=get_activities&start=${date}&end=${date}`); if(data&&!data.error){setItems(data||[]);setStatus('Online');} else setStatus(data?.error||'Erro');};
             const create=async()=>{if(!title||!date)return;const res=await api('../modules/activities.php?api=save_activity',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({title,date,period})}); if(res&&!res.error){setStatus('Atividade criada');setTitle('');load();} else setStatus(res?.error||'Erro');};
+            const toggle=async(id)=>{setStatus('Atualizando...');await api('../modules/activities.php?api=toggle_activity',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id})});await load();};
 
             return (
                 <div className="card">
@@ -251,13 +248,6 @@
                                 <input className="input" style={{width:160}} type="date" value={date} onChange={e=>setDate(e.target.value)} />
                                 <button className="pill" style={{border:'1px solid var(--border)',background:'#fff'}} onClick={()=>setDate(nowLocal().toISOString().slice(0,10))}>Hoje</button>
                             </div>
-                        </div>
-                        <div className="pill-row">
-                            {['morning','afternoon','night'].map(p=>(
-                                <div key={p} className="pill" style={{cursor:'default'}}>
-                                    {periodLabel(p)}
-                                </div>
-                            ))}
                         </div>
                         <div className="grid2">
                             <div className="space-y-2">
@@ -280,7 +270,9 @@
                                             <div className="meta"><span>{a.day_date}</span><span className="badge">{periodLabel(a.period)}</span></div>
                                         </div>
                                     </div>
-                                    <span style={{fontSize:18,color:'#9ca3af'}}>⬜</span>
+                                    <button onClick={()=>toggle(a.id)} style={{border:'none',background:'transparent',fontSize:18,cursor:'pointer'}} aria-label="Marcar feito">
+                                        {Number(a.status)===1?'☑️':'⬜'}
+                                    </button>
                                 </div>
                             ))}
                         </div>
