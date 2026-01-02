@@ -10,6 +10,10 @@ if (!isset($_SESSION['user_id'])) {
     $_SESSION['user_name'] = 'Marcos Medeiros';
 }
 
+function ensureHabitRemovalsTable(PDO $pdo) {
+    $pdo->exec("CREATE TABLE IF NOT EXISTS habit_removals (\n        habit_id INT NOT NULL PRIMARY KEY,\n        removed_from DATE NOT NULL,\n        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n        KEY idx_removed_from (removed_from)\n    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
+}
+
 if (isset($_GET['api'])) {
     $action = $_GET['api'];
     header('Content-Type: application/json');
@@ -18,9 +22,16 @@ if (isset($_GET['api'])) {
     if (!$data) $data = $_POST;
     
     try {
-        if ($action === 'get_habits') { 
-            echo json_encode($pdo->query("SELECT * FROM habits")->fetchAll()); 
-            exit; 
+        ensureHabitRemovalsTable($pdo);
+
+        if ($action === 'get_habits') {
+            $month = $_GET['month'] ?? date('Y-m');
+            $monthStart = $month . '-01';
+
+            $stmt = $pdo->prepare("SELECT h.*, hr.removed_from FROM habits h LEFT JOIN habit_removals hr ON hr.habit_id = h.id WHERE hr.removed_from IS NULL OR hr.removed_from > ? ORDER BY h.id DESC");
+            $stmt->execute([$monthStart]);
+            echo json_encode($stmt->fetchAll());
+            exit;
         }
         
         if ($action === 'save_habit') { 
@@ -37,6 +48,21 @@ if (isset($_GET['api'])) {
             $pdo->prepare("UPDATE habits SET checked_dates=? WHERE id=?")->execute([json_encode(array_values($c)),$id]); 
             echo json_encode(['success'=>true]);
             exit; 
+        }
+
+        if ($action === 'delete_habit_month') {
+            $id = $data['id'] ?? null;
+            $month = $data['month'] ?? date('Y-m');
+            if (!$id) {
+                echo json_encode(['error' => 'ID do hábito não informado']);
+                exit;
+            }
+
+            $monthStart = $month . '-01';
+            $stmt = $pdo->prepare("INSERT INTO habit_removals (habit_id, removed_from) VALUES (?, ?) ON DUPLICATE KEY UPDATE removed_from = LEAST(removed_from, VALUES(removed_from))");
+            $stmt->execute([$id, $monthStart]);
+            echo json_encode(['success' => true]);
+            exit;
         }
     } catch (Exception $e) {
         http_response_code(500);
@@ -112,40 +138,53 @@ function changeHabitMonth(dir) {
     loadHabits(); 
 }
 
-async function loadHabits() { 
-    const habits = await api('get_habits'); 
-    document.getElementById('habit-month-label').innerText = currentHabitMonth.toLocaleString('pt-BR', { month: 'long', year: 'numeric' }); 
-    
-    const dim = new Date(currentHabitMonth.getFullYear(), currentHabitMonth.getMonth() + 1, 0).getDate(); 
-    const ym = currentHabitMonth.toISOString().slice(0, 7); 
-    
-    let h = '<th class="p-1 text-left text-yellow-500 font-bold text-xs bg-slate-900/50 sticky left-0 z-10 min-w-[90px] md:min-w-[130px] border-b border-yellow-600/30">Hábito</th>'; 
-    for(let i=1; i<=dim; i++) h += `<th class="p-0.5 text-center text-[7px] md:text-[8px] text-yellow-600 w-5 md:w-8 min-w-[20px] md:min-w-[32px] border-b border-yellow-600/30">${i}</th>`;
-    document.getElementById('habits-header-row').innerHTML = h; 
-    
-    document.getElementById('habits-list').innerHTML = habits.map(hb => { 
-        const checks = JSON.parse(hb.checked_dates || '[]'); 
-        let cells = `<td class="p-1 border-b border-yellow-600/20 font-bold text-white text-xs md:text-sm sticky left-0 bg-slate-800 z-10 shadow-[4px_0_10px_rgba(0,0,0,0.2)]">✓ ${hb.name}</td>`; 
-        for(let i=1; i<=dim; i++) { 
-            const d = `${ym}-${String(i).padStart(2, '0')}`; 
-            const isChecked = checks.includes(d); 
+async function loadHabits() {
+    const ym = currentHabitMonth.toISOString().slice(0, 7);
+    const habits = await api(`get_habits&month=${ym}`);
+    document.getElementById('habit-month-label').innerText = currentHabitMonth.toLocaleString('pt-BR', { month: 'long', year: 'numeric' });
+
+    const dim = new Date(currentHabitMonth.getFullYear(), currentHabitMonth.getMonth() + 1, 0).getDate();
+
+    let h = '<th class="p-1 text-left text-yellow-500 font-bold text-xs bg-slate-900/50 sticky left-0 z-10 min-w-[90px] md:min-w-[130px] border-b border-yellow-600/30">Hábito</th>';
+    for (let i = 1; i <= dim; i++) {
+        h += `<th class="p-0.5 text-center text-[7px] md:text-[8px] text-yellow-600 w-5 md:w-8 min-w-[20px] md:min-w-[32px] border-b border-yellow-600/30">${i}</th>`;
+    }
+    h += '<th class="p-1 text-center text-yellow-500 font-bold text-[10px] md:text-xs bg-slate-900/50 min-w-[50px] border-b border-yellow-600/30"> </th>';
+    document.getElementById('habits-header-row').innerHTML = h;
+
+    document.getElementById('habits-list').innerHTML = habits.map(hb => {
+        const checks = JSON.parse(hb.checked_dates || '[]');
+        let cells = `<td class="p-1 border-b border-yellow-600/20 font-bold text-white text-xs md:text-sm sticky left-0 bg-slate-800 z-10 shadow-[4px_0_10px_rgba(0,0,0,0.2)]">✓ ${hb.name}</td>`;
+        for (let i = 1; i <= dim; i++) {
+            const d = `${ym}-${String(i).padStart(2, '0')}`;
+            const isChecked = checks.includes(d);
             cells += `<td class="border-b border-yellow-600/20 text-center p-0.5"><button onclick="toggleHabitInstant(event, ${hb.id}, '${d}')" class="w-5 h-5 md:w-6 md:h-6 rounded text-[6px] md:text-[8px] transition-all transform hover:scale-110 ${isChecked ? 'bg-gradient-to-r from-yellow-600 to-yellow-700 text-white shadow-[0_0_8px_rgba(212,175,55,0.4)]' : 'bg-slate-700/30 hover:bg-slate-700 text-transparent'}">${isChecked ? '<i class="fas fa-check"></i>' : ''}</button></td>`;
-        } 
-        return `<tr class="hover:bg-slate-800/30 transition">${cells}</tr>`; 
-    }).join(''); 
+        }
+        cells += `<td class="border-b border-yellow-600/20 text-center p-1"><button onclick="deleteHabitForMonth(${hb.id})" class="w-8 h-8 md:w-9 md:h-9 rounded-lg text-red-400 hover:text-red-200 hover:bg-red-900/30 transition"><i class="fas fa-trash"></i></button></td>`;
+        return `<tr class="hover:bg-slate-800/30 transition">${cells}</tr>`;
+    }).join('');
 }
 
-async function toggleHabitInstant(event, id, date) { 
-    const btn = event.currentTarget; 
-    const isChecked = btn.classList.contains('bg-gradient-to-r'); 
-    if (isChecked) { 
-        btn.className = "w-8 h-8 rounded-lg text-[10px] transition-all transform hover:scale-110 bg-slate-700/30 hover:bg-slate-700 text-transparent"; 
-        btn.innerHTML = ""; 
-    } else { 
-        btn.className = "w-8 h-8 rounded-lg text-[10px] transition-all transform hover:scale-110 bg-gradient-to-r from-yellow-600 to-yellow-700 text-white shadow-[0_0_10px_rgba(212,175,55,0.4)]"; 
-        btn.innerHTML = '<i class="fas fa-check"></i>'; 
-    } 
-    await api('toggle_habit', {id, date}); 
+async function toggleHabitInstant(event, id, date) {
+    const btn = event.currentTarget;
+    const isChecked = btn.classList.contains('bg-gradient-to-r');
+    if (isChecked) {
+        btn.className = "w-5 h-5 md:w-6 md:h-6 rounded text-[6px] md:text-[8px] transition-all transform hover:scale-110 bg-slate-700/30 hover:bg-slate-700 text-transparent";
+        btn.innerHTML = "";
+    } else {
+        btn.className = "w-5 h-5 md:w-6 md:h-6 rounded text-[6px] md:text-[8px] transition-all transform hover:scale-110 bg-gradient-to-r from-yellow-600 to-yellow-700 text-white shadow-[0_0_8px_rgba(212,175,55,0.4)]";
+        btn.innerHTML = '<i class="fas fa-check"></i>';
+    }
+    await api('toggle_habit', { id, date });
+}
+
+async function deleteHabitForMonth(id) {
+    const ym = currentHabitMonth.toISOString().slice(0, 7);
+    const label = currentHabitMonth.toLocaleString('pt-BR', { month: 'long', year: 'numeric' });
+    const confirmDelete = confirm(`Remover este hábito a partir de ${label}? Meses anteriores permanecerão salvos.`);
+    if (!confirmDelete) return;
+    await api('delete_habit_month', { id, month: ym });
+    loadHabits();
 }
 
 async function submitHabit(e) { 

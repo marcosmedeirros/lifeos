@@ -6,6 +6,10 @@ require_login(); // Agora requer login obrigatório
 // Define user_id da sessão
 $user_id = $_SESSION['user_id'];
 
+function ensureHabitRemovalsTable(PDO $pdo) {
+    $pdo->exec("CREATE TABLE IF NOT EXISTS habit_removals (\n        habit_id INT NOT NULL PRIMARY KEY,\n        removed_from DATE NOT NULL,\n        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n        KEY idx_removed_from (removed_from)\n    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
+}
+
 // Roteador da API para o Dashboard
 if (isset($_GET['api'])) {
     $action = $_GET['api'];
@@ -14,6 +18,7 @@ if (isset($_GET['api'])) {
     if (!$data) $data = $_POST;
     
     try {
+        ensureHabitRemovalsTable($pdo);
         // API do Dashboard
         if ($action === 'dashboard_stats') {
             $startOfWeek = date('Y-m-d', strtotime('monday this week'));
@@ -240,7 +245,11 @@ if (isset($_GET['api'])) {
 
         // Obter hábitos (via dashboard)
         if ($action === 'get_habits') {
-            echo json_encode($pdo->query("SELECT * FROM habits ORDER BY id DESC")->fetchAll());
+            $month = $_GET['month'] ?? date('Y-m');
+            $monthStart = $month . '-01';
+            $stmt = $pdo->prepare("SELECT h.*, hr.removed_from FROM habits h LEFT JOIN habit_removals hr ON hr.habit_id = h.id WHERE hr.removed_from IS NULL OR hr.removed_from > ? ORDER BY h.id DESC");
+            $stmt->execute([$monthStart]);
+            echo json_encode($stmt->fetchAll());
             exit;
         }
 
@@ -568,8 +577,9 @@ async function loadDashboard() {
     
     // Lista de Hábitos com toggle do dia
     try {
-        const habitsRes = await fetch(`?api=get_habits`).then(r => r.json());
         const today = new Date().toISOString().slice(0, 10);
+        const currentMonth = today.slice(0, 7);
+        const habitsRes = await fetch(`?api=get_habits&month=${currentMonth}`).then(r => r.json());
         const habitsOrdered = Array.isArray(habitsRes)
             ? [...habitsRes].sort((a, b) => (a.id || 0) - (b.id || 0))
             : [];
