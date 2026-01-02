@@ -327,6 +327,11 @@ include __DIR__ . '/../includes/header.php';
                     <h3 class="text-xl font-bold text-yellow-500 mb-4">Seus Eventos Sincronizados</h3>
                     <div id="events-list" class="space-y-3"></div>
                 </div>
+
+                <div class="glass-card p-6 rounded-2xl mt-6">
+                    <h3 class="text-xl font-bold text-yellow-500 mb-4">Calendário</h3>
+                    <div id="calendar" class="bg-slate-900 rounded-xl p-2"></div>
+                </div>
             <?php endif; ?>
         </div>
     </div>
@@ -352,8 +357,11 @@ include __DIR__ . '/../includes/header.php';
     </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
 <script src="<?php echo BASE_PATH; ?>/assets/js/common.js"></script>
 <script>
+let calendarInstance = null;
+
 async function syncFromGoogle(silent = false) {
     try {
         const result = await api('sync_from_google');
@@ -407,6 +415,38 @@ async function loadEvents() {
             </div>
         </div>`;
     }).join('');
+
+    renderCalendar(events);
+}
+
+function renderCalendar(events) {
+    const calendarEl = document.getElementById('calendar');
+    if (!calendarEl) return;
+
+    const fcEvents = Array.isArray(events) ? events.map(ev => ({
+        title: ev.title || 'Sem título',
+        start: ev.start_date,
+        allDay: (ev.start_date && ev.start_date.length === 10)
+    })) : [];
+
+    if (!calendarInstance) {
+        calendarInstance = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'dayGridMonth',
+            locale: 'pt-br',
+            height: 'auto',
+            themeSystem: 'standard',
+            headerToolbar: {
+                start: 'title',
+                center: '',
+                end: 'prev,next today'
+            },
+            events: fcEvents
+        });
+        calendarInstance.render();
+    } else {
+        calendarInstance.removeAllEvents();
+        calendarInstance.addEventSource(fcEvents);
+    }
 }
 
 function createEventModal() {
