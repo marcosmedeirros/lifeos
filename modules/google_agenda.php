@@ -463,13 +463,6 @@ function renderCalendarGrid(events) {
     syncBtn.title = 'Sincronizar calendário';
     monthNavDiv.appendChild(syncBtn);
     
-    const disconnectBtn = document.createElement('button');
-    disconnectBtn.className = 'w-9 h-9 hover:bg-red-900/30 rounded text-red-400 hover:text-red-300 transition ml-2';
-    disconnectBtn.innerHTML = '<i class="fas fa-sign-out-alt"></i>';
-    disconnectBtn.onclick = () => disconnect();
-    disconnectBtn.title = 'Desconectar Google Calendar';
-    monthNavDiv.appendChild(disconnectBtn);
-    
     cal.appendChild(monthNavDiv);
 
     // Header com dias da semana

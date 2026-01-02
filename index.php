@@ -371,7 +371,7 @@ include 'includes/header.php';
                     
                     <!-- Adicionar Evento -->
                     <div class="glass-card p-4 rounded-xl">
-                        <form onsubmit="addEventQuick(event)" class="space-y-2">
+                        <form onsubmit="openQuickEventModal(event)" class="space-y-2">
                             <input type="text" id="quick-event-title" placeholder="Nome do evento" class="text-sm" required>
                             <button type="submit" class="w-full bg-gradient-to-r from-yellow-600 to-yellow-700 hover:from-yellow-500 hover:to-yellow-600 text-white px-3 py-2 rounded-lg text-sm font-bold transition shadow-lg shadow-yellow-600/30">
                                 <i class="fas fa-plus mr-1"></i> Evento
@@ -649,19 +649,27 @@ async function addActivityQuick(e) {
     loadDashboard();
 }
 
-async function addEventQuick(e) {
+function openQuickEventModal(e) {
     e.preventDefault();
     const title = document.getElementById('quick-event-title').value;
-    const today = new Date().toISOString().split('T')[0];
+    const now = new Date();
+    const dateTime = now.toISOString().slice(0, 16);
     
-    await api('save_event', {
-        title,
-        date: today,
-        desc: ''
-    });
+    // Abre modal do google_agenda se estiver na página
+    if (typeof openEventModal !== 'undefined') {
+        document.getElementById('event-id').value = '';
+        document.getElementById('event-title').value = title;
+        document.getElementById('event-date').value = dateTime;
+        document.getElementById('modal-event-title').textContent = 'Novo Evento';
+        document.getElementById('btn-delete-event').classList.add('hidden');
+        document.getElementById('btn-save-event').textContent = 'Salvar';
+        openEventModal();
+    } else {
+        // Se não estiver na página de google_agenda, redireciona passando os dados
+        window.location.href = `<?php echo BASE_PATH; ?>/modules/google_agenda.php?new_event=${encodeURIComponent(title)}&datetime=${encodeURIComponent(dateTime)}`;
+    }
     
     document.getElementById('quick-event-title').value = '';
-    loadDashboard();
 }
 
 async function addFinanceQuick(e) {
