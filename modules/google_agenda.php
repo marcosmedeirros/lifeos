@@ -231,15 +231,28 @@ if (isset($_GET['api'])) {
                 exit;
             }
             
+            // Converter datetime-local do input para formato ISO 8601
+            $startDateTime = str_replace('T', ' ', $data['start_date']) . ':00';
+            try {
+                $dt = new DateTime($startDateTime, new DateTimeZone('America/Sao_Paulo'));
+                $startIso = $dt->format('c');
+                $endDateTime = clone $dt;
+                $endDateTime->add(new DateInterval('PT1H'));
+                $endIso = $endDateTime->format('c');
+            } catch (Exception $e) {
+                echo json_encode(['error' => 'Erro ao processar data: ' . $e->getMessage()]);
+                exit;
+            }
+            
             $event_data = [
                 'summary' => $data['title'],
                 'description' => $data['description'] ?? '',
                 'start' => [
-                    'dateTime' => date('c', strtotime($data['start_date'])),
+                    'dateTime' => $startIso,
                     'timeZone' => 'America/Sao_Paulo'
                 ],
                 'end' => [
-                    'dateTime' => date('c', strtotime($data['start_date']) + 3600),
+                    'dateTime' => $endIso,
                     'timeZone' => 'America/Sao_Paulo'
                 ]
             ];
