@@ -386,12 +386,39 @@ async function syncFromGoogle(silent = false) {
 
 async function loadCalendarEvents() {
     const events = await fetchEvents();
+    window.currentEvents = events;
     renderCalendarGrid(events);
 }
+
+let currentMonth = new Date();
 
 function renderCalendarGrid(events) {
     const cal = document.getElementById('calendar');
     cal.innerHTML = '';
+
+    // Header com navegação de mês
+    const monthNavDiv = document.createElement('div');
+    monthNavDiv.className = 'flex items-center justify-between mb-6 gap-3';
+    
+    const prevBtn = document.createElement('button');
+    prevBtn.className = 'w-8 h-8 hover:bg-slate-700 rounded text-slate-400 hover:text-white transition';
+    prevBtn.innerHTML = '<i class="fas fa-chevron-left"></i>';
+    prevBtn.onclick = () => changeMonth(-1);
+    
+    const monthLabel = document.createElement('span');
+    monthLabel.className = 'px-4 font-medium text-sm min-w-[140px] text-center capitalize text-slate-300';
+    monthLabel.id = 'month-label';
+    monthLabel.textContent = currentMonth.toLocaleString('pt-BR', { month: 'long', year: 'numeric' });
+    
+    const nextBtn = document.createElement('button');
+    nextBtn.className = 'w-8 h-8 hover:bg-slate-700 rounded text-slate-400 hover:text-white transition';
+    nextBtn.innerHTML = '<i class="fas fa-chevron-right"></i>';
+    nextBtn.onclick = () => changeMonth(1);
+    
+    monthNavDiv.appendChild(prevBtn);
+    monthNavDiv.appendChild(monthLabel);
+    monthNavDiv.appendChild(nextBtn);
+    cal.appendChild(monthNavDiv);
 
     // Header com dias da semana
     const header = document.createElement('div');
@@ -408,9 +435,8 @@ function renderCalendarGrid(events) {
     const grid = document.createElement('div');
     grid.className = 'grid grid-cols-7 gap-2';
 
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = now.getMonth();
+    const year = currentMonth.getFullYear();
+    const month = currentMonth.getMonth();
     const firstDay = new Date(year, month, 1).getDay();
     const daysInMonth = new Date(year, month + 1, 0).getDate();
 
@@ -424,6 +450,7 @@ function renderCalendarGrid(events) {
     // Adicionar dias do mês
     for (let day = 1; day <= daysInMonth; day++) {
         const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        const now = new Date();
         const isToday = dateStr === now.toISOString().split('T')[0];
         const dayEvents = events.filter(e => e.start_date.startsWith(dateStr));
 
@@ -499,6 +526,15 @@ function editEvent(ev) {
     document.getElementById('btn-delete-event').classList.remove('hidden');
     document.getElementById('btn-save-event').textContent = 'Atualizar';
     openEventModal();
+}
+
+function changeMonth(dir) {
+    currentMonth.setMonth(currentMonth.getMonth() + dir);
+    const monthLabel = document.getElementById('month-label');
+    if (monthLabel) {
+        monthLabel.textContent = currentMonth.toLocaleString('pt-BR', { month: 'long', year: 'numeric' });
+    }
+    renderCalendarGrid(window.currentEvents || []);
 }
 
 function createEventModal() {
