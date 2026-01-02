@@ -10,29 +10,29 @@
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <style>
-        :root { --bg:#f6f7fb; --panel:#ffffff; --card:#ffffff; --muted:#697386; --accent:#6a7bff; --accent2:#5fd4ff; --text:#111827; --border:#e5e7f3; }
+        :root { --bg:#0c0f1a; --panel:#101425; --card:#12182b; --muted:#9ea7c3; --accent:#8b9bff; --accent2:#5dd3ff; --text:#e9edfa; --border:#1c2740; }
         *{box-sizing:border-box;} a{text-decoration:none;color:inherit;}
-        body{margin:0;font-family:'Inter',system-ui,sans-serif;background:linear-gradient(180deg,#fdf2f7 0%,#f6f7fb 35%,#eef3ff 100%);min-height:100vh;color:var(--text);} 
+        body{margin:0;font-family:'Inter',system-ui,sans-serif;background:radial-gradient(circle at 20% 20%,rgba(91,114,255,0.18),transparent 36%),radial-gradient(circle at 80% 10%,rgba(93,211,255,0.14),transparent 36%),linear-gradient(160deg,#080c18 0%,#0b1021 55%,#060910 100%);min-height:100vh;color:var(--text);} 
         .page{min-height:100vh;padding:18px 16px 32px;max-width:520px;margin:0 auto;}
-        .topbar{position:sticky;top:0;z-index:20;backdrop-filter:blur(10px);background:rgba(255,255,255,0.75);border:1px solid rgba(255,255,255,0.9);border-radius:18px;margin:-8px -4px 16px -4px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 12px 40px rgba(17,24,39,0.08);} 
+        .topbar{position:sticky;top:0;z-index:20;backdrop-filter:blur(10px);background:rgba(20,26,46,0.72);border:1px solid rgba(255,255,255,0.06);border-radius:18px;margin:-8px -4px 16px -4px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 12px 40px rgba(0,0,0,0.35);} 
         .brand{font-weight:800;letter-spacing:0.2px;} .status{color:var(--muted);font-size:12px;}
         .nav{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:16px;} @media(min-width:640px){.nav{grid-template-columns:repeat(4,1fr);} }
-        .nav button{border:1px solid var(--border);background:#f5f7ff;color:var(--muted);padding:12px 10px;border-radius:14px;font-weight:800;font-size:14px;cursor:pointer;box-shadow:0 10px 28px rgba(17,24,39,0.06);transition:all .18s ease;} 
-        .nav button.active{color:#0f172a;border-color:rgba(90,120,255,0.4);background:linear-gradient(135deg,rgba(90,120,255,0.16),rgba(95,212,255,0.14));box-shadow:0 12px 30px rgba(90,120,255,0.18);} 
-        .card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:16px;box-shadow:0 16px 44px rgba(17,24,39,0.08);} .card + .card{margin-top:12px;}
-        .input, select, button.action{width:100%;padding:12px;border-radius:14px;border:1px solid var(--border);background:#f9fbff;color:var(--text);font-size:14px;box-shadow:inset 0 1px 0 rgba(255,255,255,0.5);} 
-        button.action{cursor:pointer;font-weight:800;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#0a0d1a;border:none;box-shadow:0 12px 28px rgba(90,120,255,0.22);} 
+        .nav button{border:1px solid var(--border);background:linear-gradient(135deg,#12182b,#0e1426);color:var(--muted);padding:12px 10px;border-radius:14px;font-weight:800;font-size:14px;cursor:pointer;box-shadow:0 10px 28px rgba(0,0,0,0.35);transition:all .18s ease;} 
+        .nav button.active{color:#fff;border-color:rgba(139,155,255,0.65);background:linear-gradient(135deg,rgba(139,155,255,0.28),rgba(93,211,255,0.22));box-shadow:0 12px 30px rgba(93,211,255,0.28);} 
+        .card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:16px;box-shadow:0 16px 44px rgba(0,0,0,0.45);} .card + .card{margin-top:12px;}
+        .input, select, button.action{width:100%;padding:12px;border-radius:14px;border:1px solid var(--border);background:#0f1527;color:var(--text);font-size:14px;box-shadow:inset 0 1px 0 rgba(255,255,255,0.05);} 
+        button.action{cursor:pointer;font-weight:800;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#06101d;border:none;box-shadow:0 12px 28px rgba(93,211,255,0.28);} 
         .label{font-size:13px;color:var(--muted);} .list{display:grid;gap:10px;margin-top:10px;} 
-        .item{border:1px solid var(--border);padding:12px;border-radius:14px;background:linear-gradient(180deg,#ffffff 0%,#f8faff 100%);box-shadow:0 10px 25px rgba(17,24,39,0.05);} 
-        .title{font-weight:800;font-size:14px;margin-bottom:4px;color:#111827;} .meta{color:var(--muted);font-size:12px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;} 
-        .badge{display:inline-flex;align-items:center;gap:4px;font-size:11px;padding:4px 9px;border-radius:999px;background:rgba(106,123,255,0.14);color:var(--accent);border:1px solid rgba(106,123,255,0.24);} 
+        .item{border:1px solid var(--border);padding:12px;border-radius:14px;background:linear-gradient(180deg,rgba(16,22,39,0.98) 0%,rgba(12,17,31,0.94) 100%);box-shadow:0 10px 25px rgba(0,0,0,0.35);} 
+        .title{font-weight:800;font-size:14px;margin-bottom:4px;color:#f5f7ff;} .meta{color:var(--muted);font-size:12px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;} 
+        .badge{display:inline-flex;align-items:center;gap:4px;font-size:11px;padding:4px 9px;border-radius:999px;background:rgba(139,155,255,0.18);color:var(--accent);border:1px solid rgba(139,155,255,0.32);} 
         .grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;}
         .pill-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px;}
-        .pill{padding:8px 12px;border-radius:999px;border:1px solid var(--border);background:#f4f6fb;color:var(--muted);font-size:12px;font-weight:700;cursor:pointer;box-shadow:0 8px 18px rgba(17,24,39,0.04);transition:all .16s ease;}
-        .pill.active{background:linear-gradient(135deg,rgba(90,120,255,0.18),rgba(95,212,255,0.14));color:#0f172a;border-color:rgba(90,120,255,0.32);} 
+        .pill{padding:8px 12px;border-radius:999px;border:1px solid var(--border);background:#0f1527;color:var(--muted);font-size:12px;font-weight:700;cursor:pointer;box-shadow:0 8px 18px rgba(0,0,0,0.28);transition:all .16s ease;}
+        .pill.active{background:linear-gradient(135deg,rgba(139,155,255,0.26),rgba(93,211,255,0.2));color:#f5f7ff;border-color:rgba(139,155,255,0.4);} 
         .day-row{display:flex;gap:8px;overflow:auto;padding:4px 0;margin-top:8px;}
-        .day-chip{min-width:54px;text-align:center;padding:8px 10px;border-radius:12px;border:1px solid var(--border);background:#fff;color:#111827;box-shadow:0 8px 20px rgba(17,24,39,0.05);}
-        .day-chip.active{background:linear-gradient(135deg,rgba(90,120,255,0.18),rgba(95,212,255,0.14));border-color:rgba(90,120,255,0.32);} 
+        .day-chip{min-width:54px;text-align:center;padding:8px 10px;border-radius:12px;border:1px solid var(--border);background:#0f1527;color:#f5f7ff;box-shadow:0 8px 20px rgba(0,0,0,0.3);}
+        .day-chip.active{background:linear-gradient(135deg,rgba(139,155,255,0.26),rgba(93,211,255,0.2));border-color:rgba(139,155,255,0.4);} 
     </style>
 </head>
 <body>
@@ -74,7 +74,7 @@
             if(t.includes('medico')||t.includes('doctor')) return '🩺';
             return '📌';
         };
-        const habitColors = ['#e8f1ff','#ffeef5','#e8fff2','#fff5e5','#f1e8ff'];
+        const habitColors = ['rgba(139,155,255,0.18)','rgba(93,211,255,0.16)','rgba(255,190,92,0.16)','rgba(255,132,196,0.16)','rgba(120,255,214,0.16)'];
         const fmtMoney = v => (Number(v)||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
 
         function App(){
@@ -109,27 +109,151 @@
             const [actTitle,setActTitle]=useState('');
             const [actDate,setActDate]=useState(nowLocal().toISOString().slice(0,10));
             const [actPeriod,setActPeriod]=useState('morning');
+            const [loading,setLoading]=useState(false);
+            const [summary,setSummary]=useState({
+                today:{events:0,activities:0,doneActivities:0,habitsDone:0},
+                week:{events:0,activities:0},
+                finance:{income:0,outcome:0,balance:0,total_balance:0},
+                routine:{mood:'📝',content:''},
+                strava:{km:0,time:'0h',activities:0}
+            });
+
+            const getWeekRange=()=>{
+                const d=nowLocal();
+                const dow=d.getDay()===0?6:d.getDay()-1; // Monday start
+                const start=new Date(d); start.setDate(d.getDate()-dow);
+                const end=new Date(start); end.setDate(start.getDate()+6);
+                const toStr=x=>x.toISOString().slice(0,10);
+                return {start:toStr(start),end:toStr(end)};
+            };
+
+            useEffect(()=>{loadSummary();},[]);
+
+            const loadSummary=async()=>{
+                const today=nowLocal().toISOString().slice(0,10);
+                const {start,end}=getWeekRange();
+                setLoading(true); setStatus('Carregando...');
+                try {
+                    const [eventsData,actsData,habitsData,finData,routineData,stravaData] = await Promise.all([
+                        api('../modules/google_agenda.php?api=list_events'),
+                        api(`../modules/activities.php?api=get_activities&start=${start}&end=${end}`),
+                        api(`../modules/habits.php?api=get_habits&month=${today.slice(0,7)}`),
+                        api(`../modules/finance.php?api=get_finances&month=${today.slice(0,7)}`),
+                        api(`../modules/routine.php?api=get_routine_day&date=${today}`),
+                        api('../modules/strava.php?api=get_strava_data')
+                    ]);
+                    const evs = eventsData?.events||[];
+                    const startDate=new Date(`${start}T00:00:00`); const endDate=new Date(`${end}T23:59:59`);
+                    const weekEvents = evs.filter(ev=>{const dt=ev.start_date?.replace(' ','T'); if(!dt) return false; const d=new Date(dt); return d>=startDate && d<=endDate;});
+                    const todayEvents = weekEvents.filter(ev=>(ev.start_date||'').startsWith(today));
+
+                    const actsRaw = Array.isArray(actsData)?actsData:(actsData||[]);
+                    const weekActs = actsRaw.filter(a=>a.day_date);
+                    const todayActs = weekActs.filter(a=>a.day_date===today);
+                    const doneToday = todayActs.filter(a=>Number(a.status)===1).length;
+
+                    const habitList = Array.isArray(habitsData)?habitsData:(habitsData||[]);
+                    const habitsDone = habitList.filter(h=>{
+                        try { return (h.checked_dates?JSON.parse(h.checked_dates):[]).includes(today); } catch(e){ return false; }
+                    }).length;
+
+                    const finSummary = finData?.summary||{income:0,outcome:0,balance:0,total_balance:0};
+                    const routine = routineData && !routineData.error && routineData.log_date ? { mood:routineData.mood||'📝', content:routineData.content||'' } : { mood:'📝', content:'Nenhum registro hoje' };
+                    const strava = stravaData && stravaData.connected ? { km:stravaData.summary?.total_km||0, time:stravaData.summary?.total_time||'0h', activities:stravaData.summary?.total_activities||0 } : { km:0,time:'0h',activities:0 };
+
+                    setSummary({
+                        today:{events:todayEvents.length,activities:todayActs.length,doneActivities:doneToday,habitsDone:habitsDone},
+                        week:{events:weekEvents.length,activities:weekActs.length},
+                        finance:finSummary,
+                        routine:routine,
+                        strava:strava
+                    });
+                    setStatus('Online');
+                } catch(err){
+                    console.error(err);
+                    setStatus('Erro');
+                } finally { setLoading(false); }
+            };
 
             const createEvent=async()=>{
                 if(!eventTitle||!eventDt) return;
                 const res=await api('../modules/google_agenda.php?api=create_event',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({title:eventTitle,start_date:eventDt})});
-                if(res&&!res.error){setStatus('Evento criado');setEventTitle('');} else setStatus(res?.error||'Erro');
+                if(res&&!res.error){setStatus('Evento criado');setEventTitle('');loadSummary();} else setStatus(res?.error||'Erro');
             };
             const createActivity=async()=>{
                 if(!actTitle||!actDate) return;
                 const res=await api('../modules/activities.php?api=save_activity',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({title:actTitle,date:actDate,period:actPeriod})});
-                if(res&&!res.error){setStatus('Atividade criada');setActTitle('');} else setStatus(res?.error||'Erro');
+                if(res&&!res.error){setStatus('Atividade criada');setActTitle('');loadSummary();} else setStatus(res?.error||'Erro');
             };
 
             return (
-                <div className="card">
+                <div className="card" style={{display:'grid',gap:12}}>
                     <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',gap:10}}>
-                        <h2 className="title" style={{fontSize:'16px',margin:0,display:'flex',alignItems:'center',gap:8}}>
-                            <span>🚀</span><span>Atalhos rápidos</span>
-                        </h2>
-                        <span className="badge" style={{background:'rgba(95,212,255,0.15)',color:'#0f172a'}}>Hoje</span>
+                        <div style={{display:'flex',alignItems:'center',gap:8}}>
+                            <h2 className="title" style={{fontSize:'16px',margin:0}}>Visão rápida</h2>
+                            <span className="badge">Hoje</span>
+                        </div>
+                        <button className="pill" style={{display:'flex',alignItems:'center',gap:6}} onClick={loadSummary} disabled={loading}>{loading?'Atualizando...':'Atualizar'}</button>
                     </div>
-                    <div className="grid2" style={{marginTop:10}}>
+                    <div className="grid2">
+                        <div className="item" style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+                            <div>
+                                <div className="label">Eventos hoje</div>
+                                <div className="title" style={{fontSize:20}}>{summary.today.events}</div>
+                            </div>
+                            <span className="badge">Semana {summary.week.events}</span>
+                        </div>
+                        <div className="item" style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+                            <div>
+                                <div className="label">Atividades</div>
+                                <div className="title" style={{fontSize:20}}>{summary.today.doneActivities}/{summary.today.activities}</div>
+                            </div>
+                            <span className="badge">Semana {summary.week.activities}</span>
+                        </div>
+                        <div className="item" style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+                            <div>
+                                <div className="label">Hábitos feitos</div>
+                                <div className="title" style={{fontSize:20}}>{summary.today.habitsDone}</div>
+                            </div>
+                            <span className="badge" style={{background:'rgba(90,255,190,0.14)',color:'#8af9d5'}}>Dia</span>
+                        </div>
+                        <div className="item" style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+                            <div>
+                                <div className="label">Balanço do mês</div>
+                                <div className="title" style={{fontSize:18}}>{fmtMoney(summary.finance.balance||0)}</div>
+                                <div className="meta" style={{gap:6}}>
+                                    <span style={{color:'#16a34a'}}>+{fmtMoney(summary.finance.income||0)}</span>
+                                    <span style={{color:'#dc2626'}}>-{fmtMoney(summary.finance.outcome||0)}</span>
+                                </div>
+                            </div>
+                            <span className="badge">Saldo {fmtMoney(summary.finance.total_balance||0)}</span>
+                        </div>
+                        <div className="item" style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+                            <div>
+                                <div className="label">Rotina de hoje</div>
+                                <div className="title" style={{fontSize:18}}>{summary.routine.mood}</div>
+                                <div className="meta" style={{maxWidth:240,whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>{summary.routine.content||'Sem anotação'}</div>
+                            </div>
+                            <span style={{fontSize:18}}>📖</span>
+                        </div>
+                        <div className="item" style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+                            <div>
+                                <div className="label">Treinos</div>
+                                <div className="title" style={{fontSize:18}}>{summary.strava.km} km</div>
+                                <div className="meta" style={{gap:6}}>
+                                    <span>{summary.strava.time}</span>
+                                    <span className="badge">{summary.strava.activities} atividades</span>
+                                </div>
+                            </div>
+                            <span style={{fontSize:18}}>🚴</span>
+                        </div>
+                    </div>
+
+                    <div style={{borderTop:`1px solid ${'var(--border)'}`,paddingTop:8,display:'flex',alignItems:'center',gap:8}}>
+                        <span className="label">Atalhos rápidos</span>
+                        <span className="badge" style={{background:'rgba(93,211,255,0.12)'}}>Criar</span>
+                    </div>
+                    <div className="grid2">
                         <div className="space-y-2">
                             <div className="label">Evento rápido</div>
                             <input className="input" placeholder="Título" value={eventTitle} onChange={e=>setEventTitle(e.target.value)} />
@@ -215,11 +339,11 @@
                             {!sorted.length && <div className="item">Sem eventos.</div>}
                             {sorted.map(ev=>{const dt=ev.start_date?.replace(' ','T'); const dateObj = dt? new Date(dt):null; const day = dateObj? dateObj.toLocaleDateString('pt-BR',{day:'2-digit',month:'short'}) : ''; const hour = dateObj? dateObj.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}) : '';
                                 return (
-                                <div key={ev.id||ev.google_event_id} className="item" style={{display:'flex',gap:12,alignItems:'center',background:'#ffffff',borderColor:'#e5e7f3',boxShadow:'0 16px 34px rgba(17,24,39,0.08)'}}>
+                                <div key={ev.id||ev.google_event_id} className="item" style={{display:'flex',gap:12,alignItems:'center'}}>
                                     <div style={{minWidth:58,textAlign:'center'}}>
-                                        <div className="badge" style={{display:'flex',flexDirection:'column',gap:2,alignItems:'center',padding:'6px 8px',width:'100%',background:'rgba(90,120,255,0.12)'}}>
+                                        <div className="badge" style={{display:'flex',flexDirection:'column',gap:2,alignItems:'center',padding:'6px 8px',width:'100%'}}>
                                             <span style={{fontSize:11,letterSpacing:0.5}}>Dia</span>
-                                            <span style={{fontWeight:800,fontSize:14,color:'#0f172a'}}>{day}</span>
+                                            <span style={{fontWeight:800,fontSize:14,color:'#e9edfa'}}>{day}</span>
                                         </div>
                                     </div>
                                     <div style={{flex:1}}>
@@ -263,7 +387,7 @@
                             </div>
                             <div style={{display:'flex',gap:8,alignItems:'center'}}>
                                 <input className="input" style={{width:160}} type="date" value={date} onChange={e=>setDate(e.target.value)} />
-                                <button className="pill" style={{border:'1px solid var(--border)',background:'#fff'}} onClick={()=>setDate(nowLocal().toISOString().slice(0,10))}>Hoje</button>
+                                <button className="pill" style={{border:'1px solid var(--border)',background:'#0f1527'}} onClick={()=>setDate(nowLocal().toISOString().slice(0,10))}>Hoje</button>
                             </div>
                         </div>
                         <div className="grid2">
@@ -279,7 +403,7 @@
                         <div className="list" style={{maxHeight:'60vh',overflow:'auto',paddingRight:4}}>
                             {!items.length && <div className="item">Sem atividades.</div>}
                             {items.map(a=>(
-                                <div key={a.id} className="item" style={{display:'flex',justifyContent:'space-between',alignItems:'center',gap:10,background:'#fff',boxShadow:'0 12px 28px rgba(17,24,39,0.07)'}}>
+                                <div key={a.id} className="item" style={{display:'flex',justifyContent:'space-between',alignItems:'center',gap:10}}>
                                     <div style={{display:'flex',gap:10,alignItems:'center'}}>
                                         <span style={{fontSize:18}}>{periodIcon(a.period)}</span>
                                         <div>
@@ -346,17 +470,17 @@
                                     return true;
                                 })
                                 .map((h,idx)=>{const parsed = h.checked_dates?JSON.parse(h.checked_dates):[]; const doneSelected = parsed.includes(selectedDay); const checks=parsed.length; const color=habitColors[idx%habitColors.length]; return (
-                                <div key={h.id} className="item" style={{display:'flex',flexDirection:'column',gap:10,background:color,borderColor:'rgba(0,0,0,0.04)',boxShadow:'0 16px 34px rgba(17,24,39,0.08)'}}>
+                                <div key={h.id} className="item" style={{display:'flex',flexDirection:'column',gap:10,background:color,borderColor:'var(--border)',boxShadow:'0 16px 34px rgba(0,0,0,0.35)'}}>
                                     <div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
                                         <div className="title" style={{display:'flex',alignItems:'center',gap:8}}>
                                             <span>🔥</span>
                                             <span>{h.name}</span>
                                         </div>
-                                        <span className="badge" style={{background:'rgba(255,149,5,0.18)',color:'#b45309',borderColor:'rgba(255,149,5,0.3)'}}>{checks} dias</span>
+                                        <span className="badge" style={{background:'rgba(255,149,5,0.18)',color:'#f5d0a9',borderColor:'rgba(255,149,5,0.3)'}}>{checks} dias</span>
                                     </div>
                                     <div className="meta" style={{justifyContent:'space-between',width:'100%'}}>
                                         <span>Status: {doneSelected?'Feito no dia':'Pendente'}</span>
-                                        <span className="badge" style={{background: doneSelected?'rgba(76,175,80,0.2)':'rgba(99,197,255,0.18)',color: doneSelected?'#0f5132':'#0f172a',borderColor: doneSelected?'rgba(76,175,80,0.35)':'rgba(99,197,255,0.3)'}}>{doneSelected?'✔️':'Marcar'}</span>
+                                        <span className="badge" style={{background: doneSelected?'rgba(76,175,80,0.2)':'rgba(99,197,255,0.18)',color: doneSelected?'#c8f7d4':'#e9edfa',borderColor: doneSelected?'rgba(76,175,80,0.35)':'rgba(99,197,255,0.3)'}}>{doneSelected?'✔️':'Marcar'}</span>
                                     </div>
                                     <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',gap:10}}>
                                         <button className="action" onClick={()=>toggle(h.id)} style={{background:doneSelected?'linear-gradient(135deg,#5fe37c,#4ccf9a)':undefined,flex:1}}>Marcar dia</button>
@@ -562,10 +686,10 @@
                             </div>
                         </div>
                         {lastLog && (
-                            <div className="item" style={{background:'#f9fbff',borderColor:'#e5e7f3'}}>
+                            <div className="item" style={{background:'linear-gradient(180deg,rgba(20,26,46,0.9),rgba(16,22,39,0.95))',borderColor:'var(--border)'}}>
                                 <div className="title" style={{display:'flex',gap:8,alignItems:'center'}}><span>{lastLog.mood||'📝'}</span><span>Salvo</span></div>
                                 <div className="meta" style={{marginBottom:6}}>{new Date(lastLog.log_date+'T00:00:00').toLocaleDateString('pt-BR')}</div>
-                                <div style={{color:'#111827',whiteSpace:'pre-wrap'}}>{lastLog.content}</div>
+                                <div style={{color:'var(--text)',whiteSpace:'pre-wrap'}}>{lastLog.content}</div>
                             </div>
                         )}
                         <textarea className="input" style={{height:140}} placeholder="Como foi seu dia?" value={content} onChange={e=>setContent(e.target.value)}></textarea>
@@ -590,19 +714,21 @@
                 </div>
             );
 
+            const summary = data.summary || { total_km:0,total_time:'--',total_activities:0 };
+
             return (
                 <div className="card">
                     <div style={{display:'flex',flexDirection:'column',gap:10}}>
                         <div className="title" style={{fontSize:'16px'}}>Treinos</div>
                         <div className="grid2">
                             <div className="item" style={{display:'flex',justifyContent:'space-between'}}>
-                                <span className="label">Km recentes</span><span className="title">{data.summary.total_km} km</span>
+                                <span className="label">Km recentes</span><span className="title">{summary.total_km} km</span>
                             </div>
                             <div className="item" style={{display:'flex',justifyContent:'space-between'}}>
-                                <span className="label">Tempo</span><span className="title">{data.summary.total_time}</span>
+                                <span className="label">Tempo</span><span className="title">{summary.total_time}</span>
                             </div>
                             <div className="item" style={{display:'flex',justifyContent:'space-between'}}>
-                                <span className="label">Atividades</span><span className="title">{data.summary.total_activities}</span>
+                                <span className="label">Atividades</span><span className="title">{summary.total_activities}</span>
                             </div>
                         </div>
                         <div className="list" style={{maxHeight:'55vh',overflow:'auto',paddingRight:4}}>
@@ -617,7 +743,7 @@
                                             <span>{act.distance} km</span>
                                         </div>
                                     </div>
-                                    <span className="badge" style={{background:'rgba(99,197,255,0.18)',color:'#0f172a'}}>{act.time}</span>
+                                    <span className="badge" style={{background:'rgba(99,197,255,0.18)',color:'var(--text)'}}>{act.time}</span>
                                 </div>
                             ))}
                         </div>
