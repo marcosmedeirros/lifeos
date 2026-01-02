@@ -142,6 +142,7 @@ if (isset($_GET['api'])) {
             curl_setopt($ch, CURLOPT_HTTPHEADER, ["Authorization: Bearer {$access_token}"]);
             $response = curl_exec($ch);
             $http_status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            $curl_error = curl_error($ch);
             curl_close($ch);
             
             $events_data = json_decode($response, true);
@@ -172,7 +173,9 @@ if (isset($_GET['api'])) {
                 echo json_encode([
                     'error' => 'Erro ao buscar eventos',
                     'http_status' => $http_status,
-                    'response' => substr($response ?: '', 0, 500)
+                    'response' => substr($response ?: '', 0, 500),
+                    'curl_error' => $curl_error,
+                    'request_url' => $calendar_url
                 ]);
             }
             exit;
