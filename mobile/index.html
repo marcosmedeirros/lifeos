@@ -10,23 +10,29 @@
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <style>
-        :root { --bg:#050915; --panel:#0d1024; --card:#0f142d; --muted:#9fb1d1; --accent:#9c7bff; --accent2:#63c5ff; --text:#eef3ff; --border:#1c2745; }
+        :root { --bg:#f6f7fb; --panel:#ffffff; --card:#ffffff; --muted:#697386; --accent:#6a7bff; --accent2:#5fd4ff; --text:#111827; --border:#e5e7f3; }
         *{box-sizing:border-box;} a{text-decoration:none;color:inherit;}
-        body{margin:0;font-family:'Inter',system-ui,sans-serif;background:radial-gradient(circle at 20% 20%,rgba(156,123,255,0.08),transparent 32%),radial-gradient(circle at 80% 10%,rgba(99,197,255,0.06),transparent 36%),linear-gradient(145deg,#040813 0%,#0b1230 50%,#050915 100%);min-height:100vh;color:var(--text);} 
-        .page{min-height:100vh;padding:18px 16px 32px;max-width:1100px;margin:0 auto;}
-        .topbar{position:sticky;top:0;z-index:20;backdrop-filter:blur(12px);background:linear-gradient(135deg,rgba(156,123,255,0.16),rgba(99,197,255,0.12));border:1px solid rgba(255,255,255,0.05);border-radius:16px;margin:-8px -4px 16px -4px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 10px 35px rgba(0,0,0,0.35);} 
-        .brand{font-weight:800;letter-spacing:0.4px;} .status{color:var(--muted);font-size:12px;}
-        .nav{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:14px;} @media(min-width:640px){.nav{grid-template-columns:repeat(4,1fr);} }
-        .nav button{border:1px solid rgba(255,255,255,0.04);background:linear-gradient(135deg,#0e1328,#0b1020);color:var(--muted);padding:12px 10px;border-radius:14px;font-weight:800;font-size:14px;cursor:pointer;box-shadow:0 10px 25px rgba(0,0,0,0.35);transition:all .2s ease;} 
-        .nav button.active{color:#fff;border-color:var(--accent);background:linear-gradient(135deg,rgba(156,123,255,0.35),rgba(99,197,255,0.25));box-shadow:0 12px 30px rgba(156,123,255,0.25);} 
-        .card{background:linear-gradient(145deg,rgba(15,20,45,0.95),rgba(10,14,30,0.92));border:1px solid rgba(255,255,255,0.06);border-radius:18px;padding:16px;box-shadow:0 18px 50px rgba(0,0,0,0.45);backdrop-filter:blur(8px);} .card + .card{margin-top:12px;}
-        .input, select, button.action{width:100%;padding:12px;border-radius:14px;border:1px solid rgba(255,255,255,0.06);background:#0c1022;color:var(--text);font-size:14px;box-shadow:inset 0 1px 0 rgba(255,255,255,0.04);} 
-        button.action{cursor:pointer;font-weight:800;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#0a0d1a;border:none;box-shadow:0 12px 28px rgba(156,123,255,0.28);}
-        .label{font-size:13px;color:var(--muted);} .list{display:grid;gap:8px;margin-top:10px;} 
-        .item{border:1px solid rgba(255,255,255,0.05);padding:12px;border-radius:14px;background:linear-gradient(135deg,rgba(18,22,40,0.9),rgba(12,16,28,0.9));box-shadow:0 10px 25px rgba(0,0,0,0.35);} 
-        .title{font-weight:800;font-size:14px;margin-bottom:4px;color:#fff;} .meta{color:var(--muted);font-size:12px;display:flex;gap:8px;align-items:center;} 
-        .badge{display:inline-flex;align-items:center;gap:4px;font-size:11px;padding:4px 9px;border-radius:999px;background:rgba(156,123,255,0.18);color:var(--accent);border:1px solid rgba(156,123,255,0.25);} 
+        body{margin:0;font-family:'Inter',system-ui,sans-serif;background:linear-gradient(180deg,#fdf2f7 0%,#f6f7fb 35%,#eef3ff 100%);min-height:100vh;color:var(--text);} 
+        .page{min-height:100vh;padding:18px 16px 32px;max-width:520px;margin:0 auto;}
+        .topbar{position:sticky;top:0;z-index:20;backdrop-filter:blur(10px);background:rgba(255,255,255,0.75);border:1px solid rgba(255,255,255,0.9);border-radius:18px;margin:-8px -4px 16px -4px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 12px 40px rgba(17,24,39,0.08);} 
+        .brand{font-weight:800;letter-spacing:0.2px;} .status{color:var(--muted);font-size:12px;}
+        .nav{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:16px;} @media(min-width:640px){.nav{grid-template-columns:repeat(4,1fr);} }
+        .nav button{border:1px solid var(--border);background:#f5f7ff;color:var(--muted);padding:12px 10px;border-radius:14px;font-weight:800;font-size:14px;cursor:pointer;box-shadow:0 10px 28px rgba(17,24,39,0.06);transition:all .18s ease;} 
+        .nav button.active{color:#0f172a;border-color:rgba(90,120,255,0.4);background:linear-gradient(135deg,rgba(90,120,255,0.16),rgba(95,212,255,0.14));box-shadow:0 12px 30px rgba(90,120,255,0.18);} 
+        .card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:16px;box-shadow:0 16px 44px rgba(17,24,39,0.08);} .card + .card{margin-top:12px;}
+        .input, select, button.action{width:100%;padding:12px;border-radius:14px;border:1px solid var(--border);background:#f9fbff;color:var(--text);font-size:14px;box-shadow:inset 0 1px 0 rgba(255,255,255,0.5);} 
+        button.action{cursor:pointer;font-weight:800;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#0a0d1a;border:none;box-shadow:0 12px 28px rgba(90,120,255,0.22);} 
+        .label{font-size:13px;color:var(--muted);} .list{display:grid;gap:10px;margin-top:10px;} 
+        .item{border:1px solid var(--border);padding:12px;border-radius:14px;background:linear-gradient(180deg,#ffffff 0%,#f8faff 100%);box-shadow:0 10px 25px rgba(17,24,39,0.05);} 
+        .title{font-weight:800;font-size:14px;margin-bottom:4px;color:#111827;} .meta{color:var(--muted);font-size:12px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;} 
+        .badge{display:inline-flex;align-items:center;gap:4px;font-size:11px;padding:4px 9px;border-radius:999px;background:rgba(106,123,255,0.14);color:var(--accent);border:1px solid rgba(106,123,255,0.24);} 
         .grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;}
+        .pill-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px;}
+        .pill{padding:8px 12px;border-radius:999px;border:1px solid var(--border);background:#f4f6fb;color:var(--muted);font-size:12px;font-weight:700;cursor:pointer;box-shadow:0 8px 18px rgba(17,24,39,0.04);transition:all .16s ease;}
+        .pill.active{background:linear-gradient(135deg,rgba(90,120,255,0.18),rgba(95,212,255,0.14));color:#0f172a;border-color:rgba(90,120,255,0.32);} 
+        .day-row{display:flex;gap:8px;overflow:auto;padding:4px 0;margin-top:8px;}
+        .day-chip{min-width:54px;text-align:center;padding:8px 10px;border-radius:12px;border:1px solid var(--border);background:#fff;color:#111827;box-shadow:0 8px 20px rgba(17,24,39,0.05);}
+        .day-chip.active{background:linear-gradient(135deg,rgba(90,120,255,0.18),rgba(95,212,255,0.14));border-color:rgba(90,120,255,0.32);} 
     </style>
 </head>
 <body>
@@ -54,6 +60,17 @@
         const nowLocal = () => { const n = new Date(); return new Date(n.getTime() - n.getTimezoneOffset()*60000); };
         const fmtDateTime = dt => dt ? new Date(dt).toLocaleString('pt-BR') : '';
         const periodLabel = p => ({ morning:'Manhã', afternoon:'Tarde', night:'Noite' }[p] || 'Dia');
+        const periodIcon = p => ({ morning:'🌅', afternoon:'🌤️', night:'🌙' }[p] || '🗒️');
+        const eventEmoji = title => {
+            const t=(title||'').toLowerCase();
+            if(t.includes('reuni')||t.includes('call')||t.includes('meet')) return '📞';
+            if(t.includes('treino')||t.includes('gym')||t.includes('run')||t.includes('corrida')) return '🏃';
+            if(t.includes('pagar')||t.includes('conta')||t.includes('bill')) return '💳';
+            if(t.includes('anivers')||t.includes('bday')) return '🎉';
+            if(t.includes('medico')||t.includes('doctor')) return '🩺';
+            return '📌';
+        };
+        const habitColors = ['#e8f1ff','#ffeef5','#e8fff2','#fff5e5','#f1e8ff'];
 
         function App(){
             const [tab, setTab] = useState('dashboard');
@@ -97,8 +114,13 @@
 
             return (
                 <div className="card">
-                    <h2 className="title" style={{fontSize:'16px'}}>Atalhos</h2>
-                    <div className="grid2">
+                    <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',gap:10}}>
+                        <h2 className="title" style={{fontSize:'16px',margin:0,display:'flex',alignItems:'center',gap:8}}>
+                            <span>🚀</span><span>Atalhos rápidos</span>
+                        </h2>
+                        <span className="badge" style={{background:'rgba(95,212,255,0.15)',color:'#0f172a'}}>Hoje</span>
+                    </div>
+                    <div className="grid2" style={{marginTop:10}}>
                         <div className="space-y-2">
                             <div className="label">Evento rápido</div>
                             <input className="input" placeholder="Título" value={eventTitle} onChange={e=>setEventTitle(e.target.value)} />
@@ -124,7 +146,15 @@
             const [events,setEvents]=useState([]);
             const [eventTitle,setEventTitle]=useState('');
             const [eventDt,setEventDt]=useState(nowLocal().toISOString().slice(0,16));
-            const filtered=useMemo(()=>events.filter(e=>(e.start_date||'').startsWith(ym)),[events,ym]);
+            const [scope,setScope]=useState('month');
+            const filtered=useMemo(()=>{
+                const list=events.filter(e=>(e.start_date||'').startsWith(ym));
+                if(scope==='today'){
+                    const today=nowLocal().toISOString().slice(0,10);
+                    return list.filter(e=>(e.start_date||'').startsWith(today));
+                }
+                return list;
+            },[events,ym,scope]);
             useEffect(()=>{load();},[]);
 
             const load=async()=>{setStatus('Carregando...');const data=await api('../modules/google_agenda.php?api=list_events'); if(data&&!data.error){setEvents(data.events||[]);setStatus('Online');} else setStatus(data?.error||'Erro');};
@@ -136,13 +166,28 @@
                     <div className="flex" style={{display:'flex',flexDirection:'column',gap:8}}>
                         <div style={{display:'flex',flexWrap:'wrap',gap:8,justifyContent:'space-between',alignItems:'center'}}>
                             <div>
-                                <div className="title" style={{fontSize:'16px'}}>Eventos</div>
+                                <div className="title" style={{fontSize:'16px'}}>Agenda</div>
                                 <div className="label">Sincronizado com Google</div>
                             </div>
                             <div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
-                                <input className="input" style={{width:160}} type="month" value={ym} onChange={e=>setYm(e.target.value)} />
+                                <input className="input" style={{width:140}} type="month" value={ym} onChange={e=>setYm(e.target.value)} />
                                 <button className="action" style={{width:'auto'}} onClick={sync}>Sincronizar</button>
                             </div>
+                        </div>
+                        <div className="pill-row">
+                            {['month','today'].map(p=>(
+                                <div key={p} className={`pill ${scope===p?'active':''}`} onClick={()=>setScope(p)}>
+                                    {p==='month'?'Este mês':'Hoje'}
+                                </div>
+                            ))}
+                        </div>
+                        <div className="day-row">
+                            {[...Array(7).keys()].map(i=>{const d=new Date();d.setDate(d.getDate()+i);const ds=d.toISOString().slice(0,10);return (
+                                <div key={i} className={`day-chip ${ds===nowLocal().toISOString().slice(0,10)?'active':''}`}>
+                                    <div style={{fontSize:12,color:'#6b7280'}}>{d.toLocaleDateString('pt-BR',{weekday:'short'})}</div>
+                                    <div style={{fontWeight:800}}>{d.getDate()}</div>
+                                </div>
+                            );})}
                         </div>
                         <div className="grid2">
                             <div className="space-y-2">
@@ -156,22 +201,26 @@
                             {!filtered.length && <div className="item">Sem eventos.</div>}
                             {filtered.map(ev=>{const dt=ev.start_date?.replace(' ','T'); const dateObj = dt? new Date(dt):null; const day = dateObj? dateObj.toLocaleDateString('pt-BR',{day:'2-digit',month:'short'}) : ''; const hour = dateObj? dateObj.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}) : '';
                                 return (
-                                <div key={ev.id||ev.google_event_id} className="item" style={{display:'flex',gap:12,alignItems:'center'}}>
-                                    <div style={{minWidth:62,textAlign:'center'}}>
-                                        <div className="badge" style={{display:'flex',flexDirection:'column',gap:2,alignItems:'center',padding:'6px 8px',width:'100%'}}>
+                                <div key={ev.id||ev.google_event_id} className="item" style={{display:'flex',gap:12,alignItems:'center',background:'#ffffff',borderColor:'#e5e7f3',boxShadow:'0 16px 34px rgba(17,24,39,0.08)'}}>
+                                    <div style={{minWidth:58,textAlign:'center'}}>
+                                        <div className="badge" style={{display:'flex',flexDirection:'column',gap:2,alignItems:'center',padding:'6px 8px',width:'100%',background:'rgba(90,120,255,0.12)'}}>
                                             <span style={{fontSize:11,letterSpacing:0.5}}>Dia</span>
-                                            <span style={{fontWeight:800,fontSize:14,color:'#fff'}}>{day}</span>
+                                            <span style={{fontWeight:800,fontSize:14,color:'#0f172a'}}>{day}</span>
                                         </div>
                                     </div>
                                     <div style={{flex:1}}>
-                                        <div className="title" style={{display:'flex',alignItems:'center',gap:8}}>
-                                            <span>📌</span>
+                                        <div className="title" style={{display:'flex',alignItems:'center',gap:8,marginBottom:4}}>
+                                            <span>{eventEmoji(ev.title)}</span>
                                             <span>{ev.title||'Sem título'}</span>
                                         </div>
                                         <div className="meta" style={{gap:6}}>
-                                            <span className="badge" style={{background:'rgba(99,197,255,0.15)',color:'var(--accent2)',borderColor:'rgba(99,197,255,0.3)'}}>{hour||'Horário'}</span>
+                                            <span className="badge" style={{background:'rgba(99,197,255,0.18)',color:'var(--accent2)',borderColor:'rgba(99,197,255,0.32)'}}>{hour||'Horário'}</span>
                                             <span>{fmtDateTime(dt)}</span>
                                         </div>
+                                    </div>
+                                    <div style={{display:'flex',flexDirection:'column',alignItems:'flex-end',gap:6}}>
+                                        <span style={{fontSize:18}}>🔔</span>
+                                        <span style={{fontSize:18}}>📄</span>
                                     </div>
                                 </div>
                             );})}
@@ -198,7 +247,17 @@
                                 <div className="title" style={{fontSize:'16px'}}>Atividades</div>
                                 <div className="label">Planejamento do dia</div>
                             </div>
-                            <input className="input" style={{width:160}} type="date" value={date} onChange={e=>setDate(e.target.value)} />
+                            <div style={{display:'flex',gap:8,alignItems:'center'}}>
+                                <input className="input" style={{width:160}} type="date" value={date} onChange={e=>setDate(e.target.value)} />
+                                <button className="pill" style={{border:'1px solid var(--border)',background:'#fff'}} onClick={()=>setDate(nowLocal().toISOString().slice(0,10))}>Hoje</button>
+                            </div>
+                        </div>
+                        <div className="pill-row">
+                            {['morning','afternoon','night'].map(p=>(
+                                <div key={p} className="pill" style={{cursor:'default'}}>
+                                    {periodLabel(p)}
+                                </div>
+                            ))}
                         </div>
                         <div className="grid2">
                             <div className="space-y-2">
@@ -213,12 +272,15 @@
                         <div className="list" style={{maxHeight:'60vh',overflow:'auto',paddingRight:4}}>
                             {!items.length && <div className="item">Sem atividades.</div>}
                             {items.map(a=>(
-                                <div key={a.id} className="item">
-                                    <div className="title" style={{display:'flex',alignItems:'center',gap:8}}>
-                                        <span>📘</span>
-                                        <span>{a.title}</span>
+                                <div key={a.id} className="item" style={{display:'flex',justifyContent:'space-between',alignItems:'center',gap:10,background:'#fff',boxShadow:'0 12px 28px rgba(17,24,39,0.07)'}}>
+                                    <div style={{display:'flex',gap:10,alignItems:'center'}}>
+                                        <span style={{fontSize:18}}>{periodIcon(a.period)}</span>
+                                        <div>
+                                            <div className="title" style={{marginBottom:2}}>{a.title}</div>
+                                            <div className="meta"><span>{a.day_date}</span><span className="badge">{periodLabel(a.period)}</span></div>
+                                        </div>
                                     </div>
-                                    <div className="meta"><span>{a.day_date}</span><span className="badge">{periodLabel(a.period)}</span></div>
+                                    <span style={{fontSize:18,color:'#9ca3af'}}>⬜</span>
                                 </div>
                             ))}
                         </div>
@@ -230,10 +292,12 @@
         function Habits({ setStatus }){
             const [ym,setYm]=useState(nowLocal().toISOString().slice(0,7));
             const [items,setItems]=useState([]);
+            const [selectedDay,setSelectedDay]=useState(nowLocal().toISOString().slice(0,10));
+            const [viewMode,setViewMode]=useState('all');
             const today = nowLocal().toISOString().slice(0,10);
             useEffect(()=>{load();},[ym]);
             const load=async()=>{setStatus('Carregando...');const data=await api(`../modules/habits.php?api=get_habits&month=${ym}`); if(data&&!data.error){setItems(data||[]);setStatus('Online');} else setStatus(data?.error||'Erro');};
-            const toggle=async(id)=>{setStatus('Atualizando...'); await api('../modules/habits.php?api=toggle_habit',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id,date:today})}); await load();};
+            const toggle=async(id)=>{setStatus('Atualizando...'); await api('../modules/habits.php?api=toggle_habit',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id,date:selectedDay})}); await load();};
             return (
                 <div className="card">
                     <div style={{display:'flex',flexDirection:'column',gap:8}}>
@@ -244,19 +308,47 @@
                             </div>
                             <input className="input" style={{width:160}} type="month" value={ym} onChange={e=>setYm(e.target.value)} />
                         </div>
+                        <div className="pill-row">
+                            {['all','done'].map(mode=>(
+                                <div key={mode} className={`pill ${viewMode===mode?'active':''}`} onClick={()=>setViewMode(mode)}>
+                                    {mode==='all'?'Todos':'Feitos no dia'}
+                                </div>
+                            ))}
+                        </div>
+                        <div className="day-row">
+                            {[...Array(7).keys()].map(i=>{const d=new Date();d.setDate(d.getDate()+i);const ds=d.toISOString().slice(0,10);return (
+                                <div key={i} className={`day-chip ${ds===selectedDay?'active':''}`} onClick={()=>setSelectedDay(ds)}>
+                                    <div style={{fontSize:12,color:'#6b7280'}}>{d.toLocaleDateString('pt-BR',{weekday:'short'})}</div>
+                                    <div style={{fontWeight:800}}>{d.getDate()}</div>
+                                </div>
+                            );})}
+                        </div>
                         <div className="grid2">
                             {!items.length && <div className="item">Sem hábitos.</div>}
-                            {items.map(h=>{const parsed = h.checked_dates?JSON.parse(h.checked_dates):[]; const doneToday = parsed.includes(today); const checks=parsed.length; return (
-                                <div key={h.id} className="item" style={{display:'flex',flexDirection:'column',gap:10}}>
-                                    <div className="title" style={{display:'flex',alignItems:'center',gap:8}}>
-                                        <span>🔥</span>
-                                        <span>{h.name}</span>
+                            {items
+                                .filter(h=>{
+                                    const parsed = h.checked_dates?JSON.parse(h.checked_dates):[];
+                                    const doneSelected = parsed.includes(selectedDay);
+                                    if(viewMode==='done') return doneSelected;
+                                    return true;
+                                })
+                                .map((h,idx)=>{const parsed = h.checked_dates?JSON.parse(h.checked_dates):[]; const doneSelected = parsed.includes(selectedDay); const checks=parsed.length; const color=habitColors[idx%habitColors.length]; return (
+                                <div key={h.id} className="item" style={{display:'flex',flexDirection:'column',gap:10,background:color,borderColor:'rgba(0,0,0,0.04)',boxShadow:'0 16px 34px rgba(17,24,39,0.08)'}}>
+                                    <div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+                                        <div className="title" style={{display:'flex',alignItems:'center',gap:8}}>
+                                            <span>🔥</span>
+                                            <span>{h.name}</span>
+                                        </div>
+                                        <span className="badge" style={{background:'rgba(255,149,5,0.18)',color:'#b45309',borderColor:'rgba(255,149,5,0.3)'}}>{checks} dias</span>
                                     </div>
                                     <div className="meta" style={{justifyContent:'space-between',width:'100%'}}>
-                                        <span>Check-ins: {checks}</span>
-                                        <span className="badge" style={{background: doneToday?'rgba(76,175,80,0.2)':'rgba(156,123,255,0.18)',color: doneToday?'#5fe37c':'var(--accent)',borderColor: doneToday?'rgba(76,175,80,0.35)':'rgba(156,123,255,0.25)'}}>{doneToday?'Feito hoje':'Pendente'}</span>
+                                        <span>Status: {doneSelected?'Feito no dia':'Pendente'}</span>
+                                        <span className="badge" style={{background: doneSelected?'rgba(76,175,80,0.2)':'rgba(99,197,255,0.18)',color: doneSelected?'#0f5132':'#0f172a',borderColor: doneSelected?'rgba(76,175,80,0.35)':'rgba(99,197,255,0.3)'}}>{doneSelected?'✔️':'Marcar'}</span>
                                     </div>
-                                    <button className="action" onClick={()=>toggle(h.id)} style={{background:doneToday?'linear-gradient(135deg,#5fe37c,#4ccf9a)':undefined}}>Marcar hoje</button>
+                                    <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',gap:10}}>
+                                        <button className="action" onClick={()=>toggle(h.id)} style={{background:doneSelected?'linear-gradient(135deg,#5fe37c,#4ccf9a)':undefined,flex:1}}>Marcar dia</button>
+                                        <span style={{fontSize:20}}>🏅</span>
+                                    </div>
                                 </div>
                             );})}
                         </div>
