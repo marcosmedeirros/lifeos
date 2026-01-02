@@ -440,9 +440,15 @@ function renderCalendarGrid(events) {
         const numClass = isToday ? 'text-yellow-400 font-bold' : 'text-slate-400 font-medium';
 
         cell.className = `${cellClass} h-28 rounded-xl border p-2 cursor-pointer transition group relative flex flex-col`;
-        cell.innerHTML = `<span class="${numClass} text-sm mb-1 ml-1">${day}</span>
-                          <div class="flex-1 overflow-y-auto no-scrollbar space-y-1">`;
-
+        
+        const dayNumEl = document.createElement('span');
+        dayNumEl.className = `${numClass} text-sm mb-1 ml-1`;
+        dayNumEl.textContent = day;
+        cell.appendChild(dayNumEl);
+        
+        const eventsContainer = document.createElement('div');
+        eventsContainer.className = 'flex-1 overflow-y-auto no-scrollbar space-y-1';
+        
         dayEvents.forEach(ev => {
             const time = new Date(ev.start_date).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
             const eventEl = document.createElement('div');
@@ -453,10 +459,16 @@ function renderCalendarGrid(events) {
                 e.stopPropagation();
                 editEvent(ev);
             };
-            cell.querySelector('.space-y-1').appendChild(eventEl);
+            eventsContainer.appendChild(eventEl);
         });
-
-        cell.innerHTML += `</div><div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"><i class="fas fa-plus text-xs text-slate-500 hover:text-white cursor-pointer"></i></div>`;
+        
+        cell.appendChild(eventsContainer);
+        
+        const addBtn = document.createElement('div');
+        addBtn.className = 'absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity';
+        addBtn.innerHTML = '<i class="fas fa-plus text-xs text-slate-500 hover:text-white cursor-pointer"></i>';
+        cell.appendChild(addBtn);
+        
         grid.appendChild(cell);
     }
 
