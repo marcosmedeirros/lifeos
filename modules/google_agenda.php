@@ -267,7 +267,7 @@ $google_token = $stmt->fetch();
 $is_connected = $google_token && !empty($google_token['access_token']);
 
 $page = 'google_agenda';
-$page_title = 'Google Agenda - LifeOS';
+$page_title = 'Calendário - LifeOS';
 include __DIR__ . '/../includes/header.php';
 ?>
 
@@ -277,10 +277,10 @@ include __DIR__ . '/../includes/header.php';
     <div class="flex-1 p-4 md:p-10 content-wrap transition-all duration-300">
         <div class="main-shell">
             <header class="mb-8">
-                <h2 class="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-yellow-500">
-                    📅 Google Agenda
+                <h2 class="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-amber-400 to-yellow-500 drop-shadow-[0_4px_18px_rgba(250,204,21,0.25)]">
+                    📅 Calendário
                 </h2>
-                <p class="text-slate-400">Sincronização com Google Calendar</p>
+                <p class="text-slate-300">Visual clean para seus eventos conectados</p>
             </header>
 
             <?php if (!$is_connected): ?>
@@ -318,24 +318,20 @@ include __DIR__ . '/../includes/header.php';
                     <button onclick="createEventModal()" class="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white px-6 py-3 rounded-xl font-bold shadow-lg transition">
                         <i class="fas fa-plus mr-2"></i> Novo Evento
                     </button>
-                    <div class="text-green-300 text-sm font-semibold ml-2 flex items-center gap-2">
-                        <i class="fas fa-check-circle"></i>
-                        <span>Conectado ao Google Calendar<?php if (!empty($google_token['updated_at'])) { echo ' • token atualizado em ' . $google_token['updated_at']; } ?></span>
-                    </div>
                 </div>
 
-                <div class="glass-card p-6 rounded-2xl mt-6 bg-slate-900/60 border border-slate-800 shadow-lg shadow-yellow-600/20">
+                <div class="glass-card p-6 rounded-2xl mt-6 bg-gradient-to-br from-slate-900/70 via-slate-900 to-slate-950 border border-slate-800 shadow-2xl shadow-yellow-600/20">
                     <div class="flex flex-wrap items-center justify-between gap-4 mb-4">
                         <div>
-                            <h3 class="text-2xl font-bold text-yellow-400">Calendário</h3>
-                            <p class="text-slate-400 text-sm">Eventos sincronizados direto do Google Calendar</p>
+                            <h3 class="text-2xl font-bold text-yellow-300 drop-shadow">Calendário</h3>
+                            <p class="text-slate-400 text-sm">Visão mensal, semanal e lista em um lugar só</p>
                         </div>
-                        <div class="flex items-center gap-2 text-xs text-slate-300 bg-slate-800/70 px-3 py-2 rounded-full border border-slate-700">
-                            <span class="h-3 w-3 rounded-full bg-yellow-400 border border-yellow-200"></span>
-                            <span>Eventos ativos</span>
+                        <div class="flex items-center gap-2 text-xs text-slate-200 bg-slate-800/80 px-3 py-2 rounded-full border border-slate-700 shadow">
+                            <span class="h-3 w-3 rounded-full bg-yellow-400 border border-yellow-200 shadow-sm"></span>
+                            <span>Atualizado automaticamente</span>
                         </div>
                     </div>
-                    <div id="calendar" class="bg-slate-950/60 rounded-2xl p-4 border border-slate-800 shadow-inner"></div>
+                    <div id="calendar" class="bg-slate-950/70 rounded-2xl p-4 border border-slate-800 shadow-inner"></div>
                 </div>
             <?php endif; ?>
         </div>
