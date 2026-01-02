@@ -9,6 +9,9 @@ $page = 'board';
 if (isset($_GET['api'])) {
     header('Content-Type: application/json');
     $action = $_GET['api'];
+    if ($action === 'upload') {
+        $action = 'upload_photo';
+    }
     
     try {
         if ($action === 'get_photos') {
@@ -55,9 +58,10 @@ if (isset($_GET['api'])) {
                 throw new Exception('Falha ao mover arquivo');
             }
             
+            $photoDate = $_POST['photo_date'] ?? date('Y-m-d');
             $rel = BASE_PATH . '/uploads/board/' . $safe;
             $stmt = $pdo->prepare("INSERT INTO board_photos (user_id, photo_date, image_path) VALUES (?,?,?)");
-            $stmt->execute([$user_id, $_POST['photo_date'], $rel]);
+            $stmt->execute([$user_id, $photoDate, $rel]);
             
             echo json_encode(['success' => true]);
             exit;

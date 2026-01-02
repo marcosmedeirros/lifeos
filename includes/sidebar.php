@@ -51,20 +51,17 @@
             <a href="<?php echo BASE_PATH; ?>/modules/goals.php" class="nav-btn <?php echo ($page === 'goals') ? 'active' : ''; ?> text-left px-4 py-3 flex items-center gap-3">
                 <i class="fas fa-bullseye w-5 text-center"></i> <span>Metas</span>
             </a>
-            <a href="<?php echo BASE_PATH; ?>/modules/finance.php" class="nav-btn <?php echo ($page === 'finance') ? 'active' : ''; ?> text-left px-4 py-3 flex items-center gap-3">
-                <i class="fas fa-wallet w-5 text-center"></i> <span>Finanças</span>
-            </a>
             <a href="<?php echo BASE_PATH; ?>/modules/strava.php" class="nav-btn <?php echo ($page === 'strava') ? 'active' : ''; ?> text-left px-4 py-3 flex items-center gap-3">
-                <i class="fab fa-strava w-5 text-center text-orange-500"></i> <span>Strava</span>
-            </a>
-            <a href="<?php echo BASE_PATH; ?>/modules/notes.php" class="nav-btn <?php echo ($page === 'notes') ? 'active' : ''; ?> text-left px-4 py-3 flex items-center gap-3">
-                <i class="fas fa-sticky-note w-5 text-center"></i> <span>Notas</span>
+                <i class="fab fa-strava w-5 text-center text-orange-500"></i> <span>Treinos</span>
             </a>
             <a href="<?php echo BASE_PATH; ?>/modules/board.php" class="nav-btn <?php echo ($page === 'board') ? 'active' : ''; ?> text-left px-4 py-3 flex items-center gap-3">
                 <i class="fas fa-images w-5 text-center"></i> <span>Board</span>
             </a>
-            <a href="<?php echo BASE_PATH; ?>/modules/workouts.php" class="nav-btn <?php echo ($page === 'workouts') ? 'active' : ''; ?> text-left px-4 py-3 flex items-center gap-3">
-                <i class="fas fa-dumbbell w-5 text-center"></i> <span>Treinos</span>
+            <a href="<?php echo BASE_PATH; ?>/modules/finance.php" class="nav-btn <?php echo ($page === 'finance') ? 'active' : ''; ?> text-left px-4 py-3 flex items-center gap-3">
+                <i class="fas fa-wallet w-5 text-center"></i> <span>Finanças</span>
+            </a>
+            <a href="<?php echo BASE_PATH; ?>/modules/notes.php" class="nav-btn <?php echo ($page === 'notes') ? 'active' : ''; ?> text-left px-4 py-3 flex items-center gap-3">
+                <i class="fas fa-sticky-note w-5 text-center"></i> <span>Notas</span>
             </a>
             <a href="<?php echo BASE_PATH; ?>/modules/game.php" class="nav-btn <?php echo ($page === 'game') ? 'active' : ''; ?> text-left px-4 py-3 flex items-center gap-3">
                 <i class="fas fa-trophy w-5 text-center text-yellow-500"></i> <span>Game</span>

@@ -225,40 +225,27 @@ if (isset($_GET['api'])) {
             exit;
         }
 
-            // Obter hábitos (via dashboard)
-            if ($action === 'get_habits') {
-                echo json_encode($pdo->query("SELECT * FROM habits ORDER BY id DESC")->fetchAll());
-                exit;
-            }
+        // Obter hábitos (via dashboard)
+        if ($action === 'get_habits') {
+            echo json_encode($pdo->query("SELECT * FROM habits ORDER BY id DESC")->fetchAll());
+            exit;
+        }
 
-            // Toggle hábito do dia (via dashboard)
-            if ($action === 'toggle_habit') {
-                $id = $data['id'] ?? ($_POST['id'] ?? null);
-                $date = $data['date'] ?? date('Y-m-d');
-                $json = $pdo->prepare("SELECT checked_dates FROM habits WHERE id = ?");
-                $json->execute([$id]);
-                $arr = json_decode($json->fetchColumn() ?: '[]', true) ?: [];
-                if (in_array($date, $arr)) {
-                    $arr = array_values(array_diff($arr, [$date]));
-                } else {
-                    $arr[] = $date;
-                }
-                $upd = $pdo->prepare("UPDATE habits SET checked_dates = ? WHERE id = ?");
-                $upd->execute([json_encode($arr), $id]);
-                echo json_encode(['success' => true]);
-                exit;
-            }
-
-        // Salvar meta (via dashboard)
-        if ($action === 'save_goal') {
-            if (!empty($data['id'])) {
-                $stmt = $pdo->prepare("UPDATE goals SET title=?, difficulty=?, goal_type=? WHERE id=? AND user_id=?");
-                $stmt->execute([$data['title'] ?? '', $data['difficulty'] ?? 'media', $data['goal_type'] ?? 'geral', $data['id'], $user_id]);
+        // Toggle hábito do dia (via dashboard)
+        if ($action === 'toggle_habit') {
+            $id = $data['id'] ?? ($_POST['id'] ?? null);
+            $date = $data['date'] ?? date('Y-m-d');
+            $json = $pdo->prepare("SELECT checked_dates FROM habits WHERE id = ?");
+            $json->execute([$id]);
+            $arr = json_decode($json->fetchColumn() ?: '[]', true) ?: [];
+            if (in_array($date, $arr)) {
+                $arr = array_values(array_diff($arr, [$date]));
             } else {
-                $stmt = $pdo->prepare("INSERT INTO goals (user_id, title, difficulty, goal_type, status) VALUES (?, ?, ?, ?, 0)");
-                $stmt->execute([$user_id, $data['title'] ?? '', $data['difficulty'] ?? 'media', $data['goal_type'] ?? 'geral']);
+                $arr[] = $date;
             }
-            echo json_encode(['success'=>true]);
+            $upd = $pdo->prepare("UPDATE habits SET checked_dates = ? WHERE id = ?");
+            $upd->execute([json_encode($arr), $id]);
+            echo json_encode(['success' => true]);
             exit;
         }
 
@@ -502,12 +489,16 @@ async function loadDashboard() {
         }).join('') : 
         '<p class="text-slate-500 text-xs italic">Nenhum evento</p>';
     
-    // Lista de Hábitos (últimos 5) com toggle do dia
+    // Lista de Hábitos com toggle do dia
     try {
         const habitsRes = await fetch(`?api=get_habits`).then(r => r.json());
         const today = new Date().toISOString().slice(0, 10);
-        document.getElementById('dash-habits-list').innerHTML = habitsRes.length ? 
-            habitsRes.slice(0, 5).map(h => {
+        const habitsOrdered = Array.isArray(habitsRes)
+            ? [...habitsRes].sort((a, b) => (a.id || 0) - (b.id || 0))
+            : [];
+
+        document.getElementById('dash-habits-list').innerHTML = habitsOrdered.length ?
+            habitsOrdered.map(h => {
                 const checks = JSON.parse(h.checked_dates || '[]');
                 const isChecked = Array.isArray(checks) && checks.includes(today);
                 const btnClass = isChecked 
@@ -620,18 +611,22 @@ async function addPhotoQuick(e) {
     
     const formData = new FormData();
     formData.append('photo', file);
+    formData.append('photo_date', new Date().toISOString().split('T')[0]);
     
     try {
-        const response = await fetch(`${BASE_PATH}/modules/board.php?api=upload`, {
+        const response = await fetch(`${BASE_PATH}/modules/board.php?api=upload_photo`, {
             method: 'POST',
             body: formData
         });
-        
-        if (response.ok) {
+
+        const json = await response.json().catch(() => ({}));
+
+        if (response.ok && json.success) {
             fileInput.value = '';
             alert('✅ Foto adicionada ao Board!');
         } else {
-            alert('❌ Erro ao fazer upload da foto');
+            const message = json.error || 'Erro ao fazer upload da foto';
+            alert(`❌ ${message}`);
         }
     } catch (error) {
         console.error('Erro:', error);
