@@ -295,6 +295,42 @@ if (isset($_GET['api'])) {
         }
         
         if ($action === 'delete_event') {
+            // Buscar o evento para obter o google_event_id
+            $stmt = $pdo->prepare("SELECT google_event_id FROM events WHERE id = ? AND user_id = ?");
+            $stmt->execute([$data['id'], $user_id]);
+            $event = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$event) {
+                echo json_encode(['error' => 'Evento não encontrado']);
+                exit;
+            }
+
+            // Se houver evento no Google, precisamos de token para excluir lá também
+            if (!empty($event['google_event_id'])) {
+                if (!$access_token) {
+                    echo json_encode(['error' => 'Não autenticado no Google para excluir o evento.']);
+                    exit;
+                }
+
+                $google_event_id = $event['google_event_id'];
+                $delete_url = "https://www.googleapis.com/calendar/v3/calendars/primary/events/{$google_event_id}";
+
+                $ch = curl_init($delete_url);
+                curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'DELETE');
+                curl_setopt($ch, CURLOPT_HTTPHEADER, ["Authorization: Bearer {$access_token}"]);
+                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                $resp = curl_exec($ch);
+                $http_status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+                curl_close($ch);
+
+                // 204 = excluído, 404 = já não existe (considerar ok)
+                if ($http_status >= 300 && $http_status !== 404) {
+                    echo json_encode(['error' => 'Falha ao excluir no Google Calendar.', 'status' => $http_status, 'response' => substr((string)$resp, 0, 200)]);
+                    exit;
+                }
+            }
+
+            // Excluir localmente
             $stmt = $pdo->prepare("DELETE FROM events WHERE id = ? AND user_id = ?");
             $stmt->execute([$data['id'], $user_id]);
             echo json_encode(['success' => true]);
@@ -326,30 +362,6 @@ $page_title = 'Calendário - LifeOS';
 include __DIR__ . '/../includes/header.php';
 ?>
             <header class="mb-8 flex items-center justify-between">
-        if ($action === 'delete_event') {
-            // Buscar google_event_id para deletar do Google Calendar também
-            $stmt = $pdo->prepare("SELECT google_event_id FROM events WHERE id = ? AND user_id = ?");
-            $stmt->execute([$data['id'], $user_id]);
-            $event = $stmt->fetch();
-            
-            // Se é um evento do Google, deletar lá também
-            if ($event && $event['google_event_id'] && $access_token) {
-                $google_event_id = $event['google_event_id'];
-                $delete_url = "https://www.googleapis.com/calendar/v3/calendars/primary/events/{$google_event_id}";
-                
-                $ch = curl_init($delete_url);
-                curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'DELETE');
-                curl_setopt($ch, CURLOPT_HTTPHEADER, ["Authorization: Bearer {$access_token}"]);
-                curl_exec($ch);
-                curl_close($ch);
-            }
-            
-            // Deletar do banco local
-            $stmt = $pdo->prepare("DELETE FROM events WHERE id = ? AND user_id = ?");
-            $stmt->execute([$data['id'], $user_id]);
-            echo json_encode(['success' => true]);
-            exit;
-        }
                 <div>
                     <h2 class="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-amber-400 to-yellow-500 drop-shadow-[0_4px_18px_rgba(250,204,21,0.25)]">
                         📅 Calendário
