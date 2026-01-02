@@ -140,7 +140,7 @@ if (isset($_GET['api'])) {
                 'timeMax' => $time_max,
                 'singleEvents' => 'true',
                 'orderBy' => 'startTime',
-                'timeZone' => 'UTC'
+                'timeZone' => 'America/Sao_Paulo'
             ];
             $calendar_url = 'https://www.googleapis.com/calendar/v3/calendars/primary/events?' . http_build_query($params, '', '&', PHP_QUERY_RFC3986);
             
@@ -162,6 +162,24 @@ if (isset($_GET['api'])) {
                     $title = $event['summary'] ?? 'Sem título';
                     $start = $event['start']['dateTime'] ?? $event['start']['date'];
                     $description = $event['description'] ?? '';
+                    
+                    // Converter horário para timezone de São Paulo
+                    if (strpos($start, 'T') !== false && strlen($start) > 10) {
+                        try {
+                            $dt = new DateTime($start, new DateTimeZone('UTC'));
+                            $dt->setTimezone(new DateTimeZone('America/Sao_Paulo'));
+                            $start = $dt->format('Y-m-d H:i:s');
+                        } catch (Exception $e) {
+                            // Se falhar na conversão, tenta converter como está
+                            try {
+                                $dt = new DateTime($start);
+                                $dt->setTimezone(new DateTimeZone('America/Sao_Paulo'));
+                                $start = $dt->format('Y-m-d H:i:s');
+                            } catch (Exception $e2) {
+                                // Se ainda falhar, usa como está
+                            }
+                        }
+                    }
                     
                     // Verificar se já existe
                     $check = $pdo->prepare("SELECT id FROM events WHERE google_event_id = ?");
