@@ -145,16 +145,16 @@ async function loadHabits() {
 
     const dim = new Date(currentHabitMonth.getFullYear(), currentHabitMonth.getMonth() + 1, 0).getDate();
 
-    let h = '<th class="p-1 text-left text-yellow-500 font-bold text-xs bg-slate-900/50 sticky left-0 z-10 min-w-[90px] md:min-w-[130px] border-b border-yellow-600/30">Hábito</th>';
+    let h = '<th class="p-1 text-left text-yellow-500 font-bold text-xs bg-black/70 sticky left-0 z-10 min-w-[90px] md:min-w-[130px] border-b border-yellow-600/30">Hábito</th>';
     for (let i = 1; i <= dim; i++) {
         h += `<th class="p-0.5 text-center text-[7px] md:text-[8px] text-yellow-600 w-5 md:w-8 min-w-[20px] md:min-w-[32px] border-b border-yellow-600/30">${i}</th>`;
     }
-    h += '<th class="p-1 text-center text-yellow-500 font-bold text-[10px] md:text-xs bg-slate-900/50 min-w-[50px] border-b border-yellow-600/30"> </th>';
+    h += '<th class="p-1 text-center text-yellow-500 font-bold text-[10px] md:text-xs bg-black/70 min-w-[50px] border-b border-yellow-600/30"> </th>';
     document.getElementById('habits-header-row').innerHTML = h;
 
     document.getElementById('habits-list').innerHTML = habits.map(hb => {
         const checks = JSON.parse(hb.checked_dates || '[]');
-        let cells = `<td class="p-1 border-b border-yellow-600/20 font-bold text-white text-xs md:text-sm sticky left-0 bg-slate-800 z-10 shadow-[4px_0_10px_rgba(0,0,0,0.2)]">✓ ${hb.name}</td>`;
+        let cells = `<td class="p-1 border-b border-yellow-600/20 font-bold text-white text-xs md:text-sm sticky left-0 bg-black z-10 shadow-[4px_0_10px_rgba(0,0,0,0.2)]">✓ ${hb.name}</td>`;
         for (let i = 1; i <= dim; i++) {
             const d = `${ym}-${String(i).padStart(2, '0')}`;
             const isChecked = checks.includes(d);
