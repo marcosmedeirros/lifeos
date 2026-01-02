@@ -377,7 +377,15 @@ function changeWeek(dir) {
 
 async function loadActivities() { 
     const s = currentWeekStart.toISOString().split('T')[0]; 
-    const res = await fetch(`?api=get_activities&start=${s}`).then(r => r.json()); 
+    let res = [];
+    try {
+        res = await api(`get_activities&start=${s}`);
+        if (!Array.isArray(res)) res = [];
+    } catch (err) {
+        console.error('Erro ao carregar atividades:', err);
+        document.getElementById('weekly-board').innerHTML = '<div class="text-slate-400">Erro ao carregar atividades.</div>';
+        return;
+    }
     window.activitiesData = res;
 
     const dayNames = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
