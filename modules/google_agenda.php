@@ -135,7 +135,14 @@ if (isset($_GET['api'])) {
             // Buscar eventos do Google Calendar
             $time_min = date('c', strtotime('-30 days'));
             $time_max = date('c', strtotime('+90 days'));
-            $calendar_url = "https://www.googleapis.com/calendar/v3/calendars/primary/events?timeMin={$time_min}&timeMax={$time_max}&singleEvents=true&orderBy=startTime";
+            $params = [
+                'timeMin' => $time_min,
+                'timeMax' => $time_max,
+                'singleEvents' => 'true',
+                'orderBy' => 'startTime',
+                'timeZone' => 'UTC'
+            ];
+            $calendar_url = 'https://www.googleapis.com/calendar/v3/calendars/primary/events?' . http_build_query($params, '', '&', PHP_QUERY_RFC3986);
             
             $ch = curl_init($calendar_url);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -170,12 +177,14 @@ if (isset($_GET['api'])) {
                 }
                 echo json_encode(['success' => true, 'count' => count($events_data['items'])]);
             } else {
+                $google_error = $events_data['error']['errors'][0]['message'] ?? ($events_data['error']['message'] ?? '');
                 echo json_encode([
                     'error' => 'Erro ao buscar eventos',
                     'http_status' => $http_status,
-                    'response' => substr($response ?: '', 0, 500),
+                    'response' => substr($response ?: '', 0, 1000),
                     'curl_error' => $curl_error,
-                    'request_url' => $calendar_url
+                    'request_url' => $calendar_url,
+                    'google_error' => $google_error
                 ]);
             }
             exit;
