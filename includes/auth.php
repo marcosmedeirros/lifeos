@@ -1,5 +1,15 @@
 <?php
 // ARQUIVO: includes/auth.php
+// Configura sessão para durar ~90 dias e cookies seguros
+$sessionLifetime = 60*60*24*90;
+ini_set('session.gc_maxlifetime', $sessionLifetime);
+session_set_cookie_params([
+    'lifetime' => $sessionLifetime,
+    'path' => '/',
+    'secure' => isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off',
+    'httponly' => true,
+    'samesite' => 'Lax'
+]);
 session_start();
 
 // Carregar variáveis de ambiente
@@ -10,6 +20,15 @@ require_once __DIR__ . '/../config.php';
 // Credenciais hardcoded
 define('AUTHORIZED_USER', 'marcosmedeirros');
 define('AUTHORIZED_PASS', '2026meuano');
+
+// Redirecionamento seguro
+function sanitize_redirect_path($path) {
+    if (!$path) return '';
+    if (strpos($path, '://') !== false || str_starts_with($path, '//')) return '';
+    if ($path[0] !== '/') return '';
+    return $path;
+}
+function default_redirect_path() { return '/index.php'; }
 
 // Função de login
 function login_user($username, $password) {
@@ -33,12 +52,14 @@ if (isset($_GET['logout'])) {
 
 // Processa Login via POST
 $login_error = '';
+$redirect = sanitize_redirect_path($_POST['redirect'] ?? $_GET['redirect'] ?? '');
 if (isset($_POST['login'])) {
     $username = $_POST['username'] ?? '';
     $password = $_POST['password'] ?? '';
     
     if (login_user($username, $password)) {
-        header("Location: " . BASE_PATH . "/index.php");
+        $target = $redirect ?: default_redirect_path();
+        header("Location: " . $target);
         exit;
     } else {
         $login_error = "Usuário ou senha inválidos.";
@@ -48,6 +69,8 @@ if (isset($_POST['login'])) {
 // Verifica se o usuário está logado
 function require_login() {
     if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
+    $current = $_SERVER['REQUEST_URI'] ?? '/';
+    $redirectParam = urlencode($current);
         http_response_code(403);
         echo '<!DOCTYPE html>
 <html lang="pt-BR" class="dark">
@@ -66,7 +89,7 @@ function require_login() {
         <div class="text-6xl mb-4">🔒</div>
         <h1 class="text-4xl font-bold text-white mb-2">Sem acesso</h1>
         <p class="text-slate-400 mb-6">Você precisa estar autenticado para acessar esta página.</p>
-        <a href="' . BASE_PATH . '/login.php" class="inline-block bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-xl font-bold transition">Fazer Login</a>
+        <a href="' . BASE_PATH . '/login.php?redirect=' . $redirectParam . '" class="inline-block bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-xl font-bold transition">Fazer Login</a>
     </div>
 </body>
 </html>';

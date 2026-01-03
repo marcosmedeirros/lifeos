@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="manifest" href="/mobile/manifest.json" />
-    <link rel="canonical" href="/mobile/index.php" />
+    <link rel="canonical" href="/mobile/index.html" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <title>LifeOS Mobile</title>
@@ -60,7 +60,8 @@
                 const res = await fetch(url, { credentials:'same-origin', ...options });
                 const text = await res.text();
                 if (res.status === 403 || text.includes('Sem Acesso')) {
-                    window.location.href = '/login.php';
+                    const back = encodeURIComponent(window.location.pathname + window.location.search + window.location.hash);
+                    window.location.href = '/login.php?redirect=' + back;
                     return { error:'Auth required' };
                 }
                 if (!res.ok) throw new Error(`${res.status} ${res.statusText} | ${text.slice(0,200)}`);

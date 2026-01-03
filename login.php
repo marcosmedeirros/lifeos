@@ -2,9 +2,11 @@
 // ARQUIVO: login.php - Página de Login
 require_once 'includes/auth.php';
 
-// Se já estiver logado, redireciona para o dashboard
+$redirect = sanitize_redirect_path($_GET['redirect'] ?? '') ?: default_redirect_path();
+
+// Se já estiver logado, redireciona para o destino solicitado
 if (isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true) {
-    header("Location: " . BASE_PATH . "/index.php");
+    header("Location: " . $redirect);
     exit;
 }
 

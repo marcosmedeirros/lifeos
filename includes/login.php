@@ -27,6 +27,7 @@
         
         <form method="POST" action="">
             <input type="hidden" name="login" value="1">
+            <input type="hidden" name="redirect" value="<?php echo htmlspecialchars($redirect ?? '', ENT_QUOTES); ?>">
             <?php if (isset($GLOBALS['login_error']) && $GLOBALS['login_error']): ?>
                 <div class="bg-rose-500/20 text-rose-300 border border-rose-500 rounded-lg p-3 mb-4 text-sm font-medium">
                     <?php echo htmlspecialchars($GLOBALS['login_error']); ?>
