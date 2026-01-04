@@ -475,7 +475,7 @@ include __DIR__ . '/../includes/header.php';
                                 id="json_data" 
                                 name="json_data" 
                                 class="form-input" 
-                                placeholder='{"data": "2025-01-04", "status_saude": {"agua": 8}, "performance": {"treino": true}}'
+                                placeholder='{"data":"2026-01-04","perfil":"Nome","score_do_dia":8.5,"justificativa_nota":"...","saude_hormonal":{"tsh_base":2.3,"levoide_38mcg_status":"OK"},"performance_fisica":{"creatina_scoops":1,"agua_total_litros":2,"treinos":[{"tipo":"Corrida","distancia_km":4,"kcal_total":180}]},"nutricao":{"proteina_total_estimada_g":125,"meta_diaria_g":150},"disciplina_mental":{"controle_doce":"10/10"}}'
                                 required></textarea>
                             <div class="help-text">
                                 O JSON deve conter pelo menos o campo "data" no formato YYYY-MM-DD.
@@ -529,22 +529,26 @@ include __DIR__ . '/../includes/header.php';
                             <div class="card-coach" style="margin-top:10px;">🧠 <?= htmlspecialchars($entry['justificativa_nota']) ?></div>
                         <?php endif; ?>
 
-                        <!-- Status de Saúde -->
-                        <?php if (isset($entry['status_saude']) && is_array($entry['status_saude'])): ?>
+                        <?php if (!empty($entry['perfil'])): ?>
+                            <div class="card-date-small" style="margin-top:6px;color:#b3b3b3;">
+                                Perfil: <?= htmlspecialchars($entry['perfil']) ?>
+                            </div>
+                        <?php endif; ?>
+
+                        <!-- Saúde Hormonal -->
+                        <?php if (!empty($entry['saude_hormonal']) && is_array($entry['saude_hormonal'])): ?>
                         <div class="card-section">
-                            <div class="card-section-title">📊 Saúde</div>
-                            <?php foreach ($entry['status_saude'] as $key => $value): ?>
+                            <div class="card-section-title">🩺 Saúde Hormonal</div>
+                            <?php foreach ($entry['saude_hormonal'] as $key => $value): ?>
                                 <div class="card-stat">
                                     <span class="card-stat-label"><?= htmlspecialchars(str_replace('_', ' ', ucfirst($key))) ?>:</span>
                                     <span class="card-stat-value">
                                         <?php if (is_bool($value)): ?>
-                                            <span class="badge-small <?= $value ? 'badge-true' : 'badge-false' ?>">
-                                                <?= $value ? '✓' : '✗' ?>
-                                            </span>
+                                            <span class="badge-small <?= $value ? 'badge-true' : 'badge-false' ?>"><?= $value ? '✓' : '✗' ?></span>
                                         <?php elseif (is_numeric($value)): ?>
                                             <?= htmlspecialchars($value) ?>
                                         <?php else: ?>
-                                            <?= htmlspecialchars(substr($value, 0, 20)) ?><?= strlen($value) > 20 ? '...' : '' ?>
+                                            <?= htmlspecialchars($value) ?>
                                         <?php endif; ?>
                                     </span>
                                 </div>
@@ -552,24 +556,71 @@ include __DIR__ . '/../includes/header.php';
                         </div>
                         <?php endif; ?>
 
-                        <!-- Performance -->
-                        <?php if (isset($entry['performance']) && is_array($entry['performance'])): ?>
+                        <!-- Micronutrientes -->
+                        <?php if (!empty($entry['micronutrientes']) && is_array($entry['micronutrientes'])): ?>
                         <div class="card-section">
-                            <div class="card-section-title">⚡ Performance</div>
-                            <?php foreach ($entry['performance'] as $key => $value): ?>
+                            <div class="card-section-title">💊 Micronutrientes</div>
+                            <?php foreach ($entry['micronutrientes'] as $key => $value): ?>
                                 <div class="card-stat">
                                     <span class="card-stat-label"><?= htmlspecialchars(str_replace('_', ' ', ucfirst($key))) ?>:</span>
-                                    <span class="card-stat-value">
-                                        <?php if (is_bool($value)): ?>
-                                            <span class="badge-small <?= $value ? 'badge-true' : 'badge-false' ?>">
-                                                <?= $value ? '✓' : '✗' ?>
-                                            </span>
-                                        <?php elseif (is_numeric($value)): ?>
-                                            <?= htmlspecialchars($value) ?>
-                                        <?php else: ?>
-                                            <?= htmlspecialchars(substr($value, 0, 20)) ?><?= strlen($value) > 20 ? '...' : '' ?>
-                                        <?php endif; ?>
-                                    </span>
+                                    <span class="card-stat-value"><?= is_bool($value) ? ($value ? '✓' : '✗') : htmlspecialchars($value) ?></span>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                        <?php endif; ?>
+
+                        <!-- Performance Física -->
+                        <?php if (!empty($entry['performance_fisica']) && is_array($entry['performance_fisica'])): ?>
+                        <div class="card-section">
+                            <div class="card-section-title">⚡ Performance Física</div>
+                            <?php foreach ($entry['performance_fisica'] as $key => $value): ?>
+                                <?php if ($key === 'treinos' && is_array($value)): ?>
+                                    <div class="card-stat" style="flex-direction:column;align-items:flex-start;gap:6px;">
+                                        <span class="card-stat-label">Treinos:</span>
+                                        <div style="display:flex;flex-direction:column;gap:6px;width:100%;">
+                                            <?php foreach ($value as $t): ?>
+                                                <div class="item" style="padding:10px;border-radius:10px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);">
+                                                    <div class="title" style="font-size:13px;margin-bottom:4px;"><?= htmlspecialchars($t['tipo'] ?? 'Treino') ?></div>
+                                                    <div class="meta" style="gap:12px;font-size:12px;">
+                                                        <?php if (!empty($t['duracao_min'])): ?><span>⏱ <?= htmlspecialchars($t['duracao_min']) ?> min</span><?php endif; ?>
+                                                        <?php if (!empty($t['distancia_km'])): ?><span>📍 <?= htmlspecialchars($t['distancia_km']) ?> km</span><?php endif; ?>
+                                                        <?php if (!empty($t['kcal_total'])): ?><span>🔥 <?= htmlspecialchars($t['kcal_total']) ?> kcal</span><?php endif; ?>
+                                                    </div>
+                                                </div>
+                                            <?php endforeach; ?>
+                                        </div>
+                                    </div>
+                                <?php else: ?>
+                                    <div class="card-stat">
+                                        <span class="card-stat-label"><?= htmlspecialchars(str_replace('_', ' ', ucfirst($key))) ?>:</span>
+                                        <span class="card-stat-value"><?= is_bool($value) ? ($value ? '✓' : '✗') : htmlspecialchars($value) ?></span>
+                                    </div>
+                                <?php endif; ?>
+                            <?php endforeach; ?>
+                        </div>
+                        <?php endif; ?>
+
+                        <!-- Nutrição -->
+                        <?php if (!empty($entry['nutricao']) && is_array($entry['nutricao'])): ?>
+                        <div class="card-section">
+                            <div class="card-section-title">🥗 Nutrição</div>
+                            <?php foreach ($entry['nutricao'] as $key => $value): ?>
+                                <div class="card-stat">
+                                    <span class="card-stat-label"><?= htmlspecialchars(str_replace('_', ' ', ucfirst($key))) ?>:</span>
+                                    <span class="card-stat-value"><?= is_bool($value) ? ($value ? '✓' : '✗') : htmlspecialchars($value) ?></span>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                        <?php endif; ?>
+
+                        <!-- Disciplina Mental -->
+                        <?php if (!empty($entry['disciplina_mental']) && is_array($entry['disciplina_mental'])): ?>
+                        <div class="card-section">
+                            <div class="card-section-title">🧘 Disciplina Mental</div>
+                            <?php foreach ($entry['disciplina_mental'] as $key => $value): ?>
+                                <div class="card-stat">
+                                    <span class="card-stat-label"><?= htmlspecialchars(str_replace('_', ' ', ucfirst($key))) ?>:</span>
+                                    <span class="card-stat-value"><?= is_bool($value) ? ($value ? '✓' : '✗') : htmlspecialchars($value) ?></span>
                                 </div>
                             <?php endforeach; ?>
                         </div>
