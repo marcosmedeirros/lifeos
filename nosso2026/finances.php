@@ -87,7 +87,7 @@ $monthNames = ['', 'Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set'
       <?php endforeach; ?>
     </div>
 
-    <!-- Últimos Lançamentos -->as Despesas</h2>
+    <!-- Últimos Lançamentos --></h2>
       <div class="space-y-2">
         <?php
         $recent = $pdo->query("SELECT * FROM nosso2026_finances WHERE year=$year ORDER BY month DESC, id DESC LIMIT 20")->fetchAll();
