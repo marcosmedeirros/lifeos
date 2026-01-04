@@ -186,10 +186,10 @@
                     // Finance
                     const finSummary = finData?.summary||{income:0,outcome:0,balance:0,total_balance:0};
                     const finList = finData?.list||[];
-                    const weekStart=getWeekRange().start;
+                    const {start:weekStart,end:weekEnd}=getWeekRange();
                     const weekFin = finList.filter(f=>{
                         const dt = (f.created_at||'').slice(0,10);
-                        return dt>=weekStart && dt<=today;
+                        return dt>=weekStart && dt<=weekEnd;
                     });
                     const weekIncome = weekFin.filter(f=>f.type==='income'||f.type==='entrada').reduce((s,f)=>s+parseFloat(f.amount||0),0);
                     const weekOutcome = weekFin.filter(f=>!(f.type==='income'||f.type==='entrada')).reduce((s,f)=>s+parseFloat(f.amount||0),0);
@@ -295,10 +295,10 @@
                                 d.setDate(d.getDate()-dow+i);
                                 const ds=d.toISOString().slice(0,10);
                                 const isToday=ds===today;
-                                const dayNames=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+                                const dayNames=['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'];
                                 return (
                                     <div key={i} style={{minWidth:48,textAlign:'center',padding:'8px 6px',borderRadius:12,border:'1px solid var(--border)',background:isToday?'linear-gradient(135deg,rgba(139,155,255,0.26),rgba(93,211,255,0.2))':'var(--card)',color:isToday?'#f5f7ff':'var(--muted)'}}>
-                                        <div style={{fontSize:11,marginBottom:4}}>{dayNames[(i+1)%7]}</div>
+                                        <div style={{fontSize:11,marginBottom:4}}>{dayNames[i]}</div>
                                         <div style={{fontWeight:800,fontSize:16}}>{d.getDate()}</div>
                                     </div>
                                 );

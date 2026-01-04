@@ -38,6 +38,9 @@ if (isset($_GET['api'])) {
             $startOfWeek = $monday->format('Y-m-d');
             $endOfWeek = $sunday->format('Y-m-d');
             
+            // Debug log
+            error_log("Dashboard Stats - Período: $startOfWeek a $endOfWeek");
+            
             // Finanças da Semana
             $fin_stmt = $pdo->prepare("
                 SELECT type, amount
@@ -483,16 +486,15 @@ include 'includes/header.php';
         <div class="flex gap-3 justify-center flex-wrap">
             <script>
                 const today = new Date();
-                const dow = today.getDay() === 0 ? 6 : today.getDay() - 1;
+                const dow = today.getDay() === 0 ? 6 : today.getDay() - 1; // 0=Seg, 1=Ter, ..., 6=Dom
+                const dayNames = ['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'];
                 for(let i=0; i<7; i++) {
                     const d = new Date();
                     d.setDate(today.getDate() - dow + i);
                     const isToday = d.toDateString() === today.toDateString();
-                    const dayNames = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
-                    const dayIndex = (i+1) % 7;
                     document.write(`
                         <div class="text-center px-4 py-2 rounded-lg border ${isToday ? 'bg-yellow-600/20 border-yellow-600/50 text-yellow-400' : 'border-slate-700 text-slate-400'}" style="min-width:60px">
-                            <div class="text-xs font-semibold mb-1">${dayNames[dayIndex]}</div>
+                            <div class="text-xs font-semibold mb-1">${dayNames[i]}</div>
                             <div class="text-lg font-bold">${d.getDate()}</div>
                         </div>
                     `);
@@ -659,7 +661,10 @@ async function loadDashboard() {
 }
 
 async function toggleActivity(id) {
+    console.log('toggleActivity chamado com ID:', id);
     const item = document.getElementById(`dash-act-${id}`);
+    console.log('Item encontrado:', item);
+    
     if (item) {
         const icon = item.querySelector('i');
         const titleDiv = item.querySelector('.font-medium');
@@ -681,8 +686,13 @@ async function toggleActivity(id) {
         }
     }
 
-    await api('toggle_activity', {id});
-    loadDashboard();
+    try {
+        const result = await api('toggle_activity', {id});
+        console.log('Resultado da API:', result);
+        await loadDashboard();
+    } catch(error) {
+        console.error('Erro ao toggle:', error);
+    }
 }
 
 // Funções de Adição Rápida
