@@ -36,8 +36,8 @@ if (isset($_GET['api'])) {
             
             $inc = 0; $out = 0; 
             foreach($fin as $f) { 
-                if(in_array($f['type'], ['income', 'entrada'])) $inc = $f['total']; 
-                else $out = $f['total']; 
+                if(in_array($f['type'], ['income', 'entrada'])) $inc += floatval($f['total']); 
+                else $out += floatval($f['total']); 
             }
             
             // XP Total
@@ -113,8 +113,8 @@ if (isset($_GET['api'])) {
 
             $inc = 0; $out = 0; 
             foreach($fin as $f) { 
-                if(in_array($f['type'], ['income', 'entrada'])) $inc = $f['total']; 
-                else $out = $f['total']; 
+                if(in_array($f['type'], ['income', 'entrada'])) $inc += floatval($f['total']); 
+                else $out += floatval($f['total']); 
             }
 
             // XP Total

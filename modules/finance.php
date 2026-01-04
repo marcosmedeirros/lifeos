@@ -47,8 +47,8 @@ if ($action === 'get_finances') {
     $allTime = $pdo->query("SELECT type, SUM(amount) as total FROM finances GROUP BY type")->fetchAll();
     $totalInc = 0; $totalOut = 0;
     foreach($allTime as $t) {
-        if(in_array($t['type'], ['income', 'entrada'])) $totalInc += $t['total'];
-        else $totalOut += $t['total'];
+        if(in_array($t['type'], ['income', 'entrada'])) $totalInc += floatval($t['total']);
+        else $totalOut += floatval($t['total']);
     }
     $saldoGeral = $totalInc - $totalOut;
 
@@ -71,8 +71,8 @@ if ($action === 'get_finances') {
     
     $inc = 0; $out = 0;
     foreach($list as $i) {
-        if(in_array($i['type'], ['income', 'entrada'])) $inc += $i['amount']; 
-        else $out += $i['amount']; 
+        if(in_array($i['type'], ['income', 'entrada'])) $inc += floatval($i['amount']); 
+        else $out += floatval($i['amount']); 
     }
     
     echo json_encode([
