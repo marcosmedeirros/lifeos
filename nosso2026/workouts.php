@@ -5,7 +5,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['add'])) {
         $date = $_POST['workout_date'];
         $stmt = $pdo->prepare("INSERT INTO nosso2026_workouts (name, workout_date, month, year, done) VALUES (?,?,?,?,?)");
-        $stmt->execute([trim($_POST['name']), $date, intval(date('m', strtotime($date))), intval(date('Y', strtotime($date))), isset($_POST['done'])?1:0]);
+        $stmt->execute([trim($_POST['name']), $date, intval(date('m', strtotime($date))), intval(date('Y', strtotime($date))), 0]);
     } elseif (isset($_POST['toggle'])) {
         $w = $pdo->prepare("SELECT done FROM nosso2026_workouts WHERE id=?")->execute([intval($_POST['id'])]);
         $w = $w->fetch();
@@ -104,7 +104,6 @@ $doneWorkouts = count(array_filter($workouts, fn($w) => $w['done']));
     <div class="flex justify-between items-center mb-6">
       <div>
         <h1 class="text-3xl font-bold"><?= $monthNames[$currentMonth] ?> <?= $currentYear ?></h1>
-        <p class="text-sm text-[#999]">Concluídos: <span class="text-white font-bold"><?= $doneWorkouts ?>/<?= $totalWorkouts ?></span></p>
       </div>
       <div class="flex gap-2">
         <a href="?month=<?= $prevMonth ?>&year=<?= $prevYear ?>" class="btn">← Anterior</a>
