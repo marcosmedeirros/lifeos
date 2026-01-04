@@ -1,15 +1,18 @@
 <?php
 require_once __DIR__ . '/_bootstrap.php';
 
+// Categorias fixas de despesas
+$categories = ['Aluguel', 'Condominio/Agua', 'Internet', 'Luz', 'Gás', 'Outro'];
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['add'])) {
-        $stmt = $pdo->prepare("INSERT INTO nosso2026_finances (month, year, type, amount, category, description) VALUES (?,?,?,?,?,?)");
-        $stmt->execute([intval($_POST['month']), intval($_POST['year']), $_POST['type'], floatval($_POST['amount']), trim($_POST['category']), trim($_POST['description'])]);
+        $stmt = $pdo->prepare("INSERT INTO nosso2026_finances (month, year, type, amount, category, description) VALUES (?,?,'expense',?,?,?)");
+        $stmt->execute([intval($_POST['month']), intval($_POST['year']), floatval($_POST['amount']), trim($_POST['category']), trim($_POST['description'])]);
     } elseif (isset($_POST['delete'])) {
         $pdo->prepare("DELETE FROM nosso2026_finances WHERE id=?")->execute([intval($_POST['id'])]);
       } elseif (isset($_POST['edit'])) {
-        $stmt = $pdo->prepare("UPDATE nosso2026_finances SET month=?, type=?, amount=?, category=?, description=? WHERE id=?");
-        $stmt->execute([intval($_POST['month']), $_POST['type'], floatval($_POST['amount']), trim($_POST['category']), trim($_POST['description']), intval($_POST['id'])]);
+        $stmt = $pdo->prepare("UPDATE nosso2026_finances SET month=?, amount=?, category=?, description=? WHERE id=?");
+        $stmt->execute([intval($_POST['month']), floatval($_POST['amount']), trim($_POST['category']), trim($_POST['description']), intval($_POST['id'])]);
     }
     header('Location: ' . n26_link('finances.php'));
     exit;
@@ -17,12 +20,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 $year = isset($_GET['year']) ? intval($_GET['year']) : 2026;
 
-// Totais por mês
+// Totais por mês organizados por categoria
 $monthData = [];
 for($m = 1; $m <= 12; $m++) {
-    $income = $pdo->query("SELECT SUM(amount) FROM nosso2026_finances WHERE year=$year AND month=$m AND type='income'")->fetchColumn() ?: 0;
-    $expense = $pdo->query("SELECT SUM(amount) FROM nosso2026_finances WHERE year=$year AND month=$m AND type='expense'")->fetchColumn() ?: 0;
-    $monthData[$m] = ['income' => $income, 'expense' => $expense, 'balance' => $income - $expense];
+    $expenses = $pdo->query("SELECT category, SUM(amount) as total FROM nosso2026_finances WHERE year=$year AND month=$m GROUP BY category")->fetchAll(PDO::FETCH_KEY_PAIR);
+    $total = array_sum($expenses);
+    $monthData[$m] = [
+        'expenses' => $expenses,
+        'total' => $total,
+        'each' => $total / 2
+    ];
 }
 
 $monthNames = ['', 'Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
@@ -59,28 +66,28 @@ $monthNames = ['', 'Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set'
       <div class="glass rounded-2xl p-6 <?= $m == date('m') ? 'border-white' : '' ?>">
         <h3 class="text-xl font-bold mb-4"><?= $monthNames[$m] ?></h3>
         <div class="space-y-2 text-sm">
-          <div class="flex justify-between">
-            <span class="text-[#999]">Entradas</span>
-            <span class="text-green-400 font-bold">R$ <?= number_format($data['income'],2,',','.') ?></span>
-          </div>
-          <div class="flex justify-between">
-            <span class="text-[#999]">Saídas</span>
-            <span class="text-red-400 font-bold">R$ <?= number_format($data['expense'],2,',','.') ?></span>
-          </div>
-          <div class="border-t border-[#222] pt-2 flex justify-between">
-            <span class="font-bold">Saldo</span>
-            <span class="font-bold <?= $data['balance'] >= 0 ? 'text-white' : 'text-red-400' ?>">
-              <?= $data['balance'] >= 0 ? '+' : '' ?>R$ <?= number_format($data['balance'],2,',','.') ?>
-            </span>
+          <?php foreach($categories as $cat): ?>
+            <div class="flex justify-between">
+              <span class="text-[#999]"><?= $cat ?></span>
+              <span class="text-white font-semibold">R$ <?= number_format($data['expenses'][$cat] ?? 0, 2, ',', '.') ?></span>
+            </div>
+          <?php endforeach; ?>
+          <div class="border-t border-[#222] pt-2 mt-3">
+            <div class="flex justify-between mb-1">
+              <span class="font-bold">Total</span>
+              <span class="font-bold text-white">R$ <?= number_format($data['total'], 2, ',', '.') ?></span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-[#999] text-xs">Cada</span>
+              <span class="text-[#999] text-xs font-semibold">R$ <?= number_format($data['each'], 2, ',', '.') ?></span>
+            </div>
           </div>
         </div>
       </div>
       <?php endforeach; ?>
     </div>
 
-    <!-- Últimos Lançamentos -->
-    <section class="glass rounded-2xl p-6">
-      <h2 class="text-2xl font-bold mb-4">Últimos Lançamentos</h2>
+    <!-- Últimos Lançamentos -->as Despesas</h2>
       <div class="space-y-2">
         <?php
         $recent = $pdo->query("SELECT * FROM nosso2026_finances WHERE year=$year ORDER BY month DESC, id DESC LIMIT 20")->fetchAll();
@@ -89,10 +96,10 @@ $monthNames = ['', 'Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set'
         <div class="flex items-center justify-between bg-[#1a1a1a] border border-[#333] rounded-xl p-4">
           <div class="flex-1">
             <p class="font-bold"><?= htmlspecialchars($r['category']) ?></p>
-            <p class="text-xs text-[#999]"><?= $monthNames[$r['month']] ?> • <?= htmlspecialchars($r['description']) ?></p>
+            <p class="text-xs text-[#999]"><?= $monthNames[$r['month']] ?><?= $r['description'] ? ' • '.htmlspecialchars($r['description']) : '' ?></p>
           </div>
           <div class="text-right">
-            <p class="font-bold <?= $r['type']=='income' ? 'text-green-400' : 'text-red-400' ?>">
+            <p class="font-bold text-white">R$ <?= number_format($r['amount'],2,',','.') ?><p class="font-bold <?= $r['type']=='income' ? 'text-green-400' : 'text-red-400' ?>">
               <?= $r['type']=='income' ? '+' : '-' ?>R$ <?= number_format($r['amount'],2,',','.') ?>
             </p>
           </div>
@@ -109,6 +116,8 @@ $monthNames = ['', 'Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set'
       <div class="glass rounded-2xl p-6 max-w-md mx-auto mt-20" onclick="event.stopPropagation()">
         <h2 class="text-2xl font-bold mb-4" id="modalTitle">Adicionar Lançamento</h2>
         <form method="post" id="financesForm">
+          <input type="hidden" name="add" id="formAction" value="1">Despesa</h2>
+        <form method="post" id="financesForm">
           <input type="hidden" name="add" id="formAction" value="1">
           <input type="hidden" name="id" id="financeId">
           <input type="hidden" name="year" value="<?= $year ?>">
@@ -121,25 +130,20 @@ $monthNames = ['', 'Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set'
             </select>
           </div>
           <div class="mb-4">
-            <label class="block text-sm font-bold mb-2">Tipo</label>
-            <select name="type" id="financeType" class="w-full bg-[#1a1a1a] border border-[#333] rounded-xl p-3 text-white">
-              <option value="income">Entrada</option>
-              <option value="expense">Saída</option>
+            <label class="block text-sm font-bold mb-2">Categoria</label>
+            <select name="category" id="financeCategory" class="w-full bg-[#1a1a1a] border border-[#333] rounded-xl p-3 text-white" required>
+              <?php foreach($categories as $cat): ?>
+                <option value="<?= $cat ?>"><?= $cat ?></option>
+              <?php endforeach; ?>
             </select>
           </div>
           <div class="mb-4">
             <label class="block text-sm font-bold mb-2">Valor</label>
-            <input type="number" step="0.01" name="amount" id="financeAmount" class="w-full bg-[#1a1a1a] border border-[#333] rounded-xl p-3 text-white" required>
+            <input type="number" step="0.01" name="amount" id="financeAmount" class="w-full bg-[#1a1a1a] border border-[#333] rounded-xl p-3 text-white" placeholder="0,00" required>
           </div>
           <div class="mb-4">
-            <label class="block text-sm font-bold mb-2">Categoria</label>
-            <input name="category" id="financeCategory" class="w-full bg-[#1a1a1a] border border-[#333] rounded-xl p-3 text-white" placeholder="Ex: Mercado" required>
-          </div>
-          <div class="mb-4">
-            <label class="block text-sm font-bold mb-2">Descrição</label>
-            <input name="description" id="financeDescription" class="w-full bg-[#1a1a1a] border border-[#333] rounded-xl p-3 text-white" placeholder="Opcional">
-          </div>
-          <div class="flex gap-3">
+            <label class="block text-sm font-bold mb-2">Descrição (opcional)</label>
+            <input name="description" id="financeDescription" class="w-full bg-[#1a1a1a] border border-[#333] rounded-xl p-3 text-white" placeholder="Detalhes adicionais
             <button type="submit" class="btn flex-1">💾 Salvar</button>
             <button type="button" id="deleteBtn" style="display:none" onclick="deleteFinance()" class="btn" style="background:#dc2626">Excluir</button>
             <button type="button" onclick="closeModal()" class="btn" style="background:#333">Fechar</button>
@@ -156,15 +160,19 @@ $monthNames = ['', 'Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set'
       document.getElementById('formAction').name = 'add';
       document.getElementById('formAction').value = '1';
       document.getElementById('financeId').value = '';
+      document.getElementById('deleteBtn').style.display = 'none';Despesa';
+      document.getElementById('financesForm').reset();
+      document.getElementById('formAction').name = 'add';
+      document.getElementById('formAction').value = '1';
+      document.getElementById('financeId').value = '';
       document.getElementById('deleteBtn').style.display = 'none';
       document.getElementById('financeMonth').value = new Date().getMonth() + 1;
       document.getElementById('lancamentoModal').style.display = 'block';
     }
     function openEdit(finance) {
-      document.getElementById('modalTitle').textContent = 'Editar Lançamento';
+      document.getElementById('modalTitle').textContent = 'Editar Despesa';
       document.getElementById('financeId').value = finance.id;
       document.getElementById('financeMonth').value = finance.month;
-      document.getElementById('financeType').value = finance.type;
       document.getElementById('financeAmount').value = finance.amount;
       document.getElementById('financeCategory').value = finance.category;
       document.getElementById('financeDescription').value = finance.description || '';
@@ -175,12 +183,7 @@ $monthNames = ['', 'Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set'
     }
     function closeModal() { document.getElementById('lancamentoModal').style.display = 'none'; }
       function deleteFinance() {
-        if(confirm('Remover lançamento?')) {
-          const form = document.getElementById('financesForm');
-          const id = document.getElementById('financeId').value;
-          form.innerHTML = '<input type="hidden" name="delete" value="1"><input type="hidden" name="id" value="' + id + '">';
-          form.submit();
-        }
+        if(confirm('Remover despesa
       }
   </script>
 </body>

@@ -6,9 +6,14 @@ require_once __DIR__ . '/_bootstrap.php';
 $totalGoals = $pdo->query("SELECT COUNT(*) FROM nosso2026_goals")->fetchColumn();
 $doneGoals = $pdo->query("SELECT COUNT(*) FROM nosso2026_goals WHERE progress=100")->fetchColumn();
 $nextEvents = $pdo->query("SELECT title, start_date FROM events WHERE group_id='nosso2026' AND start_date>=NOW() ORDER BY start_date ASC LIMIT 5")->fetchAll();
+
+// Finanças do mês atual
 $m=intval(date('m')); $y=intval(date('Y'));
-$inc=$pdo->query("SELECT SUM(amount) FROM nosso2026_finances WHERE month=$m AND year=$y AND type='income'")->fetchColumn()?:0;
-$out=$pdo->query("SELECT SUM(amount) FROM nosso2026_finances WHERE month=$m AND year=$y AND type='expense'")->fetchColumn()?:0;
+$categories = ['Aluguel', 'Condominio/Agua', 'Internet', 'Luz', 'Gás', 'Outro'];
+$expenses = $pdo->query("SELECT category, SUM(amount) as total FROM nosso2026_finances WHERE month=$m AND year=$y GROUP BY category")->fetchAll(PDO::FETCH_KEY_PAIR);
+$totalExpenses = array_sum($expenses);
+$eachExpenses = $totalExpenses / 2;
+
 $marketItems = $pdo->query("SELECT * FROM nosso2026_market_list WHERE done=0 ORDER BY id DESC LIMIT 10")->fetchAll();
 $movieItems = $pdo->query("SELECT * FROM nosso2026_movies WHERE status='planejado' OR status IS NULL ORDER BY id DESC LIMIT 10")->fetchAll();
 
@@ -100,21 +105,25 @@ else { $progress = round((($now - $yearStart)/($yearEnd - $yearStart))*100); }
       <!-- Finanças do Mês -->
       <div class="glass p-6 rounded-2xl">
         <div class="flex items-center justify-between mb-4">
-          <h3 class="text-xl font-bold">Finanças</h3>
+          <h3 class="text-xl font-bold">Finanças - <?= date('M/Y') ?></h3>
           <a href="<?= n26_link('finances.php') ?>" class="text-xs hover:text-gray-300">Ver todas →</a>
         </div>
-        <div class="space-y-3">
-          <div class="flex justify-between items-center">
-            <span class="text-sm text-[#999]">Entradas</span>
-            <span class="font-bold text-green-400">R$ <?= number_format($inc,2,',','.') ?></span>
-          </div>
-          <div class="flex justify-between items-center">
-            <span class="text-sm text-[#999]">Saídas</span>
-            <span class="font-bold text-red-400">R$ <?= number_format($out,2,',','.') ?></span>
-          </div>
-          <div class="border-t border-[#222] pt-3 flex justify-between items-center">
-            <span class="text-sm font-bold">Saldo</span>
-            <span class="font-bold text-lg"><?= $inc-$out>=0?'+':'' ?>R$ <?= number_format($inc-$out,2,',','.') ?></span>
+        <div class="space-y-2 text-sm">
+          <?php foreach($categories as $cat): ?>
+            <div class="flex justify-between items-center">
+              <span class="text-[#999]"><?= $cat ?></span>
+              <span class="font-semibold text-white">R$ <?= number_format($expenses[$cat] ?? 0, 2, ',', '.') ?></span>
+            </div>
+          <?php endforeach; ?>
+          <div class="border-t border-[#222] pt-3 mt-3">
+            <div class="flex justify-between items-center mb-1">
+              <span class="font-bold">Total</span>
+              <span class="font-bold text-white">R$ <?= number_format($totalExpenses, 2, ',', '.') ?></span>
+            </div>
+            <div class="flex justify-between items-center">
+              <span class="text-[#999] text-xs">Cada</span>
+              <span class="font-semibold text-[#999] text-xs">R$ <?= number_format($eachExpenses, 2, ',', '.') ?></span>
+            </div>
           </div>
         </div>
       </div>
@@ -171,7 +180,7 @@ else { $progress = round((($now - $yearStart)/($yearEnd - $yearStart))*100); }
 
       <!-- Filmes (ao lado do Mercado) -->
       <div class="glass p-6 rounded-2xl">
-        <h3 class="text-xl font-bold mb-3">Filmes</h3>
+        <h3 class="text-xl font-bold mb-3">Filmes/Series</h3>
         <form method="post" class="flex gap-2 mb-3">
           <input type="hidden" name="add_movie" value="1">
           <input name="title" class="flex-1 bg-[#1a1a1a] border border-[#333] rounded-lg p-2 text-white text-sm" placeholder="Título" required>
