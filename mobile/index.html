@@ -123,6 +123,9 @@
             // Routine state
             const [routineMood,setRoutineMood]=useState('😊');
             const [routineContent,setRoutineContent]=useState('');
+            
+            // Mensagem do dia
+            const [dailyMessage,setDailyMessage]=useState('Carregando mensagem do dia...');
 
             const getWeekRange=()=>{
                 const d=nowLocal();
@@ -139,14 +142,27 @@
                 setLoading(true); setStatus('Carregando...');
                 try {
                     const {start,end}=getWeekRange();
-                    const [eventsData,actsData,habitsData,finData,routineData,stravaData] = await Promise.all([
+                    
+                    // Carrega mensagem do dia
+                    const now = new Date();
+                    const startOfYear = new Date(now.getFullYear(), 0, 0);
+                    const diff = now - startOfYear;
+                    const oneDay = 1000 * 60 * 60 * 24;
+                    const dayOfYear = Math.floor(diff / oneDay);
+                    
+                    const [eventsData,actsData,habitsData,finData,routineData,stravaData,messagesData] = await Promise.all([
                         api('../modules/google_agenda.php?api=list_events'),
                         api(`../modules/activities.php?api=get_activities&start=${today}&end=${today}`),
                         api(`../modules/habits.php?api=get_habits&month=${today.slice(0,7)}`),
                         api(`../modules/finance.php?api=get_finances&month=${today.slice(0,7)}`),
                         api(`../modules/routine.php?api=get_routine_day&date=${today}`),
-                        api('../modules/strava.php?api=get_strava_data')
+                        api('../modules/strava.php?api=get_strava_data'),
+                        fetch('../mensagens_365.json').then(r=>r.json()).catch(()=>[])
                     ]);
+                    
+                    // Busca mensagem do dia
+                    const todayMessage = Array.isArray(messagesData) ? messagesData.find(m=>m.dia===dayOfYear) : null;
+                    setDailyMessage(todayMessage?.mensagem || 'A persistência é o caminho do êxito.');
 
                     // Events
                     const evs = eventsData?.events||[];
@@ -368,7 +384,7 @@
                     <div className="card" style={{textAlign:'center',padding:24}}>
                         <div style={{fontSize:32,marginBottom:12}}>✨</div>
                         <div className="title" style={{fontSize:16,marginBottom:8}}>Mensagem do Dia</div>
-                        <div className="label" style={{fontSize:14,lineHeight:1.6}}>"A persistência é o caminho do êxito."</div>
+                        <div className="label" style={{fontSize:14,lineHeight:1.6,textAlign:'justify'}}>{dailyMessage}</div>
                     </div>
                 </div>
             );
@@ -379,8 +395,6 @@
     </script>
 </body>
 </html>
-
-                today:{events:0,activities:0,doneActivities:0,habitsDone:0},
                 week:{events:0,activities:0},
                 finance:{income:0,outcome:0,balance:0,total_balance:0},
                 routine:{mood:'📝',content:'Sem anotação'},
