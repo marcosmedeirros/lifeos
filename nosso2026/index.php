@@ -14,6 +14,9 @@ $expenses = $pdo->query("SELECT category, SUM(amount) as total FROM nosso2026_fi
 $totalExpenses = array_sum($expenses);
 $eachExpenses = $totalExpenses / 2;
 
+// Total de treinos no ano
+$totalWorkoutsYear = $pdo->query("SELECT COUNT(*) FROM nosso2026_workouts WHERE year=$y")->fetchColumn() ?: 0;
+
 $marketItems = $pdo->query("SELECT * FROM nosso2026_market_list WHERE done=0 ORDER BY id DESC LIMIT 10")->fetchAll();
 $movieItems = $pdo->query("SELECT * FROM nosso2026_movies WHERE status='planejado' OR status IS NULL ORDER BY id DESC LIMIT 10")->fetchAll();
 
@@ -131,24 +134,32 @@ else { $progress = round((($now - $yearStart)/($yearEnd - $yearStart))*100); }
       <!-- Próximos Eventos -->
       <div class="glass p-6 rounded-2xl">
         <div class="flex items-center justify-between mb-4">
-          <h3 class="text-xl font-bold">Próximos</h3>
+          <h3 class="text-xl font-bold">Próximo</h3>
           <a href="<?= n26_link('calendar.php') ?>" class="text-xs hover:text-gray-300">Ver calendário →</a>
         </div>
-        <div class="space-y-3">
+        <div class="flex items-center justify-center py-6">
           <?php if(empty($nextEvents)): ?>
-            <p class="text-sm text-[#999] text-center py-4">Nenhum evento agendado</p>
-          <?php else: foreach($nextEvents as $e): ?>
-            <div class="flex gap-3">
-              <div class="text-center">
-                <div class="text-2xl font-bold"><?= date('d', strtotime($e['start_date'])) ?></div>
-                <div class="text-xs text-[#999]"><?= date('M', strtotime($e['start_date'])) ?></div>
-              </div>
-              <div class="flex-1 border-l border-[#222] pl-3">
-                <p class="text-sm font-semibold"><?= htmlspecialchars($e['title']) ?></p>
-                <p class="text-xs text-[#999]"><?= date('H:i', strtotime($e['start_date'])) ?></p>
-              </div>
+            <p class="text-sm text-[#999]">Nenhum evento agendado</p>
+          <?php else: ?>
+            <div class="text-center">
+              <div class="text-4xl font-bold mb-2"><?= date('d', strtotime($nextEvents[0]['start_date'])) ?></div>
+              <div class="text-sm text-[#999] mb-3"><?= date('M', strtotime($nextEvents[0]['start_date'])) ?></div>
+              <p class="text-sm font-semibold"><?= htmlspecialchars($nextEvents[0]['title']) ?></p>
+              <p class="text-xs text-[#999] mt-1"><?= date('H:i', strtotime($nextEvents[0]['start_date'])) ?></p>
             </div>
-          <?php endforeach; endif; ?>
+          <?php endif; ?>
+        </div>
+      </div>
+
+      <!-- Total de Treinos -->
+      <div class="glass p-6 rounded-2xl">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-xl font-bold">Treinos</h3>
+          <a href="<?= n26_link('workouts.php') ?>" class="text-xs hover:text-gray-300">Ver mais →</a>
+        </div>
+        <div class="text-center py-6">
+          <div class="text-5xl font-bold text-white"><?= $totalWorkoutsYear ?></div>
+          <p class="text-sm text-[#999] mt-2">treinos em 2026</p>
         </div>
       </div>
     </div>

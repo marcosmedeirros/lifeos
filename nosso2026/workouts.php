@@ -26,6 +26,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $currentMonth = isset($_GET['month']) ? intval($_GET['month']) : intval(date('m'));
 $currentYear = isset($_GET['year']) ? intval($_GET['year']) : intval(date('Y'));
 
+// Dashboard: total de treinos por mês
+$monthlyStats = [];
+for($m = 1; $m <= 12; $m++) {
+    $count = $pdo->query("SELECT COUNT(*) FROM nosso2026_workouts WHERE year=$currentYear AND month=$m")->fetchColumn() ?: 0;
+    $monthlyStats[$m] = intval($count);
+}
+$totalYearlyWorkouts = array_sum($monthlyStats);
+
 // Workouts do mês
 $workoutsQuery = $pdo->prepare("SELECT * FROM nosso2026_workouts WHERE year=? AND month=? ORDER BY workout_date ASC");
 $workoutsQuery->execute([$currentYear, $currentMonth]);
@@ -77,6 +85,21 @@ $doneWorkouts = count(array_filter($workouts, fn($w) => $w['done']));
   <?php include __DIR__.'/_nav.php'; ?>
   
   <main class="max-w-7xl mx-auto px-4 py-10">
+    <!-- Dashboard de Treinos -->
+    <div class="grid md:grid-cols-12 gap-4 mb-8">
+      <?php $monthNames = ['', 'Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez']; ?>
+      <?php foreach($monthlyStats as $m => $count): ?>
+      <div class="glass rounded-lg p-3 text-center <?= $m == $currentMonth ? 'border-white' : '' ?>" style="flex: 1; min-width: 60px;">
+        <div class="text-2xl font-bold text-white"><?= $count ?></div>
+        <div class="text-xs text-[#999]"><?= $monthNames[$m] ?></div>
+      </div>
+      <?php endforeach; ?>
+      <div class="glass rounded-lg p-3 text-center" style="flex: 1; min-width: 80px; background:#1a1a1a;">
+        <div class="text-2xl font-bold text-white"><?= $totalYearlyWorkouts ?></div>
+        <div class="text-xs text-[#999]">Total</div>
+      </div>
+    </div>
+
     <!-- Stats + Navegação -->
     <div class="flex justify-between items-center mb-6">
       <div>
