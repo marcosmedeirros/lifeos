@@ -375,7 +375,7 @@ include __DIR__ . '/../includes/header.php';
                     <p class="text-slate-300">Visual clean para seus eventos conectados</p>
                 </div>
                 <?php if ($is_connected): ?>
-                    <button onclick="createEventModal()" class="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white px-6 py-3 rounded-xl font-bold shadow-lg transition">
+                    <button onclick="createEventModal()" class="bg-white hover:bg-gray-100 text-black px-6 py-3 rounded-xl font-bold shadow-lg transition">
                         <i class="fas fa-plus mr-2"></i> Adicionar
                     </button>
                 <?php endif; ?>

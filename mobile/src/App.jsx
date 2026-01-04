@@ -9,7 +9,7 @@ const tabs = [
 ];
 
 export default function App() {
-  const [tab, setTab] = useState('dashboard');
+  const [tab, setTab] = useState('agenda');
   const [status, setStatus] = useState('Online');
 
   return (
