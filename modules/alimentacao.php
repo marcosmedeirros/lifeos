@@ -513,10 +513,21 @@ include __DIR__ . '/../includes/header.php';
                 <?php else: ?>
                     <?php foreach ($nutrition_data as $entry): ?>
                     <div class="nutrition-card-small">
-                        <div class="card-date">
-                            <?= htmlspecialchars(format_date($entry['data'] ?? '')) ?>
-                            <div class="card-date-small"><?= htmlspecialchars($entry['data'] ?? '') ?></div>
+                        <div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start;">
+                            <div class="card-date" style="margin-bottom:0;">
+                                <?= htmlspecialchars(format_date($entry['data'] ?? '')) ?>
+                                <div class="card-date-small"><?= htmlspecialchars($entry['data'] ?? '') ?></div>
+                            </div>
+                            <?php if (isset($entry['score_do_dia'])): ?>
+                                <div style="text-align:right;">
+                                    <div style="font-size:26px;font-weight:800;line-height:1;color:#fff;"><?= htmlspecialchars($entry['score_do_dia']) ?></div>
+                                    <div class="card-date-small" style="text-transform:uppercase;letter-spacing:0.6px;">Nota do dia</div>
+                                </div>
+                            <?php endif; ?>
                         </div>
+                        <?php if (!empty($entry['justificativa_nota'])): ?>
+                            <div class="card-coach" style="margin-top:10px;">🧠 <?= htmlspecialchars($entry['justificativa_nota']) ?></div>
+                        <?php endif; ?>
 
                         <!-- Status de Saúde -->
                         <?php if (isset($entry['status_saude']) && is_array($entry['status_saude'])): ?>
