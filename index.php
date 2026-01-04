@@ -39,30 +39,30 @@ if (isset($_GET['api'])) {
             $endOfWeek = $sunday->format('Y-m-d');
             
             // Debug log
-            error_log("Dashboard Stats - Período: $startOfWeek a $endOfWeek");
+            error_log("[DASHBOARD_STATS] Período calculado: $startOfWeek a $endOfWeek");
             
             // Finanças da Semana
             $fin_stmt = $pdo->prepare("
-                SELECT type, amount
+                SELECT type, amount, DATE(created_at) as data
                 FROM finances 
-                WHERE DATE(created_at) BETWEEN ? AND ?
+                WHERE user_id = ? AND DATE(created_at) BETWEEN ? AND ?
             ");
-            $fin_stmt->execute([$startOfWeek, $endOfWeek]);
+            $fin_stmt->execute([$user_id, $startOfWeek, $endOfWeek]);
             $fin = $fin_stmt->fetchAll();
             
             $inc = 0; $out = 0; 
-            error_log("Total de registros financeiros encontrados: " . count($fin));
+            error_log("[DASHBOARD_STATS] Total de registros encontrados: " . count($fin));
             foreach($fin as $f) { 
                 $amount = floatval($f['amount']);
                 $isIncome = in_array($f['type'], ['income', 'entrada']);
-                error_log("Tipo: {$f['type']}, Valor: {$amount}, É entrada? " . ($isIncome ? 'SIM' : 'NÃO'));
+                error_log("[DASHBOARD_STATS] Data: {$f['data']}, Tipo: {$f['type']}, Valor: {$amount}, É entrada? " . ($isIncome ? 'SIM' : 'NÃO'));
                 if($isIncome) {
                     $inc += $amount;
                 } else {
                     $out += $amount;
                 }
             }
-            error_log("Total Entradas: $inc, Total Saídas: $out");
+            error_log("[DASHBOARD_STATS] Total Entradas: $inc, Total Saídas: $out");
             
             // XP Total
             $xp_total = $pdo->query("SELECT total_xp FROM user_settings WHERE user_id = {$user_id}")->fetchColumn() ?: 0;
@@ -134,12 +134,14 @@ if (isset($_GET['api'])) {
             $sunday = (clone $monday)->modify('+6 days');
             $startOfWeek = $monday->format('Y-m-d');
             $endOfWeek = $sunday->format('Y-m-d');
+            
+            error_log("[DASHBOARD_STATS] Período calculado: $startOfWeek a $endOfWeek");
 
             // Finanças da Semana
             $fin_stmt = $pdo->prepare("
-                SELECT type, amount
+                SELECT type, amount, DATE(created_at) as data
                 FROM finances 
-                WHERE DATE(created_at) BETWEEN ? AND ?
+                WHERE user_id = ? AND DATE(created_at) BETWEEN ? AND ?
             ");
             $fin_stmt->execute([$startOfWeek, $endOfWeek]);
             $fin = $fin_stmt->fetchAll();
@@ -690,34 +692,49 @@ async function loadDashboard() {
 
 async function toggleActivity(id) {
     console.log('toggleActivity chamado com ID:', id);
-    const item = document.getElementById(`dash-act-${id}`);
-    console.log('Item encontrado:', item);
     
-    if (item) {
-        const icon = item.querySelector('i');
-        const titleDiv = item.querySelector('.font-medium');
-        const isDone = item.classList.contains('opacity-50');
-
-        if (!isDone) {
-            item.classList.add('opacity-50');
-            item.classList.remove('border-blue-500');
-            item.classList.add('border-green-500');
-            item.classList.add('bg-green-900/20');
-            if (icon) { icon.classList.remove('fa-circle'); icon.classList.add('fa-check-circle'); }
-            if (titleDiv) { titleDiv.classList.add('line-through', 'text-slate-400'); }
-        } else {
-            item.classList.remove('opacity-50');
-            item.classList.remove('border-green-500', 'bg-green-900/20');
-            item.classList.add('border-blue-500');
-            if (icon) { icon.classList.add('fa-circle'); icon.classList.remove('fa-check-circle'); }
-            if (titleDiv) { titleDiv.classList.remove('line-through', 'text-slate-400'); }
-        }
-    }
-
     try {
         const result = await api('toggle_activity', {id});
         console.log('Resultado da API:', result);
-        await loadDashboard();
+        
+        if (result.success) {
+            // Atualiza apenas as atividades pendentes no contador
+            const item = document.getElementById(`dash-act-${id}`);
+            if (item) {
+                const icon = item.querySelector('i');
+                const titleDiv = item.querySelector('.font-medium');
+                const isDone = item.classList.contains('opacity-50');
+
+                if (!isDone) {
+                    item.classList.add('opacity-50');
+                    item.classList.remove('border-blue-500');
+                    item.classList.add('border-green-500');
+                    item.classList.add('bg-green-900/20');
+                    if (icon) { icon.classList.remove('fa-circle'); icon.classList.add('fa-check-circle'); }
+                    if (titleDiv) { titleDiv.classList.add('line-through', 'text-slate-400'); }
+                    
+                    // Atualiza contador
+                    const counter = document.getElementById('dash-tasks-count');
+                    if (counter) {
+                        const currentCount = parseInt(counter.textContent) || 0;
+                        counter.textContent = Math.max(0, currentCount - 1);
+                    }
+                } else {
+                    item.classList.remove('opacity-50');
+                    item.classList.remove('border-green-500', 'bg-green-900/20');
+                    item.classList.add('border-blue-500');
+                    if (icon) { icon.classList.add('fa-circle'); icon.classList.remove('fa-check-circle'); }
+                    if (titleDiv) { titleDiv.classList.remove('line-through', 'text-slate-400'); }
+                    
+                    // Atualiza contador
+                    const counter = document.getElementById('dash-tasks-count');
+                    if (counter) {
+                        const currentCount = parseInt(counter.textContent) || 0;
+                        counter.textContent = currentCount + 1;
+                    }
+                }
+            }
+        }
     } catch(error) {
         console.error('Erro ao toggle:', error);
     }
