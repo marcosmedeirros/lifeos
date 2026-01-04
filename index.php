@@ -448,14 +448,41 @@ include 'includes/header.php';
             <p class="text-3xl font-bold text-white" id="dash-strava-count">0</p>
         </div>
     </div>
+    
+    <!-- Dias da Semana -->
+    <div class="glass-card p-4 rounded-2xl mb-8">
+        <h3 class="text-slate-400 text-sm font-semibold mb-3 text-center">Semana Atual</h3>
+        <div class="flex gap-3 justify-center flex-wrap">
+            <script>
+                const today = new Date();
+                const dow = today.getDay() === 0 ? 6 : today.getDay() - 1;
+                for(let i=0; i<7; i++) {
+                    const d = new Date();
+                    d.setDate(today.getDate() - dow + i);
+                    const isToday = d.toDateString() === today.toDateString();
+                    const dayNames = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+                    const dayIndex = (i+1) % 7;
+                    document.write(`
+                        <div class="text-center px-4 py-2 rounded-lg border ${isToday ? 'bg-yellow-600/20 border-yellow-600/50 text-yellow-400' : 'border-slate-700 text-slate-400'}" style="min-width:60px">
+                            <div class="text-xs font-semibold mb-1">${dayNames[dayIndex]}</div>
+                            <div class="text-lg font-bold">${d.getDate()}</div>
+                        </div>
+                    `);
+                }
+            </script>
+        </div>
+    </div>
 
         <!-- Listas de Atividades, Eventos e Hábitos -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <!-- Atividades de Hoje -->
         <div class="glass-card p-6 rounded-2xl">
-            <h3 class="font-bold mb-4 text-yellow-500 flex items-center gap-2">
-                <i class="fas fa-check-circle"></i> Hoje
-            </h3>
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="font-bold text-yellow-500 flex items-center gap-2">
+                    <i class="fas fa-check-circle"></i> Hoje
+                </h3>
+                <span class="text-xs font-bold px-3 py-1 rounded-full bg-red-500/20 text-red-400 border border-red-500/40" id="dash-week-spending">Carregando...</span>
+            </div>
             <div id="dash-activities-list" class="space-y-2"></div>
         </div>
         
@@ -532,6 +559,9 @@ async function loadDashboard() {
     document.getElementById('dash-tasks-count').innerText = data.activities_count;
     document.getElementById('dash-habits-week').innerText = data.habits_week || 0;
     document.getElementById('dash-strava-count').innerText = data.strava_count || 0;
+    
+    // Gastos da semana no badge
+    document.getElementById('dash-week-spending').innerText = `Gastos: ${formatCurrency(data.outcome_week || 0)}`;
     
     // Próximo Evento
     let nextEventTitle = 'Nenhum evento';

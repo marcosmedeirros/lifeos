@@ -284,6 +284,27 @@
                             <div className="item"><div className="label">Treinou?</div><div className="title" style={{fontSize:18}}>{summary.strava.trainedToday?'✅ Sim':'❌ Não'}</div></div>
                         </div>
                     </div>
+                    
+                    {/* DIAS DA SEMANA */}
+                    <div className="card">
+                        <div className="label" style={{marginBottom:8,textAlign:'center'}}>Semana Atual</div>
+                        <div style={{display:'flex',gap:8,overflowX:'auto',padding:'4px 0'}}>
+                            {[...Array(7)].map((_,i)=>{
+                                const d=new Date();
+                                const dow=d.getDay()===0?6:d.getDay()-1;
+                                d.setDate(d.getDate()-dow+i);
+                                const ds=d.toISOString().slice(0,10);
+                                const isToday=ds===today;
+                                const dayNames=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+                                return (
+                                    <div key={i} style={{minWidth:48,textAlign:'center',padding:'8px 6px',borderRadius:12,border:'1px solid var(--border)',background:isToday?'linear-gradient(135deg,rgba(139,155,255,0.26),rgba(93,211,255,0.2))':'var(--card)',color:isToday?'#f5f7ff':'var(--muted)'}}>
+                                        <div style={{fontSize:11,marginBottom:4}}>{dayNames[(i+1)%7]}</div>
+                                        <div style={{fontWeight:800,fontSize:16}}>{d.getDate()}</div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
 
                     {/* EVENTOS DO DIA */}
                     <div className="card">
@@ -350,6 +371,23 @@
                     {/* FINANÇAS */}
                     <div className="card">
                         <h3 className="title" style={{fontSize:'15px',marginBottom:10}}>💰 Registrar Gasto/Entrada</h3>
+                        
+                        {/* Resumo Mensal */}
+                        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:8,marginBottom:12}}>
+                            <div className="item" style={{textAlign:'center'}}>
+                                <div className="label" style={{fontSize:11}}>Saldo Total</div>
+                                <div className="title" style={{fontSize:14,color:'#8b9bff'}}>{fmtMoney(summary.finance.total_balance||0)}</div>
+                            </div>
+                            <div className="item" style={{textAlign:'center'}}>
+                                <div className="label" style={{fontSize:11}}>Entradas Mês</div>
+                                <div className="title" style={{fontSize:14,color:'#16a34a'}}>{fmtMoney(summary.finance.income||0)}</div>
+                            </div>
+                            <div className="item" style={{textAlign:'center'}}>
+                                <div className="label" style={{fontSize:11}}>Saídas Mês</div>
+                                <div className="title" style={{fontSize:14,color:'#dc2626'}}>{fmtMoney(summary.finance.outcome||0)}</div>
+                            </div>
+                        </div>
+                        
                         <div style={{display:'grid',gap:8,marginBottom:10}}>
                             <select className="input" value={finType} onChange={e=>setFinType(e.target.value)}>
                                 <option value="expense">💸 Saída</option><option value="income">💵 Entrada</option>
@@ -367,7 +405,10 @@
 
                     {/* BOARD - IMAGEM DO DIA */}
                     <div className="card">
-                        <h3 className="title" style={{fontSize:'15px',marginBottom:10}}>📸 Imagem do Dia</h3>
+                        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:10}}>
+                            <h3 className="title" style={{fontSize:'15px',margin:0}}>📸 Imagem do Dia</h3>
+                            <span className="badge" style={{background:'rgba(220,38,38,0.18)',color:'#ef4444',borderColor:'rgba(220,38,38,0.4)'}}>-{fmtMoney(weekFinance.outcome)}</span>
+                        </div>
                         {boardPhoto && (
                             <div style={{marginBottom:10,borderRadius:14,overflow:'hidden',border:'1px solid var(--border)'}}>
                                 <img src={`../uploads/board/${boardPhoto.filename}`} alt="Foto do dia" style={{width:'100%',display:'block'}} />
