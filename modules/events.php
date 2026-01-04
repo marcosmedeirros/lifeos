@@ -98,16 +98,16 @@ require_once __DIR__ . '/../includes/header.php';
             <div class="flex justify-between items-center mb-8">
                 <h2 class="text-3xl font-bold text-white">Calendário</h2>
                 <div class="flex gap-3 items-center">
-                    <div class="flex items-center bg-slate-800 rounded-lg p-1 border border-slate-700">
-                        <button onclick="changeEventMonth(-1)" class="w-8 h-8 hover:bg-slate-700 rounded text-slate-400">
+                    <div class="flex items-center bg-black/40 rounded-lg p-1 border border-gray-600/30">
+                        <button onclick="changeEventMonth(-1)" class="w-8 h-8 hover:bg-black/60 rounded text-gray-400">
                             <i class="fas fa-chevron-left"></i>
                         </button>
-                        <span id="event-month-label" class="px-4 font-medium text-sm min-w-[140px] text-center capitalize">...</span>
-                        <button onclick="changeEventMonth(1)" class="w-8 h-8 hover:bg-slate-700 rounded text-slate-400">
+                        <span id="event-month-label" class="px-4 text-sm font-mono text-gray-300 min-w-[140px] justify-center text-center">...</span>
+                        <button onclick="changeEventMonth(1)" class="w-8 h-8 hover:bg-black/60 rounded text-gray-400">
                             <i class="fas fa-chevron-right"></i>
                         </button>
                     </div>
-                    <button onclick="openEventModal('modal-event')" class="bg-gradient-to-r from-yellow-600 to-yellow-700 hover:from-yellow-500 hover:to-yellow-600 text-white px-5 py-2 rounded-lg font-bold shadow-lg shadow-yellow-600/30 transition">
+                    <button onclick="openEventModal('modal-event')" class="bg-white hover:bg-gray-100 text-black px-5 py-2 rounded-lg font-bold shadow-lg transition">
                         <i class="fas fa-plus mr-1"></i> 📅 Novo
                     </button>
                 </div>
@@ -125,13 +125,13 @@ require_once __DIR__ . '/../includes/header.php';
 
 <!-- Modal Event -->
 <!-- Modal Event -->
-<div id="event-modal-overlay" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4" onclick="closeEventModal()">
+<div id="event-modal-overlay" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4" onclick="closeEventModal()">
     <div class="modal-glass rounded-2xl p-8 w-full max-w-md relative max-h-[90vh] overflow-y-auto" onclick="event.stopPropagation()">
-        <button type="button" onclick="closeEventModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white transition w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-800 z-50">
+        <button type="button" onclick="closeEventModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white transition w-8 h-8 flex items-center justify-center rounded-full hover:bg-black/60 z-50">
             <i class="fas fa-times text-xl"></i>
         </button>
         <form id="modal-event" class="modal-form" onsubmit="submitEvent(event)">
-            <h3 class="text-2xl font-bold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-yellow-500" id="event-modal-title">📅 Novo Evento</h3>
+            <h3 class="text-2xl font-bold mb-6 text-white" id="event-modal-title">📅 Novo Evento</h3>
             <input type="hidden" name="id" id="event-id">
             <div class="space-y-5">
                 <input type="text" name="title" id="event-title" placeholder="Nome do Evento" required class="text-lg">
@@ -141,7 +141,7 @@ require_once __DIR__ . '/../includes/header.php';
                 </div>
                 <textarea name="desc" id="event-desc" placeholder="Descrição (opcional)" class="text-lg" rows="3"></textarea>
                 <div class="flex gap-3 pt-4">
-                    <button type="submit" class="flex-1 bg-gradient-to-r from-yellow-600 to-yellow-700 hover:from-yellow-500 hover:to-yellow-600 text-white font-bold py-3 rounded-xl shadow-lg shadow-yellow-600/30 transition">💾 Salvar</button>
+                    <button type="submit" class="flex-1 bg-white hover:bg-gray-100 text-black font-bold py-3 rounded-xl shadow-lg transition">💾 Salvar</button>
                     <button type="button" id="btn-delete-event" onclick="deleteEvent()" class="hidden bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 hover:text-rose-400 px-4 rounded-xl border border-rose-500/30 transition">
                         <i class="fas fa-trash"></i>
                     </button>
@@ -191,15 +191,15 @@ async function loadEvents() {
     const pad = new Date(currentEventMonth.getFullYear(), currentEventMonth.getMonth(), 1).getDay(); 
     
     for (let i = 0; i < pad; i++) {
-        cal.innerHTML += '<div class="bg-slate-800/10 h-28 rounded-xl border border-transparent"></div>'; 
+        cal.innerHTML += '<div class="bg-black/30 h-28 rounded-xl border border-transparent"></div>'; 
     }
     
     for (let i = 1; i <= dim; i++) { 
         const dStr = `${ym}-${String(i).padStart(2, '0')}`; 
         const evs = window.eventsData.filter(e => e.start_date.startsWith(dStr)); 
         const isToday = new Date().toISOString().slice(0,10) === dStr; 
-        const cellClass = isToday ? 'bg-yellow-500/10 border-yellow-500/50 ring-1 ring-yellow-500/30' : 'bg-slate-800/40 border-slate-700/50 hover:bg-slate-800 hover:border-slate-600'; 
-        const numClass = isToday ? 'text-yellow-400 font-bold' : 'text-slate-400 font-medium'; 
+        const cellClass = isToday ? 'bg-white/10 border-white/50 ring-1 ring-white/30' : 'bg-black/30 border-gray-600/30 hover:bg-black/50 hover:border-gray-600'; 
+        const numClass = isToday ? 'text-white font-bold' : 'text-slate-400 font-medium'; 
         
         let html = `<div class="${cellClass} h-28 rounded-xl border p-2 cursor-pointer transition group relative flex flex-col" onclick="openEventModal('modal-event'); document.getElementById('event-date').value='${dStr}'">
             <span class="${numClass} text-sm mb-1 ml-1">${i}</span>
@@ -207,7 +207,7 @@ async function loadEvents() {
         
         evs.forEach(ev => { 
             const time = new Date(ev.start_date).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }); 
-            html += `<div onclick="event.stopPropagation(); editEventRow(${ev.id})" class="cursor-pointer text-xs px-2 py-1 rounded-md bg-yellow-500/10 text-yellow-200 border-l-2 border-yellow-500 hover:bg-yellow-500/20 transition truncate mb-1" title="${time} - ${ev.title}">
+            html += `<div onclick="event.stopPropagation(); editEventRow(${ev.id})" class="cursor-pointer text-xs px-2 py-1 rounded-md bg-white/10 text-gray-200 border-l-2 border-white hover:bg-white/20 transition truncate mb-1" title="${time} - ${ev.title}">
                 <span class="opacity-70 text-[10px] mr-1">${time}</span>${ev.title}
             </div>`; 
         });

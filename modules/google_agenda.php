@@ -369,7 +369,7 @@ include __DIR__ . '/../includes/header.php';
         <div class="main-shell">
             <header class="mb-8 flex items-center justify-between">
                 <div>
-                    <h2 class="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-amber-400 to-yellow-500 drop-shadow-[0_4px_18px_rgba(250,204,21,0.25)]">
+                    <h2 class="text-3xl font-bold text-white drop-shadow-[0_4px_18px_rgba(255,255,255,0.25)]">
                         📅 Calendário
                     </h2>
                     <p class="text-slate-300">Visual clean para seus eventos conectados</p>
@@ -384,7 +384,7 @@ include __DIR__ . '/../includes/header.php';
             <?php if (!$is_connected): ?>
                 <!-- Não Conectado -->
                 <div class="glass-card p-8 rounded-2xl text-center max-w-2xl mx-auto">
-                    <i class="fas fa-calendar-alt text-6xl text-yellow-500 mb-4"></i>
+                    <i class="fas fa-calendar-alt text-6xl text-white mb-4"></i>
                     <h3 class="text-2xl font-bold text-white mb-4">Conecte sua Google Agenda</h3>
                     <p class="text-slate-300 mb-6">Sincronize seus eventos automaticamente entre o LifeOS e o Google Calendar</p>
 
@@ -404,7 +404,7 @@ include __DIR__ . '/../includes/header.php';
                         </div>
                     <?php else: ?>
                         <a href="https://accounts.google.com/o/oauth2/v2/auth?client_id=<?php echo urlencode($GOOGLE_CLIENT_ID); ?>&redirect_uri=<?php echo urlencode($REDIRECT_URI); ?>&response_type=code&scope=https://www.googleapis.com/auth/calendar&access_type=offline&prompt=consent" 
-                           class="inline-block bg-gradient-to-r from-yellow-600 to-yellow-700 hover:from-yellow-500 hover:to-yellow-600 text-white px-8 py-4 rounded-xl font-bold text-lg shadow-lg shadow-yellow-600/30 transition">
+                           class="inline-block bg-white hover:bg-gray-100 text-black px-8 py-4 rounded-xl font-bold text-lg shadow-lg transition">
                             <i class="fab fa-google mr-2"></i> Conectar com Google
                         </a>
                         <p class="text-slate-400 text-xs mt-3">Redirecionamento: <?php echo htmlspecialchars($REDIRECT_URI); ?></p>
@@ -423,13 +423,13 @@ include __DIR__ . '/../includes/header.php';
 <!-- Modal para criar/editar evento -->
 <div id="modal-event-overlay" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
     <div class="modal-glass rounded-2xl p-8 w-full max-w-md">
-        <h3 class="text-2xl font-bold mb-6 text-yellow-400" id="modal-event-title">Novo Evento</h3>
+        <h3 class="text-2xl font-bold mb-6 text-white" id="modal-event-title">Novo Evento</h3>
         <form onsubmit="submitEvent(event)" class="space-y-4">
             <input type="hidden" id="event-id">
             <input type="text" id="event-title" placeholder="Título do evento" required class="w-full">
             <input type="datetime-local" id="event-date" required class="w-full">
             <div class="flex gap-3">
-                <button type="submit" class="flex-1 bg-yellow-600 hover:bg-yellow-500 text-white py-3 rounded-xl font-bold" id="btn-save-event">
+                <button type="submit" class="flex-1 bg-white hover:bg-gray-100 text-black py-3 rounded-xl font-bold" id="btn-save-event">
                     Salvar
                 </button>
                 <button type="button" id="btn-delete-event" onclick="deleteEvent()" class="hidden px-6 bg-red-600 hover:bg-red-500 text-white py-3 rounded-xl font-bold">
@@ -512,7 +512,7 @@ function renderCalendarGrid(events) {
     monthNavDiv.appendChild(leftDiv);
     
     const syncBtn = document.createElement('button');
-    syncBtn.className = 'w-9 h-9 hover:bg-slate-700 rounded text-yellow-400 hover:text-yellow-300 transition';
+    syncBtn.className = 'w-9 h-9 hover:bg-slate-700 rounded text-gray-400 hover:text-gray-300 transition';
     syncBtn.innerHTML = '<i class="fas fa-sync-alt"></i>';
     syncBtn.id = 'sync-calendar-btn';
     syncBtn.onclick = () => syncFromGoogle(false);
@@ -557,9 +557,9 @@ function renderCalendarGrid(events) {
 
         const cell = document.createElement('div');
         const cellClass = isToday 
-            ? 'bg-yellow-500/10 border-yellow-500/50 ring-1 ring-yellow-500/30' 
+            ? 'bg-white/10 border-white/50 ring-1 ring-white/30' 
             : 'bg-slate-800/40 border-slate-700/50 hover:bg-slate-800 hover:border-slate-600';
-        const numClass = isToday ? 'text-yellow-400 font-bold' : 'text-slate-400 font-medium';
+        const numClass = isToday ? 'text-white font-bold' : 'text-slate-400 font-medium';
 
         cell.className = `${cellClass} h-28 rounded-xl border p-2 cursor-pointer transition group relative flex flex-col`;
         
@@ -574,7 +574,7 @@ function renderCalendarGrid(events) {
         dayEvents.forEach(ev => {
             const time = new Date(ev.start_date).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
             const eventEl = document.createElement('div');
-            eventEl.className = 'cursor-pointer text-xs px-2 py-1 rounded-md bg-yellow-500/20 text-yellow-100 border-l-2 border-yellow-500 hover:bg-yellow-500/30 transition truncate mb-1';
+            eventEl.className = 'cursor-pointer text-xs px-2 py-1 rounded-md bg-white/20 text-gray-100 border-l-2 border-white hover:bg-white/30 transition truncate mb-1';
             eventEl.title = `${time} - ${ev.title}`;
             eventEl.innerHTML = `<span class="opacity-70 text-[10px] mr-1">${time}</span>${ev.title}`;
             eventEl.onclick = (e) => {

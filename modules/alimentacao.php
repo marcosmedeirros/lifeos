@@ -75,7 +75,6 @@ include __DIR__ . '/../includes/header.php';
     
     <div class="flex-1 p-2 md:p-4 content-wrap transition-all duration-300">
         <div class="main-shell">
-    
     <style>
         /* Estilos específicos para cards de nutrição */
         .nutrition-grid {
@@ -86,29 +85,29 @@ include __DIR__ . '/../includes/header.php';
         }
 
         .nutrition-card-small {
-            background: rgba(30, 30, 50, 0.8);
+            background: rgba(30, 30, 30, 0.8);
             backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.15);
             border-radius: 12px;
             padding: 20px;
             transition: all 0.3s ease;
         }
 
         .nutrition-card-small:hover {
-            border-color: rgba(251, 191, 36, 0.5);
-            background: rgba(30, 30, 50, 0.95);
+            border-color: rgba(255, 255, 255, 0.3);
+            background: rgba(30, 30, 30, 0.95);
         }
 
         .card-date {
             font-size: 18px;
             font-weight: bold;
             margin-bottom: 16px;
-            color: #fbbf24;
+            color: #ffffff;
         }
 
         .card-date-small {
             font-size: 12px;
-            color: #9ca3af;
+            color: #999999;
             margin-top: 4px;
         }
 
@@ -118,7 +117,7 @@ include __DIR__ . '/../includes/header.php';
 
         .card-section-title {
             font-size: 12px;
-            color: #60a5fa;
+            color: #cccccc;
             text-transform: uppercase;
             letter-spacing: 0.5px;
             font-weight: 600;
@@ -134,12 +133,12 @@ include __DIR__ . '/../includes/header.php';
         }
 
         .card-stat-label {
-            color: #9ca3af;
+            color: #999999;
         }
 
         .card-stat-value {
             font-weight: 500;
-            color: #fff;
+            color: #ffffff;
         }
 
         .badge-small {
@@ -151,20 +150,20 @@ include __DIR__ . '/../includes/header.php';
         }
 
         .badge-true {
-            background: rgba(34, 197, 94, 0.2);
-            color: #86efac;
+            background: rgba(100, 100, 100, 0.2);
+            color: #cccccc;
         }
 
         .badge-false {
-            background: rgba(239, 68, 68, 0.2);
-            color: #fca5a5;
+            background: rgba(100, 100, 100, 0.2);
+            color: #999999;
         }
 
         .card-coach {
-            background: rgba(139, 92, 246, 0.15);
+            background: rgba(50, 50, 50, 0.5);
             padding: 10px;
             border-radius: 6px;
-            border-left: 3px solid #a78bfa;
+            border-left: 3px solid #ffffff;
             font-size: 13px;
             color: #ddd;
             line-height: 1.5;
@@ -172,9 +171,9 @@ include __DIR__ . '/../includes/header.php';
         }
 
         .btn-delete {
-            background: rgba(239, 68, 68, 0.2);
-            color: #fca5a5;
-            border: 1px solid rgba(239, 68, 68, 0.3);
+            background: rgba(80, 80, 80, 0.2);
+            color: #cccccc;
+            border: 1px solid rgba(80, 80, 80, 0.3);
             padding: 6px 12px;
             border-radius: 6px;
             font-size: 12px;
@@ -185,14 +184,15 @@ include __DIR__ . '/../includes/header.php';
         }
 
         .btn-delete:hover {
-            background: rgba(239, 68, 68, 0.3);
-            border-color: rgba(239, 68, 68, 0.5);
+            background: rgba(80, 80, 80, 0.3);
+            border-color: rgba(80, 80, 80, 0.5);
+            color: #ffffff;
         }
 
         .empty-state {
             text-align: center;
             padding: 60px 20px;
-            color: #9ca3af;
+            color: #999999;
         }
 
         .empty-state p {
@@ -200,18 +200,18 @@ include __DIR__ . '/../includes/header.php';
         }
 
         .success-banner {
-            background: rgba(34, 197, 94, 0.2);
-            border: 1px solid rgba(34, 197, 94, 0.5);
-            color: #86efac;
+            background: rgba(100, 100, 100, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #ffffff;
             padding: 12px 16px;
             border-radius: 8px;
             margin-bottom: 20px;
         }
 
         .error-banner {
-            background: rgba(239, 68, 68, 0.2);
-            border: 1px solid rgba(239, 68, 68, 0.5);
-            color: #fca5a5;
+            background: rgba(100, 100, 100, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #ffffff;
             padding: 12px 16px;
             border-radius: 8px;
             margin-bottom: 20px;
@@ -242,15 +242,15 @@ include __DIR__ . '/../includes/header.php';
         }
 
         .modal-content {
-            background: linear-gradient(135deg, rgba(15, 15, 25, 0.98) 0%, rgba(20, 20, 35, 0.98) 100%);
-            border: 1px solid rgba(96, 165, 250, 0.3);
+            background: rgba(20, 20, 20, 0.98);
+            border: 1px solid rgba(255, 255, 255, 0.15);
             padding: 40px;
             border-radius: 16px;
             max-width: 650px;
             width: 90%;
             max-height: 85vh;
             overflow-y: auto;
-            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.7), 0 0 40px rgba(96, 165, 250, 0.1);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.7);
             animation: slideUp 0.3s ease;
         }
 
@@ -264,23 +264,20 @@ include __DIR__ . '/../includes/header.php';
             justify-content: space-between;
             align-items: center;
             margin-bottom: 28px;
-            border-bottom: 2px solid rgba(96, 165, 250, 0.2);
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
             padding-bottom: 20px;
         }
 
         .modal-header h2 {
             margin: 0;
-            background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            color: #ffffff;
             font-size: 24px;
             font-weight: 800;
             letter-spacing: -0.5px;
         }
 
         .close-modal {
-            color: #9ca3af;
+            color: #999999;
             font-size: 32px;
             font-weight: bold;
             cursor: pointer;
@@ -298,8 +295,8 @@ include __DIR__ . '/../includes/header.php';
         }
 
         .close-modal:hover {
-            color: #60a5fa;
-            background: rgba(96, 165, 250, 0.1);
+            color: #ffffff;
+            background: rgba(255, 255, 255, 0.1);
         }
 
         .form-group {
@@ -309,7 +306,7 @@ include __DIR__ . '/../includes/header.php';
         .form-group label {
             display: block;
             margin-bottom: 12px;
-            color: #60a5fa;
+            color: #cccccc;
             font-size: 13px;
             text-transform: uppercase;
             letter-spacing: 0.8px;
@@ -321,9 +318,9 @@ include __DIR__ . '/../includes/header.php';
             font-family: 'Courier New', monospace;
             font-size: 13px;
             resize: vertical;
-            background: rgba(15, 15, 25, 0.9);
-            border: 2px solid rgba(96, 165, 250, 0.3);
-            color: #e5e7eb;
+            background: rgba(15, 15, 15, 0.9);
+            border: 2px solid rgba(255, 255, 255, 0.15);
+            color: #ffffff;
             padding: 16px;
             border-radius: 10px;
             transition: all 0.3s ease;
@@ -331,19 +328,19 @@ include __DIR__ . '/../includes/header.php';
         }
 
         #json_data::placeholder {
-            color: #6b7280;
+            color: #666666;
         }
 
         #json_data:focus {
             outline: none;
-            border-color: #60a5fa;
-            background: rgba(15, 15, 25, 0.95);
-            box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.15), 0 0 20px rgba(96, 165, 250, 0.2);
+            border-color: #ffffff;
+            background: rgba(15, 15, 15, 0.95);
+            box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.05), 0 0 20px rgba(255, 255, 255, 0.1);
         }
 
         .btn-add-json {
-            background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
-            color: #fff;
+            background: #ffffff;
+            color: #000000;
             border: 2px solid transparent;
             padding: 14px 28px;
             border-radius: 10px;
@@ -359,8 +356,8 @@ include __DIR__ . '/../includes/header.php';
 
         .btn-add-json:hover {
             transform: translateY(-3px);
-            box-shadow: 0 15px 35px rgba(96, 165, 250, 0.4);
-            border-color: #60a5fa;
+            box-shadow: 0 15px 35px rgba(255, 255, 255, 0.2);
+            border-color: #ffffff;
         }
 
         .btn-add-json:active {
@@ -368,8 +365,8 @@ include __DIR__ . '/../includes/header.php';
         }
 
         .btn-open-modal {
-            background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
-            color: #fff;
+            background: #ffffff;
+            color: #000000;
             border: none;
             padding: 12px 24px;
             border-radius: 8px;
@@ -385,23 +382,23 @@ include __DIR__ . '/../includes/header.php';
 
         .btn-open-modal:hover {
             transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(96, 165, 250, 0.3);
+            box-shadow: 0 10px 25px rgba(255, 255, 255, 0.2);
         }
 
         .help-text {
-            color: #9ca3af;
+            color: #999999;
             font-size: 12px;
             margin-top: 10px;
             line-height: 1.6;
         }
 
         .example-json {
-            background: linear-gradient(135deg, rgba(15, 15, 25, 0.95) 0%, rgba(20, 20, 35, 0.95) 100%);
-            border: 1px solid rgba(96, 165, 250, 0.2);
+            background: rgba(30, 30, 30, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
             padding: 14px;
             border-radius: 8px;
             font-size: 12px;
-            color: #d1d5db;
+            color: #cccccc;
             font-family: 'Courier New', monospace;
             margin-top: 12px;
             overflow-x: auto;
@@ -437,7 +434,7 @@ include __DIR__ . '/../includes/header.php';
             <!-- Header -->
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
                 <div>
-                    <h2 class="text-2xl md:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-yellow-500">🥗 Alimentação & Saúde</h2>
+                    <h2 class="text-2xl md:text-3xl font-bold text-white">🥗 Alimentação & Saúde</h2>
                     <p class="text-gray-400 text-sm mt-1">Acompanhe seus registros diários</p>
                 </div>
                 <button class="btn-open-modal" onclick="openModal()">

@@ -402,15 +402,15 @@ include 'includes/header.php';
             
             <!-- SEÇÃO: CONTROLES RÁPIDOS -->
             <div class="mb-8">
-                <h3 class="text-xl font-bold text-yellow-500 mb-4 flex items-center gap-2">
-                    <i class="fas fa-sliders-h text-yellow-600"></i> Adicionar Rápido
+                <h3 class="text-xl font-bold text-white mb-4 flex items-center gap-2">
+                    <i class="fas fa-sliders-h text-gray-400"></i> Adicionar Rápido
                 </h3>
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                     <!-- Adicionar Atividade -->
                     <div class="glass-card p-4 rounded-xl">
                         <form onsubmit="addActivityQuick(event)" class="space-y-2">
                             <input type="text" id="quick-activity-title" placeholder="Nome da atividade" class="text-sm" required>
-                            <button type="submit" class="w-full bg-gradient-to-r from-yellow-600 to-yellow-700 hover:from-yellow-500 hover:to-yellow-600 text-white px-3 py-2 rounded-lg text-sm font-bold transition shadow-lg shadow-yellow-600/30">
+                            <button type="submit" class="w-full bg-white hover:bg-gray-100 text-black px-3 py-2 rounded-lg text-sm font-bold transition shadow-lg">
                                 <i class="fas fa-plus mr-1"></i> Atividade
                             </button>
                         </form>
@@ -421,7 +421,7 @@ include 'includes/header.php';
                         <form onsubmit="openQuickEventModal(event)" class="space-y-2">
                             <input type="text" id="quick-event-title" placeholder="Nome do evento" class="text-sm" required>
                             <input type="datetime-local" id="quick-event-date" class="text-sm" required>
-                            <button type="submit" class="w-full bg-gradient-to-r from-yellow-600 to-yellow-700 hover:from-yellow-500 hover:to-yellow-600 text-white px-3 py-2 rounded-lg text-sm font-bold transition shadow-lg shadow-yellow-600/30">
+                            <button type="submit" class="w-full bg-white hover:bg-gray-100 text-black px-3 py-2 rounded-lg text-sm font-bold transition shadow-lg">
                                 <i class="fas fa-plus mr-1"></i> Evento
                             </button>
                         </form>
@@ -430,8 +430,8 @@ include 'includes/header.php';
                     <!-- Adicionar Foto -->
                     <div class="glass-card p-4 rounded-xl">
                         <form onsubmit="addPhotoQuick(event)" enctype="multipart/form-data" class="space-y-2">
-                            <input type="file" id="quick-photo-file" accept="image/*" class="text-sm w-full text-white file:mr-2 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-yellow-600 file:text-white hover:file:bg-yellow-500" required>
-                            <button type="submit" class="w-full bg-gradient-to-r from-yellow-600 to-yellow-700 hover:from-yellow-500 hover:to-yellow-600 text-white px-3 py-2 rounded-lg text-sm font-bold transition shadow-lg shadow-yellow-600/30">
+                            <input type="file" id="quick-photo-file" accept="image/*" class="text-sm w-full text-white file:mr-2 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-white file:text-black hover:file:bg-gray-100" required>
+                            <button type="submit" class="w-full bg-white hover:bg-gray-100 text-black px-3 py-2 rounded-lg text-sm font-bold transition shadow-lg">
                                 <i class="fas fa-plus mr-1"></i> Foto
                             </button>
                         </form>
@@ -448,7 +448,7 @@ include 'includes/header.php';
                                 <input type="number" step="0.01" id="quick-fin-amount" placeholder="Valor" class="text-sm" required>
                             </div>
                             <input type="text" id="quick-fin-desc" placeholder="Descrição (opcional)" class="text-sm">
-                            <button type="submit" class="w-full bg-gradient-to-r from-yellow-600 to-yellow-700 hover:from-yellow-500 hover:to-yellow-600 text-white px-3 py-2 rounded-lg text-sm font-bold transition shadow-lg shadow-yellow-600/30">
+                            <button type="submit" class="w-full bg-white hover:bg-gray-100 text-black px-3 py-2 rounded-lg text-sm font-bold transition shadow-lg">
                                 <i class="fas fa-plus mr-1"></i> Lançar Finanças
                             </button>
                         </form>
@@ -459,8 +459,8 @@ include 'includes/header.php';
             <!-- 6 Cards Principais -->
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
         <!-- 1. Entradas (Semana) -->
-        <div class="glass-card p-6 rounded-2xl border-l-4 border-yellow-600">
-            <h3 class="text-yellow-500 text-sm font-bold uppercase tracking-wider mb-1">💰 Entradas (Semana)</h3>
+        <div class="glass-card p-6 rounded-2xl border-l-4 border-gray-400">
+            <h3 class="text-gray-300 text-sm font-bold uppercase tracking-wider mb-1">💰 Entradas (Semana)</h3>
             <p class="text-3xl font-bold text-white" id="dash-income">R$ 0,00</p>
         </div>
         
@@ -471,8 +471,8 @@ include 'includes/header.php';
         </div>
         
         <!-- 3. Hábitos concluídos na semana -->
-        <div class="glass-card p-6 rounded-2xl border-l-4 border-yellow-600">
-            <h3 class="text-yellow-500 text-sm font-bold uppercase tracking-wider mb-1">🔥 Hábitos concluídos (Semana)</h3>
+        <div class="glass-card p-6 rounded-2xl border-l-4 border-gray-400">
+            <h3 class="text-gray-300 text-sm font-bold uppercase tracking-wider mb-1">🔥 Hábitos concluídos (Semana)</h3>
             <p class="text-3xl font-bold text-white" id="dash-habits-week">0</p>
         </div>
         
@@ -483,8 +483,8 @@ include 'includes/header.php';
         </div>
         
         <!-- 5. Próximo Evento -->
-        <div class="glass-card p-6 rounded-2xl border-l-4 border-yellow-600">
-            <h3 class="text-yellow-500 text-sm font-bold uppercase tracking-wider mb-1">📅 Próximo Evento</h3>
+        <div class="glass-card p-6 rounded-2xl border-l-4 border-gray-400">
+            <h3 class="text-gray-300 text-sm font-bold uppercase tracking-wider mb-1">📅 Próximo Evento</h3>
             <p class="text-xl font-bold text-white truncate" id="dash-next-event-title">Nenhum evento</p>
             <p class="text-xs text-gray-400" id="dash-next-event-time">Sem data</p>
         </div>
@@ -509,7 +509,7 @@ include 'includes/header.php';
                     d.setDate(today.getDate() - dow + i);
                     const isToday = d.toDateString() === today.toDateString();
                     document.write(`
-                        <div class="text-center px-4 py-2 rounded-lg border ${isToday ? 'bg-yellow-600/20 border-yellow-600/50 text-yellow-400' : 'border-slate-700 text-slate-400'}" style="min-width:60px">
+                        <div class="text-center px-4 py-2 rounded-lg border ${isToday ? 'bg-white/20 border-white/50 text-white' : 'border-slate-700 text-slate-400'}" style="min-width:60px">
                             <div class="text-xs font-semibold mb-1">${dayNames[i]}</div>
                             <div class="text-lg font-bold">${d.getDate()}</div>
                         </div>
@@ -523,7 +523,7 @@ include 'includes/header.php';
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <!-- Atividades de Hoje -->
         <div class="glass-card p-6 rounded-2xl">
-            <h3 class="font-bold mb-4 text-yellow-500 flex items-center gap-2">
+            <h3 class="font-bold mb-4 text-white flex items-center gap-2">
                 <i class="fas fa-check-circle"></i> Hoje
             </h3>
             <div id="dash-activities-list" class="space-y-2"></div>
@@ -531,7 +531,7 @@ include 'includes/header.php';
         
         <!-- Eventos desta Semana -->
         <div class="glass-card p-6 rounded-2xl">
-            <h3 class="font-bold mb-4 text-yellow-500 flex items-center gap-2">
+            <h3 class="font-bold mb-4 text-white flex items-center gap-2">
                 <i class="fas fa-calendar-week"></i> Eventos
             </h3>
             <div id="dash-events-list" class="space-y-2"></div>
@@ -539,7 +539,7 @@ include 'includes/header.php';
         
         <!-- Hábitos -->
         <div class="glass-card p-6 rounded-2xl">
-            <h3 class="font-bold mb-4 text-yellow-500 flex items-center gap-2">
+            <h3 class="font-bold mb-4 text-white flex items-center gap-2">
                 <i class="fas fa-fire"></i> Hábitos
             </h3>
             <div id="dash-habits-list" class="space-y-2"></div>
@@ -550,25 +550,25 @@ include 'includes/header.php';
     <!-- Mensagem do Dia (final do dashboard) -->
     <div class="glass-card p-6 rounded-2xl mb-8 mt-8">
         <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4">
-            <h3 class="text-xl font-bold text-yellow-500 flex items-center gap-2">
+            <h3 class="text-xl font-bold text-white flex items-center gap-2">
                 <i class="fas fa-scroll"></i> Mensagem do Dia
             </h3>
-            <div class="flex items-center gap-2 bg-slate-900 rounded-lg p-2 border border-slate-700/70">
-                <span id="daily-date-label" class="text-slate-200 font-semibold text-sm min-w-[140px] text-center">...</span>
+            <div class="flex items-center gap-2 bg-black rounded-lg p-2 border border-gray-600/30">
+                <span id="daily-date-label" class="text-gray-300 font-semibold text-sm min-w-[140px] text-center">...</span>
             </div>
         </div>
-        <p id="daily-message" class="text-slate-200 whitespace-pre-line leading-relaxed"></p>
+        <p id="daily-message" class="text-gray-300 whitespace-pre-line leading-relaxed"></p>
     </div>
 
 <!-- Widget de Chat com Gemini -->
-<div id="chat-container" class="fixed bottom-5 right-5 w-80 glass-card p-4 hidden border border-yellow-600/50 shadow-2xl z-50">
+<div id="chat-container" class="fixed bottom-5 right-5 w-80 glass-card p-4 hidden border border-gray-600/50 shadow-2xl z-50">
     <div class="flex justify-between items-center mb-3">
         <h3 class="text-yellow-500 font-bold text-sm">Gemini</h3>
         <button onclick="toggleChatWidget()" class="text-yellow-500 hover:text-yellow-400"><i class="fas fa-times"></i></button>
     </div>
     <div id="chat-box" class="h-64 overflow-y-auto mb-2 text-xs text-white space-y-2"></div>
     <div class="flex gap-2">
-        <input type="text" id="chat-input" class="text-xs bg-slate-900 border-none flex-1 rounded-lg px-2" placeholder="Pergunte algo...">
+        <input type="text" id="chat-input" class="text-xs bg-black border-none flex-1 rounded-lg px-2" placeholder="Pergunte algo...">
         <button onclick="sendToGemini()" class="bg-yellow-600 p-2 rounded-lg"><i class="fas fa-paper-plane"></i></button>
     </div>
 </div>
@@ -620,8 +620,8 @@ async function loadDashboard() {
     const activitiesList = document.getElementById('dash-activities-list');
     if (data.activities_today.length) {
         activitiesList.innerHTML = data.activities_today.map(t => 
-            `<div id="dash-act-${t.id}" class="flex items-center gap-2 p-2 bg-slate-800/50 rounded-lg border-l-2 border-blue-500 hover:bg-slate-800 transition ${t.status == 1 ? 'opacity-50' : ''}" style="cursor:pointer">
-                <div class="text-blue-400 hover:text-blue-300 transition flex-shrink-0" data-activity-id="${t.id}">
+            `<div id="dash-act-${t.id}" class="flex items-center gap-2 p-2 bg-black/40 rounded-lg border-l-2 border-gray-400 hover:bg-black/50 transition ${t.status == 1 ? 'opacity-50' : ''}" style="cursor:pointer">
+                <div class="text-gray-400 hover:text-gray-300 transition flex-shrink-0" data-activity-id="${t.id}">
                     <i class="fas ${t.status == 1 ? 'fa-check-circle' : 'fa-circle'} text-sm"></i>
                 </div>
                 <div class="flex-1 min-w-0">
@@ -653,8 +653,8 @@ async function loadDashboard() {
             const day = eventDate.toLocaleDateString('pt-BR', { day: '2-digit' });
             const time = eventDate.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
             
-            return `<div class="p-2 bg-slate-800/50 rounded-lg border-l-2 border-yellow-500">
-                        <div class="font-medium text-xs text-yellow-300">${day} - ${time}</div>
+            return `<div class="p-2 bg-black/40 rounded-lg border-l-2 border-gray-400">
+                        <div class="font-medium text-xs text-gray-300">${day} - ${time}</div>
                         <div class="text-xs text-white truncate">${ev.title}</div>
                     </div>`;
         }).join('') : 
@@ -674,10 +674,10 @@ async function loadDashboard() {
                 const checks = JSON.parse(h.checked_dates || '[]');
                 const isChecked = Array.isArray(checks) && checks.includes(today);
                 const btnClass = isChecked 
-                    ? 'w-7 h-7 rounded-lg bg-teal-500 text-black shadow-[0_0_8px_rgba(20,184,166,0.35)] flex items-center justify-center'
-                    : 'w-7 h-7 rounded-lg bg-slate-700/40 hover:bg-slate-700 text-transparent flex items-center justify-center';
+                    ? 'w-7 h-7 rounded-lg bg-white text-black shadow-[0_0_8px_rgba(255,255,255,0.35)] flex items-center justify-center'
+                    : 'w-7 h-7 rounded-lg bg-gray-600/40 hover:bg-gray-600 text-transparent flex items-center justify-center';
                 const icon = isChecked ? '<i class="fas fa-check text-xs"></i>' : '';
-                return `<div class="flex items-center justify-between p-2 bg-slate-800/50 rounded-lg border-l-2 border-rose-500">
+                return `<div class="flex items-center justify-between p-2 bg-black/40 rounded-lg border-l-2 border-gray-400">
                     <div class="font-medium text-xs text-white truncate pr-2">${h.name}</div>
                     <button onclick="toggleHabitToday(${h.id})" class="${btnClass}">${icon}</button>
                 </div>`;
@@ -707,7 +707,7 @@ async function toggleActivity(id) {
 
                 if (!isDone) {
                     item.classList.add('opacity-50');
-                    item.classList.remove('border-blue-500');
+                    item.classList.remove('border-gray-400');
                     item.classList.add('border-green-500');
                     item.classList.add('bg-green-900/20');
                     if (icon) { icon.classList.remove('fa-circle'); icon.classList.add('fa-check-circle'); }
@@ -722,7 +722,7 @@ async function toggleActivity(id) {
                 } else {
                     item.classList.remove('opacity-50');
                     item.classList.remove('border-green-500', 'bg-green-900/20');
-                    item.classList.add('border-blue-500');
+                    item.classList.add('border-gray-400');
                     if (icon) { icon.classList.add('fa-circle'); icon.classList.remove('fa-check-circle'); }
                     if (titleDiv) { titleDiv.classList.remove('line-through', 'text-slate-400'); }
                     
@@ -824,15 +824,15 @@ async function toggleHabitToday(id) {
     // Encontrar o botão clicado para atualização imediata
     const button = event.target.closest('button');
     if (button) {
-        const isChecked = button.classList.contains('bg-teal-500');
+        const isChecked = button.classList.contains('bg-white');
         
         if (isChecked) {
             // Desmarcar
-            button.className = 'w-7 h-7 rounded-lg bg-slate-700/40 hover:bg-slate-700 text-transparent flex items-center justify-center';
+            button.className = 'w-7 h-7 rounded-lg bg-gray-600/40 hover:bg-gray-600 text-transparent flex items-center justify-center';
             button.innerHTML = '';
         } else {
             // Marcar
-            button.className = 'w-7 h-7 rounded-lg bg-teal-500 text-black shadow-[0_0_8px_rgba(20,184,166,0.35)] flex items-center justify-center';
+            button.className = 'w-7 h-7 rounded-lg bg-white text-black shadow-[0_0_8px_rgba(255,255,255,0.35)] flex items-center justify-center';
             button.innerHTML = '<i class="fas fa-check text-xs"></i>';
         }
     }

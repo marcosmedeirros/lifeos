@@ -219,12 +219,12 @@ require_once __DIR__ . '/../includes/header.php';
                     <p class="text-xs uppercase text-slate-400 font-bold mb-2">Distância Total (Recente)</p>
                     <p class="text-4xl font-bold text-white"><span id="strava-total-km">0</span> <span class="text-lg text-slate-500">km</span></p>
                 </div>
-                <div class="glass-card p-6 rounded-2xl border-l-4 border-yellow-500">
+                <div class="glass-card p-6 rounded-2xl border-l-4 border-gray-400">
                     <p class="text-xs uppercase text-slate-400 font-bold mb-2">Tempo em Movimento</p>
                     <p class="text-4xl font-bold text-white" id="strava-total-time">0h 0m</p>
                 </div>
-                <div class="glass-card p-6 rounded-2xl border-l-4 border-green-500">
-                    <p class="text-xs uppercase text-slate-400 font-bold mb-2">Total de Atividades</p>
+                <div class="glass-card p-6 rounded-2xl border-l-4 border-gray-400">
+                    <p class="text-xs uppercase text-gray-400 font-bold mb-2">Total de Atividades</p>
                     <p class="text-4xl font-bold text-white" id="strava-total-activities">0</p>
                 </div>
             </div>
@@ -239,10 +239,10 @@ require_once __DIR__ . '/../includes/header.php';
                 </div>
             </div>
 
-            <div class="glass-card rounded-2xl overflow-hidden shadow-xl border border-slate-700/50">
+            <div class="glass-card rounded-2xl overflow-hidden shadow-xl border border-gray-700/40">
                 <div class="overflow-x-auto">
                     <table class="w-full text-left min-w-[700px]">
-                        <thead class="bg-slate-900/50 text-slate-400 uppercase text-xs font-bold tracking-wider">
+                        <thead class="bg-black/60 text-gray-400 uppercase text-xs font-bold tracking-wider">
                             <tr>
                                 <th class="p-5">Data</th>
                                 <th class="p-5">Atividade</th>
@@ -251,8 +251,8 @@ require_once __DIR__ . '/../includes/header.php';
                                 <th class="p-5 text-center">Tempo</th>
                             </tr>
                         </thead>
-                        <tbody id="strava-list" class="divide-y divide-slate-700/50 text-sm font-medium">
-                            <tr><td colspan="5" class="p-8 text-center text-slate-500">Carregando dados...</td></tr>
+                        <tbody id="strava-list" class="divide-y divide-gray-700/40 text-sm font-medium">
+                            <tr><td colspan="5" class="p-8 text-center text-gray-500">Carregando dados...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -301,7 +301,7 @@ async function loadStrava() {
         btnContainer.classList.remove('hidden');
         
         document.getElementById('strava-stats').classList.add('hidden');
-        document.getElementById('strava-list').innerHTML = '<tr><td colspan="5" class="p-10 text-center text-slate-500 flex flex-col items-center gap-2"><i class="fab fa-strava text-4xl text-slate-700"></i><span>Conecte sua conta para ver suas atividades recentes.</span></td></tr>';
+        document.getElementById('strava-list').innerHTML = '<tr><td colspan="5" class="p-10 text-center text-gray-500 flex flex-col items-center gap-2"><i class="fab fa-strava text-4xl text-gray-700"></i><span>Conecte sua conta para ver suas atividades recentes.</span></td></tr>';
     } else {
         document.getElementById('strava-connect-btn').classList.add('hidden');
         document.getElementById('strava-stats').classList.remove('hidden');
@@ -320,12 +320,12 @@ async function loadStrava() {
                 ).join(' ');
                 
                 return `
-                    <div class="glass-card p-5 rounded-xl border border-slate-700/50 hover:border-[#fc4c02]/50 transition">
+                    <div class="glass-card p-5 rounded-xl border border-gray-700/40 hover:border-[#fc4c02]/50 transition">
                         <div class="flex justify-between items-start mb-3">
                             <h4 class="font-bold text-white text-lg">${month.label}</h4>
                             <span class="bg-[#fc4c02]/20 text-[#fc4c02] px-2 py-1 rounded text-sm font-bold">${month.total_dist_fmt} km</span>
                         </div>
-                        <p class="text-3xl font-bold text-white mb-3">${month.count} <span class="text-sm text-slate-400">atividades</span></p>
+                        <p class="text-3xl font-bold text-white mb-3">${month.count} <span class="text-sm text-gray-400">atividades</span></p>
                         <div class="flex flex-wrap gap-1">${typesList}</div>
                     </div>
                 `;
@@ -333,12 +333,12 @@ async function loadStrava() {
         }
         
         document.getElementById('strava-list').innerHTML = res.list.map(a => `
-            <tr class="hover:bg-slate-800/30 transition border-b border-slate-700/30 last:border-0">
-                <td class="p-5 text-slate-300 font-mono text-xs">${a.date}</td>
+            <tr class="hover:bg-black/50 transition border-b border-gray-700/30 last:border-0">
+                <td class="p-5 text-gray-300 font-mono text-xs">${a.date}</td>
                 <td class="p-5 font-bold text-white">${a.name}</td>
-                <td class="p-5 text-center"><span class="px-2 py-1 rounded border border-slate-600 text-[10px] uppercase font-bold bg-slate-800 text-slate-300">${a.type}</span></td>
+                <td class="p-5 text-center"><span class="px-2 py-1 rounded border border-gray-600 text-[10px] uppercase font-bold bg-black/40 text-gray-200">${a.type}</span></td>
                 <td class="p-5 text-center font-mono text-[#fc4c02] font-bold">${a.distance} km</td>
-                <td class="p-5 text-center text-slate-300 font-mono">${a.time}</td>
+                <td class="p-5 text-center text-gray-300 font-mono">${a.time}</td>
             </tr>
         `).join('');
     }

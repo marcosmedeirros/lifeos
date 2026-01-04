@@ -164,11 +164,11 @@ include '../includes/header.php';
             </header>
             
             <!-- Chat Container -->
-            <div class="glass-card p-6 rounded-2xl border border-yellow-600/30 h-[70vh] flex flex-col">
+            <div class="glass-card p-6 rounded-2xl border border-gray-600/30 h-[70vh] flex flex-col">
                 <!-- Messages Area -->
                 <div id="chat-messages" class="flex-1 overflow-y-auto mb-6 space-y-4 pr-2">
                     <div class="text-center text-slate-500 mt-8">
-                        <i class="fas fa-robot text-4xl text-yellow-600/30 mb-2"></i>
+                        <i class="fas fa-robot text-4xl text-gray-600/30 mb-2"></i>
                         <p>Carregando histórico...</p>
                     </div>
                 </div>
@@ -179,12 +179,12 @@ include '../includes/header.php';
                         type="text" 
                         id="ia-input" 
                         placeholder="Pergunte algo à IA (pressione Enter)..." 
-                        class="flex-1 bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-yellow-600"
+                        class="flex-1 bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-white"
                         onkeypress="if(event.key==='Enter') sendMessageIA()"
                     >
                     <button 
                         onclick="sendMessageIA()" 
-                        class="bg-yellow-600 hover:bg-yellow-500 text-white px-6 py-3 rounded-lg font-bold transition flex items-center gap-2"
+                        class="bg-white hover:bg-gray-100 text-black px-6 py-3 rounded-lg font-bold transition flex items-center gap-2"
                     >
                         <i class="fas fa-paper-plane"></i> Enviar
                     </button>
@@ -193,8 +193,8 @@ include '../includes/header.php';
 
             <!-- Stats Widget -->
             <div class="mt-8 grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div class="glass-card p-4 rounded-xl border-l-4 border-yellow-600">
-                    <p class="text-yellow-500 text-xs font-bold">XP Total</p>
+                <div class="glass-card p-4 rounded-xl border-l-4 border-gray-400">
+                    <p class="text-gray-400 text-xs font-bold">XP Total</p>
                     <p id="stat-xp" class="text-2xl font-bold text-white">0 XP</p>
                 </div>
                 <div class="glass-card p-4 rounded-xl border-l-4 border-blue-600">
@@ -238,8 +238,8 @@ async function loadChatHistory() {
             const timestamp = new Date(msg.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
             
             return `<div class="flex ${isUser ? 'justify-end' : 'justify-start'}">
-                <div class="${isUser ? 'bg-yellow-600/20 border-l-4 border-yellow-600' : 'bg-slate-800/50 border-l-4 border-slate-600'} rounded-lg p-3 max-w-xs">
-                    <p class="text-xs ${isUser ? 'text-yellow-300' : 'text-slate-400'} mb-1">${isUser ? 'Você' : 'IA Life'}</p>
+                <div class="${isUser ? 'bg-white/20 border-l-4 border-white' : 'bg-slate-800/50 border-l-4 border-slate-600'} rounded-lg p-3 max-w-xs">
+                    <p class="text-xs ${isUser ? 'text-gray-300' : 'text-slate-400'} mb-1">${isUser ? 'Você' : 'IA Life'}</p>
                     <p class="text-white text-sm">${escapeHtml(msg.content)}</p>
                     <p class="text-[11px] text-slate-500 mt-1">${timestamp}</p>
                 </div>

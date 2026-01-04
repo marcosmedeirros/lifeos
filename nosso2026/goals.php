@@ -51,7 +51,7 @@ function goalsBy($owner){
     .b-facil{background:#111;color:#fff}
     .b-medio{background:#222;color:#fff}
     .b-dificil{background:#333;color:#fff}
-    .btn{background:#d4af37;color:#000;padding:.5rem 1rem;border-radius:.5rem;font-weight:700}
+    .btn{background:#ffffff;color:#000;padding:.5rem 1rem;border-radius:.5rem;font-weight:700}
   </style>
 </head>
 <body class="min-h-screen" style="background:#000;color:#fff">

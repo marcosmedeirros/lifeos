@@ -146,14 +146,14 @@ require_once __DIR__ . '/../includes/header.php';
             <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
                 <h2 class="text-3xl font-bold text-white">Gamificação</h2>
                 <div class="flex gap-3 items-center">
-                    <div class="glass-card px-6 py-3 rounded-xl border border-yellow-500/30 bg-yellow-500/10">
+                    <div class="glass-card px-6 py-3 rounded-xl border border-white/30 bg-white/10">
                         <span class="text-sm font-medium text-slate-300 mr-2">Seu XP:</span>
-                        <span class="text-2xl font-bold text-yellow-400" id="user-xp-display">0 XP</span>
+                        <span class="text-2xl font-bold text-white" id="user-xp-display">0 XP</span>
                     </div>
-                    <button onclick="openModal('modal-game-task', false); openMissionModal(0);" class="bg-gradient-to-r from-yellow-600 to-yellow-700 hover:from-yellow-500 hover:to-yellow-600 text-white px-5 py-2 rounded-lg font-bold shadow-lg shadow-yellow-600/30 transition">
+                    <button onclick="openModal('modal-game-task', false); openMissionModal(0);" class="bg-white hover:bg-gray-100 text-black px-5 py-2 rounded-lg font-bold shadow-lg transition">
                         <i class="fas fa-plus mr-1"></i> 🎉 Missão
                     </button>
-                    <button onclick="openModal('modal-game-reward', false); openRewardModal(0);" class="bg-gradient-to-r from-yellow-600 to-yellow-700 hover:from-yellow-500 hover:to-yellow-600 text-white px-5 py-2 rounded-lg font-bold shadow-lg shadow-yellow-600/30 transition">
+                    <button onclick="openModal('modal-game-reward', false); openRewardModal(0);" class="bg-white hover:bg-gray-100 text-black px-5 py-2 rounded-lg font-bold shadow-lg transition">
                         <i class="fas fa-plus mr-1"></i> 🎁 Recompensa
                     </button>
                 </div>
@@ -172,7 +172,7 @@ require_once __DIR__ . '/../includes/header.php';
                 
                 <!-- Recompensas (Gastar XP) -->
                 <div class="glass-card p-6 rounded-2xl shadow-2xl">
-                    <h3 class="text-2xl font-bold text-yellow-400 mb-6 flex items-center gap-2">
+                    <h3 class="text-2xl font-bold text-white mb-6 flex items-center gap-2">
                         <i class="fas fa-gift"></i> Recompensas
                     </h3>
                     <div id="rewards-list" class="space-y-4">
@@ -192,7 +192,7 @@ require_once __DIR__ . '/../includes/header.php';
                         <div id="admin-missions-list" class="space-y-2 max-h-96 overflow-y-auto no-scrollbar"></div>
                     </div>
                     <div>
-                        <h4 class="text-lg font-bold text-yellow-400 mb-4">Suas Recompensas</h4>
+                        <h4 class="text-lg font-bold text-gray-300 mb-4">Suas Recompensas</h4>
                         <div id="admin-rewards-list" class="space-y-2 max-h-96 overflow-y-auto no-scrollbar"></div>
                     </div>
                 </div>
@@ -208,7 +208,7 @@ require_once __DIR__ . '/../includes/header.php';
             <i class="fas fa-times text-xl"></i>
         </button>
         <form id="modal-game-task" class="modal-form hidden" onsubmit="submitGameTask(event)">
-        <h3 class="text-2xl font-bold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-yellow-500" id="task-modal-title">🎉 Nova Missão</h3>
+        <h3 class="text-2xl font-bold mb-6 text-white" id="task-modal-title">🎉 Nova Missão</h3>
         <input type="hidden" name="id" id="task-id">
         <div class="space-y-5">
             <input type="text" name="name" id="task-name" placeholder="Nome da Missão (Ex: Correr 5km)" required>
@@ -235,7 +235,7 @@ require_once __DIR__ . '/../includes/header.php';
                 <input type="text" name="icon" id="task-icon" placeholder="Ex: fa-running" required>
             </div>
             <div class="flex gap-3 pt-4">
-                <button type="submit" class="flex-1 bg-gradient-to-r from-yellow-600 to-yellow-700 hover:from-yellow-500 hover:to-yellow-600 text-white font-bold py-3 rounded-xl shadow-lg shadow-yellow-600/30 transition">💾 Salvar Missão</button>
+                <button type="submit" class="flex-1 bg-white hover:bg-gray-100 text-black font-bold py-3 rounded-xl shadow-lg transition">💾 Salvar Missão</button>
                 <button type="button" id="btn-delete-task" onclick="deleteGameTask()" class="hidden bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 px-4 rounded-xl border border-rose-500/30 transition">
                     <i class="fas fa-trash"></i>
                 </button>
@@ -244,7 +244,7 @@ require_once __DIR__ . '/../includes/header.php';
     </form>
     
     <form id="modal-game-reward" class="modal-form hidden" onsubmit="submitGameReward(event)">
-        <h3 class="text-2xl font-bold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-yellow-500" id="reward-modal-title">🎁 Nova Recompensa</h3>
+        <h3 class="text-2xl font-bold mb-6 text-white" id="reward-modal-title">🎁 Nova Recompensa</h3>
         <input type="hidden" name="id" id="reward-id">
         <div class="space-y-5">
             <input type="text" name="name" id="reward-name" placeholder="Nome da Recompensa (Ex: Rodízio de Pizza)" required>
@@ -271,7 +271,7 @@ require_once __DIR__ . '/../includes/header.php';
                 <input type="text" name="icon" id="reward-icon" placeholder="Ex: fa-pizza-slice" required>
             </div>
             <div class="flex gap-3 pt-4">
-                <button type="submit" class="flex-1 bg-gradient-to-r from-yellow-600 to-yellow-700 hover:from-yellow-500 hover:to-yellow-600 text-white font-bold py-3 rounded-xl shadow-lg shadow-yellow-600/30 transition">💾 Salvar Recompensa</button>
+                <button type="submit" class="flex-1 bg-white hover:bg-gray-100 text-black font-bold py-3 rounded-xl shadow-lg transition">💾 Salvar Recompensa</button>
                 <button type="button" id="btn-delete-reward" onclick="deleteGameReward()" class="hidden bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 px-4 rounded-xl border border-rose-500/30 transition">
                     <i class="fas fa-trash"></i>
                 </button>
@@ -311,7 +311,7 @@ function renderAdminLists() {
 
     const rewardHtml = rewards.map(r => `
         <div onclick="openRewardModal(${r.id})" class="flex justify-between items-center bg-slate-800 p-3 rounded-lg border-l-4 mb-2 border-${r.color}-500 hover:bg-slate-700 transition cursor-pointer">
-            <span class="font-medium">${r.name} <span class="text-yellow-400 text-xs font-bold">(${r.cost} XP)</span></span>
+            <span class="font-medium">${r.name} <span class="text-gray-400 text-xs font-bold">(${r.cost} XP)</span></span>
             <i class="fas fa-pen text-slate-400 text-sm"></i>
         </div>
     `).join('');
@@ -415,21 +415,21 @@ function renderGame() {
     const rewardsHtml = rewards.map(reward => {
         const canRedeem = user_xp >= reward.cost;
         const buttonClass = canRedeem 
-            ? 'bg-yellow-600 hover:bg-yellow-500 shadow-yellow-900/30' 
+            ? 'bg-white hover:bg-gray-100 shadow-gray-900/30' 
             : 'bg-slate-700 cursor-not-allowed opacity-50';
         
         return `
             <div class="flex items-center p-3 bg-slate-800/50 rounded-xl border border-slate-700/50 hover:bg-slate-800 transition">
-                <div class="w-10 h-10 rounded-full flex items-center justify-center bg-yellow-500/20 text-yellow-400 mr-4">
+                <div class="w-10 h-10 rounded-full flex items-center justify-center bg-white/20 text-white mr-4">
                     <i class="fas ${reward.icon}"></i>
                 </div>
                 <div class="flex-1">
                     <p class="font-bold text-white">${reward.name}</p>
-                    <span class="text-sm text-yellow-400 font-mono">${reward.cost} XP</span>
+                    <span class="text-sm text-gray-400 font-mono">${reward.cost} XP</span>
                 </div>
                 <button 
                     onclick="${canRedeem ? `redeemReward(${reward.cost}, ${reward.id}, '${reward.name}')` : ''}" 
-                    class="text-white px-3 py-1.5 rounded-lg text-sm font-bold transition shadow-md ${buttonClass}"
+                    class="text-black px-3 py-1.5 rounded-lg text-sm font-bold transition shadow-md ${buttonClass}"
                     ${!canRedeem ? 'disabled' : ''}
                 >
                     Resgatar

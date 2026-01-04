@@ -31,8 +31,8 @@ $luiza = $pdo->query("SELECT * FROM nosso2026_market_list WHERE owner='luiza' AN
   <style>
     body { background:#000; color:#fff; font-family:system-ui,-apple-system,sans-serif; }
     .glass { background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.06); }
-    .btn { background:#d4af37; color:#000; padding:0.5rem 1rem; border-radius:0.75rem; font-weight:600; cursor:pointer; border:0; }
-    .btn:hover { background:#c19b1a; }
+    .btn { background:#ffffff; color:#000; padding:0.5rem 1rem; border-radius:0.75rem; font-weight:600; cursor:pointer; border:0; }
+    .btn:hover { background:#e0e0e0; }
   </style>
 </head>
 <body>

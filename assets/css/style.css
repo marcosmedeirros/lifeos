@@ -1,5 +1,5 @@
 body { 
-    background: #0a0a0a;
+    background: #000000;
     color: #ffffff; 
     font-family: 'Outfit', sans-serif; 
     min-height: 100vh;
@@ -37,28 +37,28 @@ input, select, textarea {
 
 input:focus, select:focus, textarea:focus { 
     outline: none; 
-    border-color: #d4af37; 
-    box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.2); 
+    border-color: #ffffff; 
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1); 
     background-color: #0f0f0f; 
 }
 
 .glass-sidebar { 
-    background: rgba(10, 10, 10, 0.95); 
+    background: rgba(20, 20, 20, 0.95); 
     backdrop-filter: blur(10px); 
-    border-right: 1px solid rgba(212, 175, 55, 0.2); 
+    border-right: 1px solid rgba(255, 255, 255, 0.15); 
 }
 
 .glass-card { 
-    background: rgba(20, 20, 20, 0.8); 
+    background: rgba(25, 25, 25, 0.8); 
     backdrop-filter: blur(12px); 
-    border: 1px solid rgba(212, 175, 55, 0.15); 
+    border: 1px solid rgba(255, 255, 255, 0.1); 
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3); 
 }
 
 .modal-glass { 
-    background: rgba(10, 10, 10, 0.98); 
+    background: rgba(15, 15, 15, 0.98); 
     backdrop-filter: blur(16px); 
-    border: 1px solid rgba(212, 175, 55, 0.2); 
+    border: 1px solid rgba(255, 255, 255, 0.15); 
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.9); 
 }
 
@@ -70,14 +70,14 @@ input:focus, select:focus, textarea:focus {
 }
 
 .nav-btn:hover { 
-    background-color: rgba(212, 175, 55, 0.1); 
+    background-color: rgba(255, 255, 255, 0.08); 
     color: #ffffff; 
 }
 
 .nav-btn.active { 
-    background: linear-gradient(135deg, rgba(212, 175, 55, 0.15) 0%, rgba(212, 175, 55, 0.05) 100%); 
-    color: #d4af37; 
-    border-left: 3px solid #d4af37; 
+    background: rgba(255, 255, 255, 0.12); 
+    color: #ffffff; 
+    border-left: 3px solid #ffffff; 
 }
 
 /* Layout helpers */

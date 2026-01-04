@@ -178,11 +178,11 @@ include '../includes/header.php';
             </header>
             
             <!-- Chat Container -->
-            <div class="glass-card p-6 rounded-2xl border border-yellow-600/30 h-[70vh] flex flex-col">
+            <div class="glass-card p-6 rounded-2xl border border-gray-600/30 h-[70vh] flex flex-col">
                 <!-- Messages Area -->
                 <div id="chat-messages" class="flex-1 overflow-y-auto mb-6 space-y-4 pr-2">
                     <div class="text-center text-slate-500 mt-8">
-                        <i class="fas fa-comments text-4xl text-yellow-600/30 mb-2"></i>
+                        <i class="fas fa-comments text-4xl text-gray-600/30 mb-2"></i>
                         <p>Carregando histórico...</p>
                     </div>
                 </div>
@@ -193,19 +193,19 @@ include '../includes/header.php';
                         type="text" 
                         id="chat-input" 
                         placeholder="Converse sobre qualquer coisa (pressione Enter)..." 
-                        class="flex-1 bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-yellow-600"
+                        class="flex-1 bg-black border border-gray-600/30 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-white"
                         onkeypress="if(event.key==='Enter') sendMessage()"
                     >
                     <button 
                         onclick="document.getElementById('photo-input').click()" 
-                        class="bg-slate-800 hover:bg-slate-700 text-yellow-400 px-4 py-3 rounded-lg font-bold transition flex items-center gap-2 border border-slate-700"
+                        class="bg-black/40 hover:bg-black/60 text-gray-400 px-4 py-3 rounded-lg font-bold transition flex items-center gap-2 border border-gray-600/30"
                     >
                         <i class="fas fa-image"></i> Foto
                     </button>
                     <input type="file" id="photo-input" accept="image/*" style="display: none;" onchange="uploadPhoto()">
                     <button 
                         onclick="sendMessage()" 
-                        class="bg-yellow-600 hover:bg-yellow-500 text-white px-6 py-3 rounded-lg font-bold transition flex items-center gap-2"
+                        class="bg-white hover:bg-gray-100 text-black px-6 py-3 rounded-lg font-bold transition flex items-center gap-2"
                     >
                         <i class="fas fa-paper-plane"></i> Enviar
                     </button>
@@ -274,8 +274,8 @@ async function loadChatHistory() {
             }
             
             return `<div class="flex ${isUser ? 'justify-end' : 'justify-start'}">
-                <div class="${isUser ? 'bg-yellow-600/20 border-l-4 border-yellow-600' : 'bg-slate-800/50 border-l-4 border-slate-600'} rounded-lg p-3 max-w-2xl">
-                    <p class="text-xs ${isUser ? 'text-yellow-300' : 'text-slate-400'} mb-1">${isUser ? 'Você' : 'Chat Life'}</p>
+                <div class="${isUser ? 'bg-white/20 border-l-4 border-white' : 'bg-black/40 border-l-4 border-gray-600'} rounded-lg p-3 max-w-2xl">
+                    <p class="text-xs ${isUser ? 'text-gray-300' : 'text-slate-400'} mb-1">${isUser ? 'Você' : 'Chat Life'}</p>
                     ${contentHtml}
                     <p class="text-[11px] text-slate-500 mt-1">${timestamp}</p>
                 </div>
@@ -299,8 +299,8 @@ async function sendMessage() {
     // Exibe mensagem do usuário
     const timestamp = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
     container.innerHTML += `<div class="flex justify-end">
-        <div class="bg-yellow-600/20 border-l-4 border-yellow-600 rounded-lg p-3 max-w-xs">
-            <p class="text-xs text-yellow-300 mb-1">Você</p>
+        <div class="bg-white/20 border-l-4 border-white rounded-lg p-3 max-w-xs">
+            <p class="text-xs text-gray-300 mb-1">Você</p>
             <p class="text-white text-sm">${escapeHtml(msg)}</p>
             <p class="text-[11px] text-slate-500 mt-1">${timestamp}</p>
         </div>
@@ -323,7 +323,7 @@ async function sendMessage() {
 
         const formattedReply = parseMarkdown(reply);
         container.innerHTML += `<div class="flex justify-start">
-            <div class="bg-slate-800/50 border-l-4 border-slate-600 rounded-lg p-3 max-w-2xl">
+            <div class="bg-black/40 border-l-4 border-gray-600 rounded-lg p-3 max-w-2xl">
                 <p class="text-xs text-slate-400 mb-1">Chat Life</p>
                 <div class="text-white text-sm leading-relaxed">${formattedReply}</div>
                 <p class="text-[11px] text-slate-500 mt-1">${replyTimestamp}</p>
@@ -369,8 +369,8 @@ async function uploadPhoto() {
             const container = document.getElementById('chat-messages');
             const timestamp = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
             container.innerHTML += `<div class="flex justify-end">
-                <div class="bg-yellow-600/20 border-l-4 border-yellow-600 rounded-lg p-3 max-w-xs">
-                    <p class="text-xs text-yellow-300 mb-1">Você</p>
+                <div class="bg-white/20 border-l-4 border-white rounded-lg p-3 max-w-xs">
+                    <p class="text-xs text-gray-300 mb-1">Você</p>
                     <img src="${data.path}" class="rounded-lg max-w-xs h-auto mb-2">
                     <p class="text-[11px] text-slate-500 mt-1">${timestamp}</p>
                 </div>

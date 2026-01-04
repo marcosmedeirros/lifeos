@@ -59,7 +59,7 @@ include __DIR__ . '/../includes/header.php';
         <div class="main-shell">
             <div class="flex justify-between items-center mb-8">
                 <h2 class="text-3xl font-bold text-white">Notas</h2>
-                <button onclick="openModal('modal-note')" class="bg-gradient-to-r from-yellow-600 to-yellow-700 hover:from-yellow-500 hover:to-yellow-600 text-white px-6 py-2 rounded-lg font-bold shadow-lg shadow-yellow-600/30 transition transform hover:-translate-y-0.5">
+                <button onclick="openModal('modal-note')" class="bg-white hover:bg-gray-100 text-black px-6 py-2 rounded-lg font-bold shadow-lg transition transform hover:-translate-y-0.5">
                     <i class="fas fa-sticky-note mr-2"></i> 📝 Criar Nota
                 </button>
             </div>
@@ -69,23 +69,23 @@ include __DIR__ . '/../includes/header.php';
     </div>
 </div>
 
-<div id="modal-overlay" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
+<div id="modal-overlay" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
     <div id="modal-content" class="modal-glass rounded-2xl p-8 w-full max-w-5xl relative max-h-[90vh] overflow-y-auto h-[85vh] flex flex-col">
-        <button onclick="closeModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white transition w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-800 z-50">
+        <button onclick="closeModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white transition w-8 h-8 flex items-center justify-center rounded-full hover:bg-black/60 z-50">
             <i class="fas fa-times text-xl"></i>
         </button>
         
         <form id="modal-note" class="modal-form hidden h-full flex flex-col" onsubmit="submitNote(event)">
             <div class="flex justify-between items-center mb-4">
-                <h3 class="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-yellow-500" id="note-modal-title">📝 Nota</h3>
+                <h3 class="text-2xl font-bold text-white" id="note-modal-title">📝 Nota</h3>
                 <button type="button" id="btn-delete-note" onclick="deleteNote()" class="hidden text-rose-400 hover:text-rose-300 transition">
                     <i class="fas fa-trash"></i>
                 </button>
             </div>
             <input type="hidden" name="id" id="note-id">
             <div class="flex-1 flex flex-col space-y-4">
-                <textarea name="content" id="note-content" class="flex-1 bg-slate-800/50 p-6 rounded-xl border border-slate-700/50 font-medium text-lg leading-relaxed focus:bg-slate-800 transition resize-none" placeholder="Comece a escrever..." required></textarea>
-                <button type="submit" class="w-full bg-gradient-to-r from-yellow-600 to-yellow-700 hover:from-yellow-500 hover:to-yellow-600 text-white font-bold py-3 rounded-xl shadow-lg shadow-yellow-600/30 transition">
+                <textarea name="content" id="note-content" class="flex-1 bg-black/40 p-6 rounded-xl border border-gray-600/30 font-medium text-lg leading-relaxed focus:bg-black/50 transition resize-none" placeholder="Comece a escrever..." required></textarea>
+                <button type="submit" class="w-full bg-white hover:bg-gray-100 text-black font-bold py-3 rounded-xl shadow-lg transition">
                     💾 Salvar Nota
                 </button>
             </div>
@@ -102,15 +102,15 @@ async function loadNotes() {
     const c = document.getElementById('notes-list');
     
     if(window.notesData.length === 0) {
-        c.innerHTML = '<p class="text-slate-500 col-span-3 text-center py-10 italic">Nenhuma nota por enquanto.</p>';
+        c.innerHTML = '<p class="text-gray-500 col-span-3 text-center py-10 italic">Nenhuma nota por enquanto.</p>';
         return;
     }
     
     c.innerHTML = window.notesData.map(n => 
-        `<div onclick="editNote(${n.id})" class="glass-card p-6 rounded-2xl hover:bg-slate-800/50 transition group flex flex-col justify-between min-h-[180px] border border-slate-700/50 cursor-pointer">
-            <p class="whitespace-pre-wrap font-medium text-slate-300 text-sm leading-relaxed mb-4 flex-1 line-clamp-custom">${n.content}</p>
-            <div class="flex justify-between items-center mt-auto pt-4 border-t border-slate-700/30">
-                <span class="text-[10px] text-slate-500 font-mono">${new Date(n.created_at).toLocaleDateString('pt-BR')}</span>
+        `<div onclick="editNote(${n.id})" class="glass-card p-6 rounded-2xl hover:bg-black/50 transition group flex flex-col justify-between min-h-[180px] border border-gray-700/40 cursor-pointer">
+            <p class="whitespace-pre-wrap font-medium text-gray-200 text-sm leading-relaxed mb-4 flex-1 line-clamp-custom">${n.content}</p>
+            <div class="flex justify-between items-center mt-auto pt-4 border-t border-gray-700/30">
+                <span class="text-[10px] text-gray-500 font-mono">${new Date(n.created_at).toLocaleDateString('pt-BR')}</span>
                 <div class="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                     <i class="fas fa-pen text-xs text-purple-400 hover:text-white"></i>
                     <button onclick="event.stopPropagation(); deleteNote(${n.id})" class="text-rose-500 hover:text-white transition">

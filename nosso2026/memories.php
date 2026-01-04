@@ -53,8 +53,8 @@ $items = $pdo->query("SELECT * FROM nosso2026_memories WHERE owner='nosso' ORDER
   <style>
     body { background:#000; color:#fff; font-family:system-ui,-apple-system,sans-serif; }
     .glass { background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.06); }
-    .btn { background:#d4af37; color:#000; padding:0.5rem 1rem; border-radius:0.75rem; font-weight:600; transition:all 0.2s; display:inline-block; text-align:center; border:0; cursor:pointer; }
-    .btn:hover { background:#c19b1a; transform: translateY(-1px); }
+    .btn { background:#ffffff; color:#000; padding:0.5rem 1rem; border-radius:0.75rem; font-weight:600; transition:all 0.2s; display:inline-block; text-align:center; border:0; cursor:pointer; }
+    .btn:hover { background:#e0e0e0; transform: translateY(-1px); }
     .memory-card { position:relative; overflow:hidden; border-radius:1rem; transition:transform 0.2s; }
     .memory-card:hover { transform:scale(1.02); }
     .memory-img { width:100%; height:300px; object-fit:cover; }

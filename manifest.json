@@ -6,7 +6,7 @@
   "scope": "/lifeos/",
   "display": "standalone",
   "background_color": "#0a0a0a",
-  "theme_color": "#d4af37",
+  "theme_color": "#ffffff",
   "orientation": "portrait-primary",
   "icons": [
     {

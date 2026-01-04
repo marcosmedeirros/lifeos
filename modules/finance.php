@@ -129,26 +129,26 @@ include __DIR__ . '/../includes/header.php';
             <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
                 <h2 class="text-3xl font-bold text-white">Controle Financeiro</h2>
                 <div class="flex gap-3 items-center flex-wrap justify-end">
-                    <select id="finance-filter-category" onchange="loadFinance()" class="bg-slate-800 border-slate-700 text-sm rounded-lg px-4 py-2 focus:ring-2 focus:ring-emerald-500">
+                    <select id="finance-filter-category" onchange="loadFinance()" class="bg-black/40 border border-gray-600/30 text-sm rounded-lg px-4 py-2 focus:ring-2 focus:ring-gray-400">
                         <option value="">Todas as Categorias</option>
                     </select>
-                    <div class="flex items-center bg-slate-800 rounded-lg p-1 border border-slate-700">
-                        <button onclick="changeFinanceMonth(-1)" class="w-8 h-8 flex items-center justify-center hover:bg-slate-700 rounded text-slate-400 hover:text-white">
+                    <div class="flex items-center bg-black/40 rounded-lg p-1 border border-gray-600/30">
+                        <button onclick="changeFinanceMonth(-1)" class="w-8 h-8 flex items-center justify-center hover:bg-black/60 rounded text-gray-400 hover:text-white">
                             <i class="fas fa-chevron-left"></i>
                         </button>
                         <span id="finance-month-label" class="px-4 font-medium text-sm min-w-[140px] justify-center">...</span>
-                        <button onclick="changeFinanceMonth(1)" class="w-8 h-8 flex items-center justify-center hover:bg-slate-700 rounded text-slate-400 hover:text-white">
+                        <button onclick="changeFinanceMonth(1)" class="w-8 h-8 flex items-center justify-center hover:bg-black/60 rounded text-gray-400 hover:text-white">
                             <i class="fas fa-chevron-right"></i>
                         </button>
                     </div>
-                    <button onclick="openModal('modal-finance')" class="bg-gradient-to-r from-yellow-600 to-yellow-700 hover:from-yellow-500 hover:to-yellow-600 text-white px-6 py-2 rounded-lg font-bold shadow-lg shadow-yellow-600/30 flex items-center gap-2">
+                    <button onclick="openModal('modal-finance')" class="bg-white hover:bg-gray-100 text-black px-6 py-2 rounded-lg font-bold shadow-lg flex items-center gap-2">
                         <i class="fas fa-plus"></i> Lançar
                     </button>
                 </div>
             </div>
             
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-                <div class="glass-card p-5 rounded-2xl border-b-4 border-yellow-600">
+                <div class="glass-card p-5 rounded-2xl border-b-4 border-gray-400">
                     <p class="text-xs uppercase text-gray-400 font-bold mb-2">Saldo Geral</p>
                     <p class="text-2xl font-bold text-white" id="fin-total-balance">R$ 0,00</p>
                 </div>
@@ -156,12 +156,12 @@ include __DIR__ . '/../includes/header.php';
                     <p class="text-xs uppercase text-gray-400 font-bold mb-2">Saldo (Mês)</p>
                     <p class="text-2xl font-bold text-white" id="fin-balance">R$ 0,00</p>
                 </div>
-                <div class="glass-card p-5 rounded-2xl border-l-4 border-yellow-600">
+                <div class="glass-card p-5 rounded-2xl border-l-4 border-gray-400">
                     <div class="flex justify-between mb-2">
                         <p class="text-xs uppercase text-gray-400 font-bold">Entradas</p>
-                        <i class="fas fa-arrow-up text-yellow-500"></i>
+                        <i class="fas fa-arrow-up text-gray-400"></i>
                     </div>
-                    <p class="text-2xl font-bold text-yellow-400" id="fin-income">R$ 0,00</p>
+                    <p class="text-2xl font-bold text-gray-300" id="fin-income">R$ 0,00</p>
                 </div>
                 <div class="glass-card p-5 rounded-2xl border-l-4 border-gray-600">
                     <div class="flex justify-between mb-2">
@@ -175,7 +175,7 @@ include __DIR__ . '/../includes/header.php';
             <div class="glass-card rounded-2xl overflow-hidden shadow-xl">
                 <div class="overflow-x-auto">
                     <table class="w-full text-left min-w-[700px]">
-                        <thead class="bg-slate-900/50 text-slate-400 uppercase text-xs font-bold tracking-wider">
+                        <thead class="bg-black/60 text-gray-400 uppercase text-xs font-bold tracking-wider">
                             <tr>
                                 <th class="p-5">Data</th>
                                 <th class="p-5">Descrição</th>
@@ -184,7 +184,7 @@ include __DIR__ . '/../includes/header.php';
                                 <th class="p-5 text-right">Valor</th>
                             </tr>
                         </thead>
-                        <tbody id="finance-list" class="divide-y divide-slate-700/50 text-sm font-medium"></tbody>
+                        <tbody id="finance-list" class="divide-y divide-gray-700/40 text-sm font-medium"></tbody>
                     </table>
                 </div>
             </div>
@@ -193,14 +193,14 @@ include __DIR__ . '/../includes/header.php';
 </div>
 
 <!-- Modals -->
-<div id="modal-overlay" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
+<div id="modal-overlay" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
     <div id="modal-content" class="modal-glass rounded-2xl p-8 w-full max-w-md relative max-h-[90vh] overflow-y-auto">
-        <button onclick="closeModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white transition w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-800 z-50">
+        <button onclick="closeModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white transition w-8 h-8 flex items-center justify-center rounded-full hover:bg-black/60 z-50">
             <i class="fas fa-times text-xl"></i>
         </button>
         
         <form id="modal-finance" class="modal-form hidden" onsubmit="submitFinance(event)">
-            <h3 class="text-2xl font-bold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-yellow-500" id="finance-modal-title">💰 Lançamento Financeiro</h3>
+            <h3 class="text-2xl font-bold mb-6 text-white" id="finance-modal-title">💰 Lançamento Financeiro</h3>
             <input type="hidden" name="id" id="finance-id">
             <div class="space-y-5">
                 <div>
@@ -234,7 +234,7 @@ include __DIR__ . '/../includes/header.php';
                     <input type="datetime-local" name="date" id="finance-date" required>
                 </div>
                 <div class="flex gap-3 pt-4">
-                    <button type="submit" class="flex-1 bg-gradient-to-r from-yellow-600 to-yellow-700 hover:from-yellow-500 hover:to-yellow-600 text-white font-bold py-3 rounded-xl shadow-lg shadow-yellow-600/30 transition">💾 Salvar</button>
+                    <button type="submit" class="flex-1 bg-white hover:bg-gray-100 text-black font-bold py-3 rounded-xl shadow-lg transition">💾 Salvar</button>
                     <button type="button" id="btn-delete-finance" onclick="deleteFinance()" class="hidden bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 hover:text-rose-400 px-4 rounded-xl border border-rose-500/30 transition">
                         <i class="fas fa-trash"></i>
                     </button>
@@ -245,12 +245,12 @@ include __DIR__ . '/../includes/header.php';
         <div id="modal-finance-category" class="modal-form hidden">
             <div class="flex justify-between items-center mb-6">
                 <h3 class="text-xl font-bold text-white">Categorias (Finanças)</h3>
-                <button onclick="openModal('modal-finance', false)" class="text-sm text-blue-400 hover:text-blue-300 transition">Voltar</button>
+                <button onclick="openModal('modal-finance', false)" class="text-sm text-gray-400 hover:text-gray-300 transition">Voltar</button>
             </div>
             <form onsubmit="submitFinanceCategory(event)" class="mb-6 flex gap-3">
                 <input type="text" name="name" placeholder="Nova Categoria" required class="flex-1">
-                <input type="color" name="color" value="#3B82F6" class="h-12 w-12 p-1 border-0 rounded-lg cursor-pointer bg-slate-800">
-                <button type="submit" class="bg-blue-600 hover:bg-blue-500 text-white px-4 rounded-lg transition shadow-lg">
+                <input type="color" name="color" value="#888888" class="h-12 w-12 p-1 border-0 rounded-lg cursor-pointer bg-black">
+                <button type="submit" class="bg-white hover:bg-gray-100 text-black px-4 rounded-lg transition shadow-lg">
                     <i class="fas fa-plus"></i>
                 </button>
             </form>
@@ -287,31 +287,31 @@ async function loadFinance() {
     
     const bal = document.getElementById('fin-balance');
     bal.innerText = formatCurrency(res.summary.balance);
-    bal.className = `text-2xl font-bold ${res.summary.balance >= 0 ? 'text-blue-400' : 'text-red-400'}`;
+    bal.className = `text-2xl font-bold ${res.summary.balance >= 0 ? 'text-gray-100' : 'text-red-400'}`;
     
     document.getElementById('fin-total-balance').innerText = formatCurrency(res.summary.total_balance);
     
     document.getElementById('finance-list').innerHTML = res.list.map(f => {
         const isEntry = f.type === 'income' || f.type === 'entrada';
         const catName = f.cat_name || '-';
-        const catStyle = f.cat_color ? `border-color:${f.cat_color}; color:${f.cat_color}; background-color:${f.cat_color}10` : 'border-color:#334155; color:#94a3b8';
+        const catStyle = f.cat_color ? `border-color:${f.cat_color}; color:${f.cat_color}; background-color:${f.cat_color}10` : 'border-color:#4b5563; color:#e5e7eb; background-color:rgba(255,255,255,0.04)';
         const typeLabel = isEntry ? 'Entrada' : 'Saída';
         const typeBadge = isEntry ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border-rose-500/20';
         
-        return `<tr onclick="editFinanceRow(${f.id})" class="hover:bg-slate-700/30 transition cursor-pointer group ${f.status==1 ? 'opacity-40 grayscale' : ''}">
-            <td class="p-5 text-slate-300 group-hover:text-white transition">${new Date(f.created_at).toLocaleDateString('pt-BR')}</td>
-            <td class="p-5 font-medium text-white group-hover:text-purple-400 transition ${f.status==1 ? 'line-through' : ''}">${f.description}</td>
+        return `<tr onclick="editFinanceRow(${f.id})" class="hover:bg-black/50 transition cursor-pointer group ${f.status==1 ? 'opacity-40 grayscale' : ''}">
+            <td class="p-5 text-gray-300 group-hover:text-white transition">${new Date(f.created_at).toLocaleDateString('pt-BR')}</td>
+            <td class="p-5 font-medium text-white group-hover:text-white transition ${f.status==1 ? 'line-through' : ''}">${f.description}</td>
             <td class="p-5 text-center"><span class="text-xs px-2 py-1 rounded border font-bold uppercase tracking-wider" style="${catStyle}">${catName}</span></td>
             <td class="p-5 text-center"><span class="px-2 py-1 rounded text-xs font-bold uppercase border ${typeBadge}">${typeLabel}</span></td>
-            <td class="p-5 text-right font-mono font-bold ${isEntry ? 'text-emerald-400' : 'text-slate-200'}">${!isEntry ? '- ' : ''}${formatCurrency(f.amount)}</td>
+            <td class="p-5 text-right font-mono font-bold ${isEntry ? 'text-emerald-400' : 'text-gray-200'}">${!isEntry ? '- ' : ''}${formatCurrency(f.amount)}</td>
         </tr>`;
-    }).join('') || '<tr><td colspan="5" class="p-8 text-center text-slate-500 italic">Nenhum lançamento encontrado.</td></tr>';
+    }).join('') || '<tr><td colspan="5" class="p-8 text-center text-gray-500 italic">Nenhum lançamento encontrado.</td></tr>';
 }
 
 async function loadFinanceCategories() {
     const cats = await api('get_finance_categories');
     document.getElementById('finance-category-list-modal').innerHTML = cats.map(c => 
-        `<div class="flex justify-between items-center bg-slate-800 p-3 rounded-lg border-l-4 mb-2" style="border-color:${c.color}">
+        `<div class="flex justify-between items-center bg-black/40 p-3 rounded-lg border-l-4 mb-2" style="border-color:${c.color}">
             <span>${c.name}</span>
             <button onclick="deleteFinanceCategory(${c.id})" class="text-rose-500 hover:text-rose-400 transition">
                 <i class="fas fa-trash"></i>

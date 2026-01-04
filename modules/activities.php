@@ -184,11 +184,11 @@ require_once __DIR__ . '/../includes/header.php';
 <style>
 /* Estilo para checkboxes de dias da semana */
 .day-checkbox:checked + label {
-    background: linear-gradient(135deg, rgb(202, 138, 4), rgb(234, 179, 8));
-    border-color: rgb(234, 179, 8);
+    background: #ffffff;
+    border-color: #ffffff;
     color: #000;
     font-weight: bold;
-    box-shadow: 0 0 12px rgba(234, 179, 8, 0.4);
+    box-shadow: 0 0 12px rgba(255, 255, 255, 0.4);
 }
 </style>
 
@@ -199,23 +199,23 @@ require_once __DIR__ . '/../includes/header.php';
         <div class="main-shell">
             <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
                 <h2 class="text-3xl font-bold text-white tracking-tight">Agenda Semanal</h2>
-                <div class="flex gap-2 bg-slate-900 rounded-lg p-1 border border-slate-700">
-                    <button onclick="changeWeek(-1)" class="w-10 h-10 flex items-center justify-center hover:bg-slate-800 rounded text-slate-400 transition">
+                <div class="flex gap-2 bg-black/40 rounded-lg p-1 border border-gray-600/30">
+                    <button onclick="changeWeek(-1)" class="w-10 h-10 flex items-center justify-center hover:bg-black/60 rounded text-gray-400 transition">
                         <i class="fas fa-chevron-left"></i>
                     </button>
-                    <span id="activity-week-label" class="px-4 flex items-center text-sm font-mono text-slate-300 min-w-[140px] justify-center">...</span>
-                    <button onclick="changeWeek(1)" class="w-10 h-10 flex items-center justify-center hover:bg-slate-800 rounded text-slate-400 transition">
+                    <span id="activity-week-label" class="px-4 flex items-center text-sm font-mono text-gray-300 min-w-[140px] justify-center">...</span>
+                    <button onclick="changeWeek(1)" class="w-10 h-10 flex items-center justify-center hover:bg-black/60 rounded text-gray-400 transition">
                         <i class="fas fa-chevron-right"></i>
                     </button>
                 </div>
             </div>
             
             <div class="flex gap-3 mb-6">
-            <button onclick="openActivityModal('modal-activity')" class="bg-gradient-to-r from-yellow-600 to-yellow-700 hover:from-yellow-500 hover:to-yellow-600 text-white px-5 py-2.5 rounded-xl font-bold shadow-lg shadow-yellow-600/30 transition transform hover:-translate-y-0.5 flex items-center gap-2">
+            <button onclick="openActivityModal('modal-activity')" class="bg-white hover:bg-gray-100 text-black px-5 py-2.5 rounded-xl font-bold shadow-lg transition transform hover:-translate-y-0.5 flex items-center gap-2">
                     <i class="fas fa-plus"></i> 📝 Nova Tarefa
                 </button>
-                <button onclick="openActivityModal('modal-category')" class="bg-slate-800 hover:bg-slate-700 text-white px-5 py-2.5 rounded-xl border border-slate-700 transition flex items-center gap-2">
-                    <i class="fas fa-tags text-slate-400"></i> Categorias
+                <button onclick="openActivityModal('modal-category')" class="bg-black/40 hover:bg-black/60 text-white px-5 py-2.5 rounded-xl border border-gray-600/30 transition flex items-center gap-2">
+                    <i class="fas fa-tags text-gray-400"></i> Categorias
                 </button>
             </div>
             
@@ -227,13 +227,13 @@ require_once __DIR__ . '/../includes/header.php';
 </div>
 
 <!-- Modal Activity -->
-<div id="activity-modal-overlay" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4" onclick="closeActivityModal()">
+<div id="activity-modal-overlay" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4" onclick="closeActivityModal()">
     <div class="modal-glass rounded-2xl p-8 w-full max-w-md relative max-h-[90vh] overflow-y-auto" onclick="event.stopPropagation()">
-        <button type="button" onclick="closeActivityModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white transition w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-800 z-50">
+        <button type="button" onclick="closeActivityModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white transition w-8 h-8 flex items-center justify-center rounded-full hover:bg-black/60 z-50">
             <i class="fas fa-times text-xl"></i>
         </button>
         <form id="modal-activity" class="modal-form" onsubmit="submitActivity(event)">
-            <h3 class="text-2xl font-bold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-yellow-500" id="activity-modal-title">📝 Nova Atividade</h3>
+            <h3 class="text-2xl font-bold mb-6 text-white" id="activity-modal-title">📝 Nova Atividade</h3>
             <input type="hidden" name="id" id="activity-id">
             <div class="space-y-5">
                 <input type="text" name="title" id="activity-title" placeholder="O que precisa ser feito?" required class="text-lg">
@@ -254,8 +254,8 @@ require_once __DIR__ . '/../includes/header.php';
                     </div>
                 </div>
                 <input type="date" name="date" id="activity-date" required>
-                <div class="bg-slate-800/50 p-4 rounded-xl border border-slate-700/50">
-                    <label class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 block">Tipo de Repetição</label>
+                <div class="bg-black/30 p-4 rounded-xl border border-gray-600/30">
+                    <label class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3 block">Tipo de Repetição</label>
                     <select id="repeat-type" class="mb-4" onchange="toggleRepeatOptions()">
                         <option value="none">Não repetir</option>
                         <option value="daily">Repetir todos os dias</option>
@@ -265,27 +265,27 @@ require_once __DIR__ . '/../includes/header.php';
                     
                     <!-- Opções de dias da semana (só aparece quando weekly) -->
                     <div id="weekly-options" class="hidden mt-3">
-                        <label class="text-xs font-medium text-slate-400 mb-2 block">Dias da semana:</label>
+                        <label class="text-xs font-medium text-gray-400 mb-2 block">Dias da semana:</label>
                         <div class="flex justify-between gap-1">
                             <input type="checkbox" name="repeat_days[]" value="0" id="r0" class="hidden day-checkbox">
-                            <label for="r0" class="w-9 h-9 rounded-full border border-slate-600 flex items-center justify-center cursor-pointer text-xs font-bold hover:border-yellow-500 transition hover:bg-yellow-500/10">D</label>
+                            <label for="r0" class="w-9 h-9 rounded-full border border-gray-600 flex items-center justify-center cursor-pointer text-xs font-bold hover:border-white transition hover:bg-white/10">D</label>
                             <input type="checkbox" name="repeat_days[]" value="1" id="r1" class="hidden day-checkbox">
-                            <label for="r1" class="w-9 h-9 rounded-full border border-slate-600 flex items-center justify-center cursor-pointer text-xs font-bold hover:border-yellow-500 transition hover:bg-yellow-500/10">S</label>
+                            <label for="r1" class="w-9 h-9 rounded-full border border-gray-600 flex items-center justify-center cursor-pointer text-xs font-bold hover:border-white transition hover:bg-white/10">S</label>
                             <input type="checkbox" name="repeat_days[]" value="2" id="r2" class="hidden day-checkbox">
-                            <label for="r2" class="w-9 h-9 rounded-full border border-slate-600 flex items-center justify-center cursor-pointer text-xs font-bold hover:border-yellow-500 transition hover:bg-yellow-500/10">T</label>
+                            <label for="r2" class="w-9 h-9 rounded-full border border-gray-600 flex items-center justify-center cursor-pointer text-xs font-bold hover:border-white transition hover:bg-white/10">T</label>
                             <input type="checkbox" name="repeat_days[]" value="3" id="r3" class="hidden day-checkbox">
-                            <label for="r3" class="w-9 h-9 rounded-full border border-slate-600 flex items-center justify-center cursor-pointer text-xs font-bold hover:border-yellow-500 transition hover:bg-yellow-500/10">Q</label>
+                            <label for="r3" class="w-9 h-9 rounded-full border border-gray-600 flex items-center justify-center cursor-pointer text-xs font-bold hover:border-white transition hover:bg-white/10">Q</label>
                             <input type="checkbox" name="repeat_days[]" value="4" id="r4" class="hidden day-checkbox">
-                            <label for="r4" class="w-9 h-9 rounded-full border border-slate-600 flex items-center justify-center cursor-pointer text-xs font-bold hover:border-yellow-500 transition hover:bg-yellow-500/10">Q</label>
+                            <label for="r4" class="w-9 h-9 rounded-full border border-gray-600 flex items-center justify-center cursor-pointer text-xs font-bold hover:border-white transition hover:bg-white/10">Q</label>
                             <input type="checkbox" name="repeat_days[]" value="5" id="r5" class="hidden day-checkbox">
-                            <label for="r5" class="w-9 h-9 rounded-full border border-slate-600 flex items-center justify-center cursor-pointer text-xs font-bold hover:border-yellow-500 transition hover:bg-yellow-500/10">S</label>
+                            <label for="r5" class="w-9 h-9 rounded-full border border-gray-600 flex items-center justify-center cursor-pointer text-xs font-bold hover:border-white transition hover:bg-white/10">S</label>
                             <input type="checkbox" name="repeat_days[]" value="6" id="r6" class="hidden day-checkbox">
-                            <label for="r6" class="w-9 h-9 rounded-full border border-slate-600 flex items-center justify-center cursor-pointer text-xs font-bold hover:border-yellow-500 transition hover:bg-yellow-500/10">S</label>
+                            <label for="r6" class="w-9 h-9 rounded-full border border-gray-600 flex items-center justify-center cursor-pointer text-xs font-bold hover:border-white transition hover:bg-white/10">S</label>
                         </div>
                     </div>
                 </div>
                 <div class="flex gap-3 pt-4">
-                    <button type="submit" class="flex-1 bg-gradient-to-r from-yellow-600 to-yellow-700 hover:from-yellow-500 hover:to-yellow-600 text-white font-bold py-3 rounded-xl shadow-lg shadow-yellow-600/30 transition">💾 Salvar</button>
+                    <button type="submit" class="flex-1 bg-white hover:bg-gray-100 text-black font-bold py-3 rounded-xl shadow-lg transition">💾 Salvar</button>
                     <button type="button" id="btn-delete-activity" onclick="deleteActivity()" class="hidden bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 hover:text-rose-400 px-4 rounded-xl border border-rose-500/30 transition">
                         <i class="fas fa-trash"></i>
                     </button>
@@ -297,8 +297,8 @@ require_once __DIR__ . '/../includes/header.php';
             <h3 class="text-xl font-bold mb-6 text-white">Categorias (Atividades)</h3>
             <div class="mb-6 flex gap-3">
                 <input type="text" id="category-name" placeholder="Nome" required class="flex-1">
-                <input type="color" id="category-color" value="#BB86FC" class="h-12 w-12 p-1 border-0 rounded-lg cursor-pointer bg-slate-800">
-                <button type="button" onclick="addNewCategory()" class="bg-gradient-to-r from-yellow-600 to-yellow-700 hover:from-yellow-500 hover:to-yellow-600 text-white px-4 rounded-lg transition shadow-lg shadow-yellow-600/30">
+                <input type="color" id="category-color" value="#BB86FC" class="h-12 w-12 p-1 border-0 rounded-lg cursor-pointer bg-black">
+                <button type="button" onclick="addNewCategory()" class="bg-white hover:bg-gray-100 text-black px-4 rounded-lg transition shadow-lg">
                     <i class="fas fa-plus mr-2"></i>Nova Categoria
                 </button>
                     <i class="fas fa-plus"></i>
@@ -515,7 +515,7 @@ async function deleteActivity(id) {
 
 async function loadCategories() { 
     const cats=await api('get_categories'); 
-    document.getElementById('category-list-modal').innerHTML=cats.map(c=>`<div class="flex justify-between items-center bg-slate-800 p-3 rounded-lg border-l-4 mb-2" style="border-color:${c.color}">
+    document.getElementById('category-list-modal').innerHTML=cats.map(c=>`<div class="flex justify-between items-center bg-black/40 p-3 rounded-lg border-l-4 mb-2" style="border-color:${c.color}">
         <span>${c.name}</span>
         <button onclick="deleteCategory(${c.id})" class="text-red-500 hover:text-white transition">
             <i class="fas fa-trash"></i>
@@ -544,46 +544,46 @@ async function deleteCategory(id) {
 // CSS para day-checkbox
 document.head.insertAdjacentHTML('beforeend', `<style>
 .day-checkbox:checked + label {
-    background-color: rgba(168, 85, 247, 0.2);
-    border-color: rgb(168, 85, 247);
-    color: rgb(168, 85, 247);
+    background-color: rgba(255, 255, 255, 0.18);
+    border-color: rgb(229, 229, 229);
+    color: rgb(243, 243, 243);
 }
 
 /* New agenda styling */
-.day-card {background: linear-gradient(135deg, rgba(15,23,42,0.85), rgba(15,23,42,0.65)); border:1px solid rgba(148,163,184,0.12); border-radius:18px; padding:16px; min-width:280px; box-shadow: 0 10px 40px rgba(0,0,0,0.35); display:flex; flex-direction:column; gap:14px; backdrop-filter: blur(8px); transition:all .2s ease;}
-.day-card.today {box-shadow: 0 10px 50px rgba(139,92,246,0.25); border-color: rgba(139,92,246,0.4);}
-.day-card:hover {transform: translateY(-3px); border-color: rgba(148,163,184,0.2);}
-.day-head {display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid rgba(148,163,184,0.15); padding-bottom:10px;}
-.day-name {text-transform:uppercase; letter-spacing:0.08em; font-size:11px; color:#94a3b8; font-weight:700;}
+.day-card {background: linear-gradient(135deg, rgba(0,0,0,0.85), rgba(26,26,26,0.65)); border:1px solid rgba(255,255,255,0.08); border-radius:18px; padding:16px; min-width:280px; box-shadow: 0 10px 40px rgba(0,0,0,0.35); display:flex; flex-direction:column; gap:14px; backdrop-filter: blur(8px); transition:all .2s ease;}
+.day-card.today {box-shadow: 0 10px 50px rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.25);} 
+.day-card:hover {transform: translateY(-3px); border-color: rgba(255,255,255,0.14);} 
+.day-head {display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:10px;}
+.day-name {text-transform:uppercase; letter-spacing:0.08em; font-size:11px; color:#d1d5db; font-weight:700;}
 .day-num {font-size:28px; font-weight:800; color:#e2e8f0; line-height:1;}
-.day-card.today .day-num {color:#c084fc;}
-.day-card.today .day-name {color:#c084fc;}
+.day-card.today .day-num {color:#f5f5f5;}
+.day-card.today .day-name {color:#f5f5f5;}
 .day-body {display:flex; flex-direction:column; gap:12px;}
-.period-block {background: rgba(15,23,42,0.65); border:1px solid rgba(148,163,184,0.12); border-radius:12px; padding:12px;}
+.period-block {background: rgba(0,0,0,0.6); border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:12px;}
 .period-header {display:flex; align-items:center; gap:8px; margin-bottom:10px;}
 .period-dot {width:8px; height:8px; border-radius:999px; display:inline-block;}
 .period-dot.morning {background:#f59e0b;}
 .period-dot.afternoon {background:#fb923c;}
-.period-dot.night {background:#6366f1;}
+.period-dot.night {background:#d1d5db;}
 .period-label {font-weight:700; color:#e2e8f0; font-size:12px; text-transform:uppercase; letter-spacing:0.05em;}
 .pill {display:inline-flex; align-items:center; gap:6px; padding:4px 8px; border-radius:999px; font-size:11px; font-weight:700;}
-.pill.cat {border-width:1px; border-style:solid; background:rgba(148,163,184,0.08); padding:2px 8px; color:#cbd5e1;}
-.task-card {position:relative; border:1px solid rgba(148,163,184,0.12); border-left-width:4px; border-radius:12px; padding:10px 12px; background:rgba(15,23,42,0.55); display:flex; align-items:center; gap:10px; justify-content:space-between; transition:all .2s ease;}
-.task-card:hover {background:rgba(30,41,59,0.7); border-color:rgba(148,163,184,0.25);}
+.pill.cat {border-width:1px; border-style:solid; background:rgba(255,255,255,0.06); padding:2px 8px; color:#e5e7eb;}
+.task-card {position:relative; border:1px solid rgba(255,255,255,0.08); border-left-width:4px; border-radius:12px; padding:10px 12px; background:rgba(0,0,0,0.55); display:flex; align-items:center; gap:10px; justify-content:space-between; transition:all .2s ease;}
+.task-card:hover {background:rgba(0,0,0,0.7); border-color:rgba(255,255,255,0.18);} 
 .task-card.done {opacity:0.45; filter:grayscale(0.3);}
 .task-main {display:flex; align-items:flex-start; gap:10px; flex:1; min-width:0;}
 .task-text {flex:1; min-width:0;}
 .task-title {color:#e2e8f0; font-weight:700; font-size:14px; line-height:1.4; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
 .task-card.done .task-title {text-decoration:line-through; color:#cbd5e150;}
 .task-meta {display:flex; gap:6px; flex-wrap:wrap; margin-top:4px;}
-.check {width:24px; height:24px; border:1px solid rgba(148,163,184,0.25); border-radius:999px; color:#cbd5e1; background:transparent; display:inline-flex; align-items:center; justify-content:center; transition:all .2s ease;}
-.check:hover {border-color:#c084fc; color:#c084fc;}
-.trash {width:28px; height:28px; border-radius:10px; border:1px solid transparent; color:#94a3b8; background:transparent; display:inline-flex; align-items:center; justify-content:center; opacity:0; transition:all .2s ease;}
-.task-card:hover .trash {opacity:1; border-color:rgba(148,163,184,0.2);} 
+.check {width:24px; height:24px; border:1px solid rgba(255,255,255,0.25); border-radius:999px; color:#e5e7eb; background:transparent; display:inline-flex; align-items:center; justify-content:center; transition:all .2s ease;}
+.check:hover {border-color:#f5f5f5; color:#f5f5f5;}
+.trash {width:28px; height:28px; border-radius:10px; border:1px solid transparent; color:#e5e7eb; background:transparent; display:inline-flex; align-items:center; justify-content:center; opacity:0; transition:all .2s ease;}
+.task-card:hover .trash {opacity:1; border-color:rgba(255,255,255,0.2);} 
 .trash:hover {color:#f87171; border-color:rgba(248,113,113,0.4); background:rgba(248,113,113,0.08);} 
-.add {width:34px; height:34px; border-radius:10px; background:rgba(99,102,241,0.15); color:#c084fc; border:1px solid rgba(99,102,241,0.35); display:inline-flex; align-items:center; justify-content:center; transition:all .2s ease;}
-.add:hover {background:rgba(99,102,241,0.25);} 
-.empty-period {font-size:12px; color:#94a3b8; opacity:0.7; padding:8px 6px; border:1px dashed rgba(148,163,184,0.3); border-radius:10px; text-align:center;}
+.add {width:34px; height:34px; border-radius:10px; background:rgba(255,255,255,0.08); color:#f8fafc; border:1px solid rgba(255,255,255,0.25); display:inline-flex; align-items:center; justify-content:center; transition:all .2s ease;}
+.add:hover {background:rgba(255,255,255,0.15);} 
+.empty-period {font-size:12px; color:#d1d5db; opacity:0.7; padding:8px 6px; border:1px dashed rgba(229,231,235,0.25); border-radius:10px; text-align:center;}
 </style>`);
 
 loadActivities();

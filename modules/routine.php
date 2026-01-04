@@ -67,19 +67,19 @@ require_once __DIR__ . '/../includes/header.php';
         <div class="main-shell calendar-shell">
             <div class="flex justify-between items-center mb-8">
                 <h2 class="text-3xl font-bold text-white">Diário & Rotina</h2>
-                <div class="flex items-center bg-slate-800 rounded-lg p-1 border border-slate-700">
-                    <button onclick="changeRoutineMonth(-1)" class="w-8 h-8 hover:bg-slate-700 rounded text-slate-400">
+                <div class="flex items-center bg-black/40 rounded-lg p-1 border border-gray-600/30">
+                    <button onclick="changeRoutineMonth(-1)" class="w-8 h-8 hover:bg-black/60 rounded text-gray-400">
                         <i class="fas fa-chevron-left"></i>
                     </button>
                     <span id="routine-month-label" class="px-4 font-medium text-sm min-w-[140px] text-center capitalize">...</span>
-                    <button onclick="changeRoutineMonth(1)" class="w-8 h-8 hover:bg-slate-700 rounded text-slate-400">
+                    <button onclick="changeRoutineMonth(1)" class="w-8 h-8 hover:bg-black/60 rounded text-gray-400">
                         <i class="fas fa-chevron-right"></i>
                     </button>
                 </div>
             </div>
             
             <div class="glass-card p-6 rounded-2xl shadow-2xl">
-                <div class="grid grid-cols-7 gap-2 mb-4 text-center text-slate-500 font-bold uppercase text-xs tracking-widest">
+                <div class="grid grid-cols-7 gap-2 mb-4 text-center text-gray-500 font-bold uppercase text-xs tracking-widest">
                     <div>Dom</div><div>Seg</div><div>Ter</div><div>Qua</div><div>Qui</div><div>Sex</div><div>Sáb</div>
                 </div>
                 <div class="grid grid-cols-7 gap-2" id="routine-calendar"></div>
@@ -89,19 +89,19 @@ require_once __DIR__ . '/../includes/header.php';
 </div>
 
 <!-- Modal Routine -->
-<div id="modal-overlay" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4" onclick="closeModal()">
+<div id="modal-overlay" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4" onclick="closeModal()">
     <div id="modal-content" class="modal-glass rounded-2xl p-8 w-full max-w-lg relative max-h-[90vh] overflow-y-auto" onclick="event.stopPropagation()">
-        <button onclick="closeModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white transition w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-800 z-50" type="button">
+        <button onclick="closeModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white transition w-8 h-8 flex items-center justify-center rounded-full hover:bg-black/40 z-50" type="button">
             <i class="fas fa-times text-xl"></i>
         </button>
         <form id="modal-routine" class="modal-form hidden" onsubmit="submitRoutine(event)">
-            <h3 class="text-2xl font-bold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-yellow-500 text-center" id="routine-modal-title">😊 Como foi seu dia?</h3>
+            <h3 class="text-2xl font-bold mb-6 text-white text-center" id="routine-modal-title">😊 Como foi seu dia?</h3>
             <input type="hidden" name="date" id="routine-date">
             <input type="hidden" name="mood" id="routine-mood">
 
             <div class="space-y-6">
                 <div>
-                    <label class="block text-sm font-semibold mb-2 text-slate-300 text-center">😊 Qual o seu humor?</label>
+                    <label class="block text-sm font-semibold mb-2 text-gray-300 text-center">😊 Qual o seu humor?</label>
                     <div class="flex gap-4 justify-center py-3">
                         <button type="button" onclick="selectMood('🤩')" data-mood="🤩" class="mood-btn text-5xl opacity-30 hover:opacity-100 transition-all hover:scale-125" title="Muito Bom">🤩</button>
                         <button type="button" onclick="selectMood('😊')" data-mood="😊" class="mood-btn text-5xl opacity-30 hover:opacity-100 transition-all hover:scale-125" title="Bom">😊</button>
@@ -112,8 +112,8 @@ require_once __DIR__ . '/../includes/header.php';
                 </div>
                 
                 <div>
-                    <label class="block text-sm font-semibold mb-2 text-slate-300">📝 Descrição do Dia</label>
-                    <textarea name="content" id="routine-content" required class="w-full min-h-[200px] bg-slate-800/50 border border-slate-700 rounded-xl p-4 text-white" placeholder="Como foi seu dia?"></textarea>
+                    <label class="block text-sm font-semibold mb-2 text-gray-300">📝 Descrição do Dia</label>
+                    <textarea name="content" id="routine-content" required class="w-full min-h-[200px] bg-black/40 border border-gray-600/30 rounded-xl p-4 text-white" placeholder="Como foi seu dia?"></textarea>
                 </div>
                 
                 <button type="submit" class="w-full bg-gradient-to-r from-yellow-600 to-yellow-700 hover:from-yellow-500 hover:to-yellow-600 text-white font-bold py-3 rounded-xl shadow-lg shadow-yellow-600/30 transition">💾 Salvar Dia</button>
@@ -149,7 +149,7 @@ async function loadRoutine() {
     const pad = new Date(currentRoutineMonth.getFullYear(), currentRoutineMonth.getMonth(), 1).getDay(); 
     
     for (let i = 0; i < pad; i++) {
-        cal.innerHTML += '<div class="bg-slate-800/10 h-28 rounded-xl border border-transparent"></div>'; 
+        cal.innerHTML += '<div class="bg-black/20 h-28 rounded-xl border border-transparent"></div>'; 
     }
     
     for (let i = 1; i <= dim; i++) { 
@@ -161,13 +161,13 @@ async function loadRoutine() {
         
         const emoji = log ? log.mood || '📝' : '+';
 
-        const cellClass = isToday ? 'bg-blue-500/10 border-blue-500/40' : 'bg-slate-800/30 border-slate-700/40 hover:bg-slate-800/50';
-        const numClass = isToday ? 'text-blue-400' : 'text-slate-500';
+        const cellClass = isToday ? 'bg-white/10 border-white/50' : 'bg-black/30 border-gray-700/40 hover:bg-black/50';
+        const numClass = isToday ? 'text-gray-100' : 'text-gray-500';
 
         let html = `<div onclick="openRoutineDay('${dStr}')" class="${cellClass} p-2 h-28 rounded-xl border transition flex flex-col items-center justify-center cursor-pointer relative group">
             <span class="absolute top-2 left-3 text-sm font-bold ${numClass}">${i}</span>
             <div class="text-4xl">${emoji}</div>
-            <div class="opacity-0 group-hover:opacity-50 text-2xl text-slate-600 absolute inset-0 flex items-center justify-center">${log ? '' : '+'}</div>
+            <div class="opacity-0 group-hover:opacity-50 text-2xl text-gray-600 absolute inset-0 flex items-center justify-center">${log ? '' : '+'}</div>
         </div>`; 
 
         cal.innerHTML += html; 

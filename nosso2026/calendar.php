@@ -98,8 +98,8 @@ $monthNames = ['', 'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', '
   <style>
     body { background:#000; color:#fff; font-family:system-ui,-apple-system,sans-serif; }
     .glass { background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.06); }
-    .btn { background:#d4af37; color:#000; padding:0.5rem 1rem; border-radius:0.75rem; font-weight:600; transition:all 0.2s; display:inline-block; text-align:center; border:0; cursor:pointer; }
-    .btn:hover { background:#c19b1a; transform: translateY(-1px); }
+    .btn { background:#ffffff; color:#000; padding:0.5rem 1rem; border-radius:0.75rem; font-weight:600; transition:all 0.2s; display:inline-block; text-align:center; border:0; cursor:pointer; }
+    .btn:hover { background:#e0e0e0; transform: translateY(-1px); }
     .day-cell { min-height:100px; border:1px solid #222; }
     .day-cell:hover { background:rgba(255,255,255,0.03); }
   </style>
@@ -229,7 +229,7 @@ $monthNames = ['', 'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', '
           
           <!-- BOTÕES -->
           <div style="display:flex; gap:12px;">
-            <button type="submit" style="flex:1; background:linear-gradient(to right, #fbbf24, #f97316); color:#000; padding:14px 24px; border-radius:12px; font-weight:bold; border:none; cursor:pointer; font-size:16px;">💾 Salvar</button>
+            <button type="submit" style="flex:1; background:#ffffff; color:#000; padding:14px 24px; border-radius:12px; font-weight:bold; border:none; cursor:pointer; font-size:16px;">💾 Salvar</button>
             <button type="button" id="deleteBtn" style="display:none; background:#dc2626; color:#fff; padding:14px 24px; border-radius:12px; font-weight:bold; border:none; cursor:pointer; font-size:16px;" onclick="deleteEvent()">🗑️</button>
           </div>
         </form>

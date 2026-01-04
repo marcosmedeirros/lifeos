@@ -78,7 +78,7 @@ require_once __DIR__ . '/../includes/header.php';
                             <i class="fas fa-chevron-right"></i>
                         </button>
                     </div>
-                    <button onclick="openModal('modal-workout')" class="bg-gradient-to-r from-yellow-600 to-yellow-700 hover:from-yellow-500 hover:to-yellow-600 text-white px-5 py-2 rounded-lg font-bold shadow-lg shadow-yellow-600/30 transition">
+                    <button onclick="openModal('modal-workout')" class="bg-white hover:bg-gray-100 text-black px-5 py-2 rounded-lg font-bold shadow-lg transition">
                         <i class="fas fa-dumbbell mr-2"></i> 🏃 Registrar
                     </button>
                 </div>
@@ -101,13 +101,13 @@ require_once __DIR__ . '/../includes/header.php';
             <i class="fas fa-times text-xl"></i>
         </button>
         <form id="modal-workout" class="modal-form hidden" onsubmit="submitWorkout(event)">
-        <h3 class="text-2xl font-bold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-yellow-500" id="workout-modal-title">🏃 Treino</h3>
+        <h3 class="text-2xl font-bold mb-6 text-white" id="workout-modal-title">🏃 Treino</h3>
         <input type="hidden" name="id" id="workout-id">
         <div class="space-y-5">
             <input type="text" name="name" id="workout-name" placeholder="Nome do Treino (Ex: Perna A)" required class="text-lg">
             <input type="date" name="date" id="workout-date" required>
             <div class="flex gap-3 pt-4">
-                <button type="submit" class="flex-1 bg-gradient-to-r from-yellow-600 to-yellow-700 hover:from-yellow-500 hover:to-yellow-600 text-white font-bold py-3 rounded-xl shadow-lg shadow-yellow-600/30 transition">💾 Salvar</button>
+                <button type="submit" class="flex-1 bg-white hover:bg-gray-100 text-black font-bold py-3 rounded-xl shadow-lg transition">💾 Salvar</button>
                 <button type="button" id="btn-delete-workout" onclick="deleteWorkout()" class="hidden bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 hover:text-rose-400 px-4 rounded-xl border border-rose-500/30 transition">
                     <i class="fas fa-trash"></i>
                 </button>
@@ -145,8 +145,8 @@ async function loadWorkouts() {
         const dStr = `${ym}-${String(i).padStart(2, '0')}`;
         const w = window.workoutsData.find(w => w.workout_date === dStr);
         const isToday = new Date().toISOString().slice(0,10) === dStr;
-        const cellClass = isToday ? 'bg-yellow-500/10 border-yellow-500/50 ring-1 ring-yellow-500/30' : 'bg-slate-800/40 border-slate-700/50 hover:bg-slate-800 hover:border-slate-600';
-        const numClass = isToday ? 'text-yellow-400 font-bold' : 'text-slate-400 font-medium';
+        const cellClass = isToday ? 'bg-white/10 border-white/50 ring-1 ring-white/30' : 'bg-slate-800/40 border-slate-700/50 hover:bg-slate-800 hover:border-slate-600';
+        const numClass = isToday ? 'text-white font-bold' : 'text-slate-400 font-medium';
         
         let html = `<div onclick="editWorkoutRow(${w?.id||0}, '${dStr}')" class="${cellClass} p-2 h-28 rounded-xl border transition flex flex-col group relative overflow-hidden cursor-pointer">
             <span class="${numClass} text-sm mb-1 ml-1">${i}</span>
