@@ -131,40 +131,41 @@ else { $progress = round((($now - $yearStart)/($yearEnd - $yearStart))*100); }
         </div>
       </div>
 
-      <!-- Próximos Eventos -->
-      <div class="glass p-6 rounded-2xl">
-        <div class="flex items-center justify-between mb-4">
-          <h3 class="text-xl font-bold">Próximo</h3>
-          <a href="<?= n26_link('calendar.php') ?>" class="text-xs hover:text-gray-300">Ver calendário →</a>
+      <!-- Próximos Eventos e Treinos -->
+      <div class="flex flex-col gap-6">
+        <!-- Próximos Eventos -->
+        <div class="glass p-6 rounded-2xl">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-xl font-bold">Próximo</h3>
+            <a href="<?= n26_link('calendar.php') ?>" class="text-xs hover:text-gray-300">Ver calendário →</a>
+          </div>
+          <div class="flex items-center justify-center py-4">
+            <?php if(empty($nextEvents)): ?>
+              <p class="text-sm text-[#999]">Nenhum evento agendado</p>
+            <?php else: ?>
+              <div class="text-center">
+                <div class="text-4xl font-bold mb-2"><?= date('d', strtotime($nextEvents[0]['start_date'])) ?></div>
+                <div class="text-sm text-[#999] mb-3"><?= date('M', strtotime($nextEvents[0]['start_date'])) ?></div>
+                <p class="text-sm font-semibold"><?= htmlspecialchars($nextEvents[0]['title']) ?></p>
+                <p class="text-xs text-[#999] mt-1"><?= date('H:i', strtotime($nextEvents[0]['start_date'])) ?></p>
+              </div>
+            <?php endif; ?>
+          </div>
         </div>
-        <div class="flex items-center justify-center py-6">
-          <?php if(empty($nextEvents)): ?>
-            <p class="text-sm text-[#999]">Nenhum evento agendado</p>
-          <?php else: ?>
-            <div class="text-center">
-              <div class="text-4xl font-bold mb-2"><?= date('d', strtotime($nextEvents[0]['start_date'])) ?></div>
-              <div class="text-sm text-[#999] mb-3"><?= date('M', strtotime($nextEvents[0]['start_date'])) ?></div>
-              <p class="text-sm font-semibold"><?= htmlspecialchars($nextEvents[0]['title']) ?></p>
-              <p class="text-xs text-[#999] mt-1"><?= date('H:i', strtotime($nextEvents[0]['start_date'])) ?></p>
-            </div>
-          <?php endif; ?>
-        </div>
-      </div>
 
-      <!-- Total de Treinos -->
-      <div class="glass p-6 rounded-2xl">
-        <div class="flex items-center justify-between mb-4">
-          <h3 class="text-xl font-bold">Treinos</h3>
-          <a href="<?= n26_link('workouts.php') ?>" class="text-xs hover:text-gray-300">Ver mais →</a>
-        </div>
-        <div class="text-center py-6">
-          <div class="text-5xl font-bold text-white"><?= $totalWorkoutsYear ?></div>
-          <p class="text-sm text-[#999] mt-2">treinos em 2026</p>
+        <!-- Total de Treinos -->
+        <div class="glass p-6 rounded-2xl">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-xl font-bold">Treinos</h3>
+            <a href="<?= n26_link('workouts.php') ?>" class="text-xs hover:text-gray-300">Ver mais →</a>
+          </div>
+          <div class="text-center py-4">
+            <div class="text-5xl font-bold text-white"><?= $totalWorkoutsYear ?></div>
+            <p class="text-sm text-[#999] mt-2">treinos em 2026</p>
+          </div>
         </div>
       </div>
     </div>
-
-    <!-- Segunda linha: Mercado e Filmes -->
     <div class="grid md:grid-cols-2 gap-6 mb-8">
       <!-- Lista de Mercado -->
       <div class="glass p-6 rounded-2xl">
