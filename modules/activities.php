@@ -366,7 +366,9 @@ function addNewCategory() {
     });
 }
 let currentWeekStart = new Date();
-currentWeekStart.setDate(currentWeekStart.getDate() - currentWeekStart.getDay());
+const dayOfWeek = currentWeekStart.getDay(); // 0 = Domingo, 1 = Segunda, ..., 6 = Sábado
+const daysToMonday = dayOfWeek === 0 ? -6 : -(dayOfWeek - 1); // Ajusta para segunda-feira
+currentWeekStart.setDate(currentWeekStart.getDate() + daysToMonday);
 currentWeekStart.setHours(0,0,0,0);
 window.activitiesData = [];
 
@@ -388,7 +390,7 @@ async function loadActivities() {
     }
     window.activitiesData = res;
 
-    const dayNames = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
+    const dayNames = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado', 'Domingo'];
     const periods = {
         morning: { label: 'Manhã', badge: 'bg-amber-500/15 text-amber-300 border border-amber-500/30' },
         afternoon: { label: 'Tarde', badge: 'bg-orange-500/15 text-orange-300 border border-orange-500/30' },

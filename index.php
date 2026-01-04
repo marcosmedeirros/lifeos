@@ -615,10 +615,11 @@ async function loadDashboard() {
     document.getElementById('dash-next-event-time').innerText = nextEventTime;
 
     // Atividades do Dia (hoje)
-    document.getElementById('dash-activities-list').innerHTML = data.activities_today.length ? 
-        data.activities_today.map(t => 
-            `<div id="dash-act-${t.id}" class="flex items-center gap-2 p-2 bg-slate-800/50 rounded-lg border-l-2 border-blue-500 hover:bg-slate-800 transition ${t.status == 1 ? 'opacity-50' : ''}">
-                <div onclick="event.stopPropagation(); toggleActivity(${t.id})" class="cursor-pointer text-blue-400 hover:text-blue-300 transition flex-shrink-0">
+    const activitiesList = document.getElementById('dash-activities-list');
+    if (data.activities_today.length) {
+        activitiesList.innerHTML = data.activities_today.map(t => 
+            `<div id="dash-act-${t.id}" class="flex items-center gap-2 p-2 bg-slate-800/50 rounded-lg border-l-2 border-blue-500 hover:bg-slate-800 transition ${t.status == 1 ? 'opacity-50' : ''}" style="cursor:pointer">
+                <div class="text-blue-400 hover:text-blue-300 transition flex-shrink-0" data-activity-id="${t.id}">
                     <i class="fas ${t.status == 1 ? 'fa-check-circle' : 'fa-circle'} text-sm"></i>
                 </div>
                 <div class="flex-1 min-w-0">
@@ -627,8 +628,21 @@ async function loadDashboard() {
                     </div>
                 </div>
             </div>`
-        ).join('') : 
-        '<p class="text-slate-500 text-xs italic">Tudo feito!</p>';
+        ).join('');
+        
+        // Adiciona event listeners para cada atividade
+        data.activities_today.forEach(t => {
+            const activityDiv = document.getElementById(`dash-act-${t.id}`);
+            if (activityDiv) {
+                activityDiv.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    toggleActivity(t.id);
+                });
+            }
+        });
+    } else {
+        activitiesList.innerHTML = '<p class="text-slate-500 text-xs italic">Tudo feito!</p>';
+    }
 
     // Lista de Eventos da Semana
     document.getElementById('dash-events-list').innerHTML = data.events_week.length ? 
