@@ -3,9 +3,7 @@
 @tailwind utilities;
 
 body {
-  background: radial-gradient(circle at 20% 20%, rgba(99,197,255,0.08), transparent 32%),
-    radial-gradient(circle at 80% 10%, rgba(99,197,255,0.05), transparent 36%),
-    linear-gradient(145deg, #040813 0%, #081024 50%, #0a1228 100%);
+  background: linear-gradient(145deg, #050505 0%, #0c0c0c 50%, #111111 100%);
   min-height: 100vh;
 }
 
@@ -14,15 +12,15 @@ body {
 }
 
 .btn {
-  @apply w-full rounded-xl font-semibold text-sm px-4 py-3 bg-gradient-to-r from-sky-400 to-sky-500 text-slate-900 hover:from-sky-300 hover:to-sky-400 transition;
+  @apply w-full rounded-xl font-semibold text-sm px-4 py-3 bg-gradient-to-r from-white to-gray-200 text-black hover:from-gray-100 hover:to-gray-300 transition;
 }
 
 .input {
-  @apply w-full rounded-xl border border-border bg-[#0c0c0c] text-white text-sm px-3 py-3 focus:outline-none focus:ring-2 focus:ring-sky-400/60;
+  @apply w-full rounded-xl border border-border bg-[#0c0c0c] text-white text-sm px-3 py-3 focus:outline-none focus:ring-2 focus:ring-gray-200/60;
 }
 
 .badge {
-  @apply inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full bg-sky-500/15 text-sky-200;
+  @apply inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full bg-white/15 text-white;
 }
 
 .nav-link {
@@ -30,5 +28,5 @@ body {
 }
 
 .nav-link-active {
-  @apply text-sky-200 border-sky-400 bg-sky-500/10;
+  @apply text-white border-gray-300 bg-white/10;
 }

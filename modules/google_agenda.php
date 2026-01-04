@@ -559,7 +559,7 @@ function renderCalendarGrid(events) {
         const cellClass = isToday 
             ? 'bg-white/10 border-white/50 ring-1 ring-white/30' 
             : 'bg-slate-800/40 border-slate-700/50 hover:bg-slate-800 hover:border-slate-600';
-        const numClass = isToday ? 'text-white font-bold' : 'text-slate-400 font-medium';
+        const numClass = isToday ? 'text-white font-bold' : 'text-gray-400 font-medium';
 
         cell.className = `${cellClass} h-28 rounded-xl border p-2 cursor-pointer transition group relative flex flex-col`;
         
@@ -588,7 +588,7 @@ function renderCalendarGrid(events) {
         
         const addBtn = document.createElement('div');
         addBtn.className = 'absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity';
-        addBtn.innerHTML = '<i class="fas fa-plus text-xs text-slate-500 hover:text-white cursor-pointer"></i>';
+        addBtn.innerHTML = '<i class="fas fa-plus text-xs text-white cursor-pointer"></i>';
         cell.appendChild(addBtn);
         
         grid.appendChild(cell);
