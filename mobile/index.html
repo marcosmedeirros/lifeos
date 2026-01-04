@@ -363,6 +363,13 @@
                         <textarea className="input" style={{height:100,marginBottom:8}} placeholder="Como foi seu dia?" value={routineContent} onChange={e=>setRoutineContent(e.target.value)}></textarea>
                         <button className="action" onClick={saveRoutine}>Salvar Rotina</button>
                     </div>
+
+                    {/* MENSAGEM DO DIA */}
+                    <div className="card" style={{textAlign:'center',padding:24}}>
+                        <div style={{fontSize:32,marginBottom:12}}>✨</div>
+                        <div className="title" style={{fontSize:16,marginBottom:8}}>Mensagem do Dia</div>
+                        <div className="label" style={{fontSize:14,lineHeight:1.6}}>"A persistência é o caminho do êxito."</div>
+                    </div>
                 </div>
             );
         }
