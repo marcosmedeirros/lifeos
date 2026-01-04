@@ -21,8 +21,22 @@ if (isset($_GET['api'])) {
         ensureHabitRemovalsTable($pdo);
         // API do Dashboard
         if ($action === 'dashboard_stats') {
-            $startOfWeek = date('Y-m-d', strtotime('monday this week'));
-            $endOfWeek = date('Y-m-d', strtotime('sunday this week'));
+            // Calcula segunda a domingo da semana atual
+            $now = new DateTime();
+            $dayOfWeek = $now->format('w'); // 0 = Domingo, 1 = Segunda, ..., 6 = Sábado
+            
+            // Ajusta para começar na segunda-feira
+            if ($dayOfWeek == 0) { // Se for domingo
+                $daysToMonday = -6;
+            } else {
+                $daysToMonday = -($dayOfWeek - 1);
+            }
+            
+            $monday = (clone $now)->modify("$daysToMonday days");
+            $sunday = (clone $monday)->modify('+6 days');
+            
+            $startOfWeek = $monday->format('Y-m-d');
+            $endOfWeek = $sunday->format('Y-m-d');
             
             // Finanças da Semana
             $fin_stmt = $pdo->prepare("
@@ -221,6 +235,14 @@ if (isset($_GET['api'])) {
         if ($action === 'save_activity') {
             $stmt = $pdo->prepare("INSERT INTO activities (user_id, title, category, day_date, period, status) VALUES (?, ?, ?, ?, ?, 0)");
             $stmt->execute([$user_id, $data['title'] ?? '', $data['category'] ?? '', $data['date'] ?? date('Y-m-d'), $data['period'] ?? 'morning']);
+            echo json_encode(['success'=>true]);
+            exit;
+        }
+        
+        // Toggle atividade (via dashboard)
+        if ($action === 'toggle_activity') {
+            $stmt = $pdo->prepare("UPDATE activities SET status = 1 - status WHERE id=? AND user_id=?");
+            $stmt->execute([$data['id'], $user_id]);
             echo json_encode(['success'=>true]);
             exit;
         }
@@ -483,12 +505,9 @@ include 'includes/header.php';
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <!-- Atividades de Hoje -->
         <div class="glass-card p-6 rounded-2xl">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="font-bold text-yellow-500 flex items-center gap-2">
-                    <i class="fas fa-check-circle"></i> Hoje
-                </h3>
-                <span class="text-xs font-bold px-3 py-1 rounded-full bg-red-500/20 text-red-400 border border-red-500/40" id="dash-week-spending">Carregando...</span>
-            </div>
+            <h3 class="font-bold mb-4 text-yellow-500 flex items-center gap-2">
+                <i class="fas fa-check-circle"></i> Hoje
+            </h3>
             <div id="dash-activities-list" class="space-y-2"></div>
         </div>
         
@@ -565,9 +584,6 @@ async function loadDashboard() {
     document.getElementById('dash-tasks-count').innerText = data.activities_count;
     document.getElementById('dash-habits-week').innerText = data.habits_week || 0;
     document.getElementById('dash-strava-count').innerText = data.strava_count || 0;
-    
-    // Gastos da semana no badge
-    document.getElementById('dash-week-spending').innerText = `Gastos: ${formatCurrency(data.outcome_week || 0)}`;
     
     // Próximo Evento
     let nextEventTitle = 'Nenhum evento';
