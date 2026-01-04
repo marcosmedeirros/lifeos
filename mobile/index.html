@@ -44,17 +44,6 @@
     <script type="text/babel">
         const { useState, useEffect, useMemo } = React;
 
-        const tabs = [
-            { id:'dashboard', label:'Dashboard', icon:'🏠' },
-            { id:'agenda', label:'Agenda', icon:'📅' },
-            { id:'activities', label:'Atividades', icon:'✅' },
-            { id:'habits', label:'Hábitos', icon:'🎯' },
-            { id:'finance', label:'Finanças', icon:'💰' },
-            { id:'board', label:'Board', icon:'📸' },
-            { id:'routine', label:'Rotina', icon:'📖' },
-            { id:'strava', label:'Treinos', icon:'🚴' }
-        ];
-
         const api = async (url, options={}) => {
             try {
                 const res = await fetch(url, { credentials:'same-origin', ...options });
@@ -86,7 +75,6 @@
         const fmtMoney = v => (Number(v)||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
 
         function App(){
-            const [tab, setTab] = useState('dashboard');
             const [status, setStatus] = useState('Online');
             return (
                 <div className="page">
@@ -94,31 +82,297 @@
                         <div className="brand">LifeOS Mobile</div>
                         <div className="status">{status}</div>
                     </header>
-                    <nav className="nav">
-                        {tabs.map(t => (
-                            <button key={t.id} className={tab===t.id?'active':''} onClick={()=>setTab(t.id)}>{t.icon} {t.label}</button>
-                        ))}
-                    </nav>
-                    {tab==='dashboard' && <Dashboard setStatus={setStatus} />}
-                    {tab==='agenda' && <Agenda setStatus={setStatus} />}
-                    {tab==='activities' && <Activities setStatus={setStatus} />}
-                    {tab==='habits' && <Habits setStatus={setStatus} />}
-                    {tab==='finance' && <Finance setStatus={setStatus} />}
-                    {tab==='board' && <Board setStatus={setStatus} />}
-                    {tab==='routine' && <Routine setStatus={setStatus} />}
-                    {tab==='strava' && <Strava setStatus={setStatus} />}
+                    <UnifiedApp setStatus={setStatus} />
                 </div>
             );
         }
 
-        function Dashboard({ setStatus }){
-            const [eventTitle,setEventTitle]=useState('');
-            const [eventDt,setEventDt]=useState(nowLocal().toISOString().slice(0,16));
-            const [actTitle,setActTitle]=useState('');
-            const [actDate,setActDate]=useState(nowLocal().toISOString().slice(0,10));
-            const [actPeriod,setActPeriod]=useState('morning');
+        function UnifiedApp({ setStatus }){
+            const today=nowLocal().toISOString().slice(0,10);
             const [loading,setLoading]=useState(false);
+            
+            // Summary state
             const [summary,setSummary]=useState({
+                today:{events:0,activities:0,doneActivities:0,habitsDone:0},
+                week:{events:0,activities:0},
+                finance:{income:0,outcome:0,balance:0,total_balance:0},
+                routine:{mood:'📝',content:'Sem anotação'},
+                strava:{trainedToday:false,time:'0h',activities:0}
+            });
+            
+            // Events state
+            const [todayEvents,setTodayEvents]=useState([]);
+            
+            // Activities state
+            const [todayActivities,setTodayActivities]=useState([]);
+            const [actTitle,setActTitle]=useState('');
+            const [actPeriod,setActPeriod]=useState('morning');
+            
+            // Habits state
+            const [habits,setHabits]=useState([]);
+            
+            // Finance state
+            const [finType,setFinType]=useState('expense');
+            const [finAmount,setFinAmount]=useState('');
+            const [finDesc,setFinDesc]=useState('');
+            const [weekFinance,setWeekFinance]=useState({income:0,outcome:0});
+            
+            // Board state
+            const [boardFile,setBoardFile]=useState(null);
+            
+            // Routine state
+            const [routineMood,setRoutineMood]=useState('😊');
+            const [routineContent,setRoutineContent]=useState('');
+
+            const getWeekRange=()=>{
+                const d=nowLocal();
+                const dow=d.getDay()===0?6:d.getDay()-1;
+                const start=new Date(d); start.setDate(d.getDate()-dow);
+                const end=new Date(start); end.setDate(start.getDate()+6);
+                const toStr=x=>x.toISOString().slice(0,10);
+                return {start:toStr(start),end:toStr(end)};
+            };
+
+            useEffect(()=>{loadAll();},[]);
+
+            const loadAll=async()=>{
+                setLoading(true); setStatus('Carregando...');
+                try {
+                    const {start,end}=getWeekRange();
+                    const [eventsData,actsData,habitsData,finData,routineData,stravaData] = await Promise.all([
+                        api('../modules/google_agenda.php?api=list_events'),
+                        api(`../modules/activities.php?api=get_activities&start=${today}&end=${today}`),
+                        api(`../modules/habits.php?api=get_habits&month=${today.slice(0,7)}`),
+                        api(`../modules/finance.php?api=get_finances&month=${today.slice(0,7)}`),
+                        api(`../modules/routine.php?api=get_routine_day&date=${today}`),
+                        api('../modules/strava.php?api=get_strava_data')
+                    ]);
+
+                    // Events
+                    const evs = eventsData?.events||[];
+                    const todayEvs = evs.filter(ev=>(ev.start_date||'').startsWith(today));
+                    setTodayEvents(todayEvs.slice(0,3)); // Apenas 3 primeiros
+
+                    // Activities
+                    const actsRaw = Array.isArray(actsData)?actsData:[];
+                    setTodayActivities(actsRaw);
+                    const doneToday = actsRaw.filter(a=>Number(a.status)===1).length;
+
+                    // Habits
+                    const habitList = Array.isArray(habitsData)?habitsData:[];
+                    setHabits(habitList);
+                    const habitsDone = habitList.filter(h=>{
+                        try { return (h.checked_dates?JSON.parse(h.checked_dates):[]).includes(today); } catch(e){ return false; }
+                    }).length;
+
+                    // Finance
+                    const finSummary = finData?.summary||{income:0,outcome:0,balance:0,total_balance:0};
+                    const finList = finData?.list||[];
+                    const weekStart=getWeekRange().start;
+                    const weekFin = finList.filter(f=>{
+                        const dt = (f.created_at||'').slice(0,10);
+                        return dt>=weekStart && dt<=today;
+                    });
+                    const weekIncome = weekFin.filter(f=>f.type==='income').reduce((s,f)=>s+Number(f.amount||0),0);
+                    const weekOutcome = weekFin.filter(f=>f.type==='expense').reduce((s,f)=>s+Number(f.amount||0),0);
+                    setWeekFinance({income:weekIncome,outcome:weekOutcome});
+
+                    // Routine
+                    if(routineData && !routineData.error && routineData.log_date){
+                        setRoutineMood(routineData.mood||'😊');
+                        setRoutineContent(routineData.content||'');
+                    }
+
+                    // Strava
+                    const stravaList = (stravaData && stravaData.connected && Array.isArray(stravaData.list)) ? stravaData.list : [];
+                    const todayPt = new Date().toLocaleDateString('pt-BR');
+                    const trainedToday = stravaList.some(act=>{
+                        const d = act.date || '';
+                        return d.includes(today) || d.includes(todayPt);
+                    });
+                    const stravaSummary = stravaData?.summary || {};
+
+                    setSummary({
+                        today:{events:todayEvs.length,activities:actsRaw.length,doneActivities:doneToday,habitsDone},
+                        week:{events:evs.filter(ev=>{const dt=ev.start_date?.replace(' ','T'); if(!dt) return false; const d=new Date(dt); const {start,end}=getWeekRange(); return d>=new Date(`${start}T00:00:00`) && d<=new Date(`${end}T23:59:59`);}).length,activities:0},
+                        finance:finSummary,
+                        routine:routineData && routineData.log_date ? {mood:routineData.mood||'📝',content:routineData.content||''} : {mood:'📝',content:'Sem anotação'},
+                        strava:{trainedToday,time:stravaSummary.total_time||'0h',activities:stravaSummary.total_activities||0}
+                    });
+
+                    setStatus('Online');
+                } catch(err){
+                    console.error(err);
+                    setStatus('Erro');
+                } finally { setLoading(false); }
+            };
+
+            const addActivity=async()=>{
+                if(!actTitle) return;
+                const res=await api('../modules/activities.php?api=save_activity',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({title:actTitle,date:today,period:actPeriod,source:'mobile'})});
+                if(res&&!res.error){setActTitle('');loadAll();} else setStatus(res?.error||'Erro');
+            };
+
+            const toggleActivity=async(id)=>{
+                await api('../modules/activities.php?api=toggle_activity',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id})});
+                loadAll();
+            };
+
+            const toggleHabit=async(id)=>{
+                await api('../modules/habits.php?api=toggle_habit',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id,date:today})});
+                loadAll();
+            };
+
+            const addFinance=async()=>{
+                if(!finAmount||!finDesc) return;
+                await api('../modules/finance.php?api=save_finance',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type:finType,amount:finAmount,description:finDesc,date:nowLocal().toISOString().slice(0,16)})});
+                setFinAmount('');setFinDesc('');loadAll();
+            };
+
+            const uploadBoard=async()=>{
+                if(!boardFile) return;
+                const fd=new FormData(); fd.append('photo',boardFile); fd.append('photo_date',today);
+                await fetch('../modules/board.php?api=upload_photo',{method:'POST',body:fd,credentials:'same-origin'});
+                setBoardFile(null); setStatus('Foto enviada');
+            };
+
+            const saveRoutine=async()=>{
+                await api('../modules/routine.php?api=save_routine',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({date:today,mood:routineMood,content:routineContent})});
+                setStatus('Rotina salva');loadAll();
+            };
+
+            return (
+                <div style={{display:'flex',flexDirection:'column',gap:12}}>
+                    {/* VISÃO RÁPIDA */}
+                    <div className="card">
+                        <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',gap:10,marginBottom:12}}>
+                            <div style={{display:'flex',alignItems:'center',gap:8}}>
+                                <h2 className="title" style={{fontSize:'16px',margin:0}}>📊 Visão Rápida</h2>
+                                <span className="badge">Hoje</span>
+                            </div>
+                            <button className="pill" onClick={loadAll} disabled={loading}>{loading?'...':'🔄'}</button>
+                        </div>
+                        <div className="grid2">
+                            <div className="item"><div className="label">Eventos hoje</div><div className="title" style={{fontSize:20}}>{summary.today.events}</div></div>
+                            <div className="item"><div className="label">Atividades</div><div className="title" style={{fontSize:20}}>{summary.today.doneActivities}/{summary.today.activities}</div></div>
+                            <div className="item"><div className="label">Hábitos feitos</div><div className="title" style={{fontSize:20}}>{summary.today.habitsDone}</div></div>
+                            <div className="item"><div className="label">Balanço</div><div className="title" style={{fontSize:18}}>{fmtMoney(summary.finance.balance||0)}</div></div>
+                            <div className="item"><div className="label">Rotina</div><div className="title" style={{fontSize:18}}>{summary.routine.mood}</div></div>
+                            <div className="item"><div className="label">Treinou?</div><div className="title" style={{fontSize:18}}>{summary.strava.trainedToday?'✅ Sim':'❌ Não'}</div></div>
+                        </div>
+                    </div>
+
+                    {/* EVENTOS DO DIA */}
+                    <div className="card">
+                        <h3 className="title" style={{fontSize:'15px',marginBottom:10}}>📅 Eventos de Hoje</h3>
+                        {!todayEvents.length && <div className="label">Sem eventos hoje</div>}
+                        {todayEvents.map(ev=>{
+                            const dt=ev.start_date?.replace(' ','T');
+                            const hour = dt? new Date(dt).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}) : '';
+                            return (
+                                <div key={ev.id||ev.google_event_id} className="item" style={{marginBottom:8}}>
+                                    <div className="title" style={{display:'flex',alignItems:'center',gap:8}}>
+                                        <span>{eventEmoji(ev.title)}</span><span>{ev.title||'Sem título'}</span>
+                                    </div>
+                                    <div className="meta"><span className="badge">{hour||'Horário'}</span></div>
+                                </div>
+                            );
+                        })}
+                    </div>
+
+                    {/* ATIVIDADES DO DIA */}
+                    <div className="card">
+                        <h3 className="title" style={{fontSize:'15px',marginBottom:10}}>✅ Atividades de Hoje</h3>
+                        <div style={{display:'flex',gap:8,marginBottom:10}}>
+                            <input className="input" placeholder="Nova atividade" value={actTitle} onChange={e=>setActTitle(e.target.value)} style={{flex:1}} />
+                            <select className="input" value={actPeriod} onChange={e=>setActPeriod(e.target.value)} style={{width:100}}>
+                                <option value="morning">Manhã</option><option value="afternoon">Tarde</option><option value="night">Noite</option>
+                            </select>
+                            <button className="action" onClick={addActivity} style={{width:60}}>+</button>
+                        </div>
+                        {!todayActivities.length && <div className="label">Sem atividades hoje</div>}
+                        {todayActivities.map(a=>(
+                            <div key={a.id} className="item" style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:8}}>
+                                <div style={{display:'flex',gap:10,alignItems:'center'}}>
+                                    <span>{periodIcon(a.period)}</span>
+                                    <div><div className="title">{a.title}</div><div className="meta"><span className="badge">{periodLabel(a.period)}</span></div></div>
+                                </div>
+                                <button onClick={()=>toggleActivity(a.id)} style={{border:'none',background:'transparent',fontSize:20,cursor:'pointer'}}>
+                                    {Number(a.status)===1?'☑️':'⬜'}
+                                </button>
+                            </div>
+                        ))}
+                    </div>
+
+                    {/* REGISTRO DE HÁBITOS */}
+                    <div className="card">
+                        <h3 className="title" style={{fontSize:'15px',marginBottom:10}}>🎯 Marcar Hábitos</h3>
+                        {!habits.length && <div className="label">Sem hábitos cadastrados</div>}
+                        <div style={{display:'grid',gap:8}}>
+                            {habits.map((h,idx)=>{
+                                const parsed = h.checked_dates?JSON.parse(h.checked_dates):[];
+                                const done = parsed.includes(today);
+                                return (
+                                    <div key={h.id} className="item" style={{display:'flex',justifyContent:'space-between',alignItems:'center',background:habitColors[idx%habitColors.length]}}>
+                                        <div className="title" style={{display:'flex',alignItems:'center',gap:8}}><span>🔥</span><span>{h.name}</span></div>
+                                        <button onClick={()=>toggleHabit(h.id)} style={{border:'none',background:done?'#5fe37c':'transparent',color:done?'#000':'#fff',padding:'6px 12px',borderRadius:999,cursor:'pointer',fontWeight:800}}>
+                                            {done?'✓':'Marcar'}
+                                        </button>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+
+                    {/* FINANÇAS */}
+                    <div className="card">
+                        <h3 className="title" style={{fontSize:'15px',marginBottom:10}}>💰 Registrar Gasto/Entrada</h3>
+                        <div style={{display:'grid',gap:8,marginBottom:10}}>
+                            <select className="input" value={finType} onChange={e=>setFinType(e.target.value)}>
+                                <option value="expense">💸 Saída</option><option value="income">💵 Entrada</option>
+                            </select>
+                            <input className="input" type="number" step="0.01" placeholder="Valor" value={finAmount} onChange={e=>setFinAmount(e.target.value)} />
+                            <input className="input" placeholder="Descrição" value={finDesc} onChange={e=>setFinDesc(e.target.value)} />
+                            <button className="action" onClick={addFinance}>Adicionar</button>
+                        </div>
+                        <div className="label" style={{marginBottom:6}}>Gastos da semana</div>
+                        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8}}>
+                            <div className="item"><div className="label">Entradas</div><div className="title" style={{color:'#16a34a'}}>{fmtMoney(weekFinance.income)}</div></div>
+                            <div className="item"><div className="label">Saídas</div><div className="title" style={{color:'#dc2626'}}>{fmtMoney(weekFinance.outcome)}</div></div>
+                        </div>
+                    </div>
+
+                    {/* BOARD - IMAGEM DO DIA */}
+                    <div className="card">
+                        <h3 className="title" style={{fontSize:'15px',marginBottom:10}}>📸 Imagem do Dia</h3>
+                        <input className="input" type="file" accept="image/*" onChange={e=>setBoardFile(e.target.files[0])} style={{marginBottom:8}} />
+                        <button className="action" onClick={uploadBoard}>Enviar Foto</button>
+                    </div>
+
+                    {/* ROTINA */}
+                    <div className="card">
+                        <h3 className="title" style={{fontSize:'15px',marginBottom:10}}>📖 Rotina do Dia</h3>
+                        <div className="item" style={{display:'flex',gap:8,justifyContent:'space-between',alignItems:'center',marginBottom:10}}>
+                            <div className="label">Humor</div>
+                            <div style={{display:'flex',gap:6}}>
+                                {['🤩','😊','😐','😟','😭'].map(m=>(
+                                    <button key={m} onClick={()=>setRoutineMood(m)} style={{border:'none',background:'transparent',fontSize:20,opacity:routineMood===m?1:0.3,cursor:'pointer'}}>{m}</button>
+                                ))}
+                            </div>
+                        </div>
+                        <textarea className="input" style={{height:100,marginBottom:8}} placeholder="Como foi seu dia?" value={routineContent} onChange={e=>setRoutineContent(e.target.value)}></textarea>
+                        <button className="action" onClick={saveRoutine}>Salvar Rotina</button>
+                    </div>
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
+
                 today:{events:0,activities:0,doneActivities:0,habitsDone:0},
                 week:{events:0,activities:0},
                 finance:{income:0,outcome:0,balance:0,total_balance:0},
