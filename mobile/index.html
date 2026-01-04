@@ -115,7 +115,7 @@
             const [finType,setFinType]=useState('expense');
             const [finAmount,setFinAmount]=useState('');
             const [finDesc,setFinDesc]=useState('');
-            const [weekFinance,setWeekFinance]=useState({income:0,outcome:0});
+            const [weekFinance,setWeekFinance]=useState({income:0,outcome:0,monthOutcome:0});
             
             // Board state
             const [boardFile,setBoardFile]=useState(null);
@@ -186,23 +186,34 @@
                     // Finance
                     const finSummary = finData?.summary||{income:0,outcome:0,balance:0,total_balance:0};
                     const finList = finData?.list||[];
-                    const {start:weekStart,end:weekEnd}=getWeekRange();
-                    console.log('Período da semana:', weekStart, 'a', weekEnd);
+                    
+                    // Gastos do dia
                     console.log('Total de registros financeiros:', finList.length);
-                    const weekFin = finList.filter(f=>{
+                    const todayFin = finList.filter(f=>{
                         const dt = (f.created_at||'').slice(0,10);
-                        return dt>=weekStart && dt<=weekEnd;
+                        return dt === today;
                     });
-                    console.log('Registros na semana:', weekFin.length);
-                    weekFin.forEach(f=>console.log('Tipo:', f.type, 'Valor:', f.amount, 'Data:', (f.created_at||'').slice(0,10)));
-                    const weekIncome = weekFin.filter(f=>f.type==='income'||f.type==='entrada').reduce((s,f)=>s+parseFloat(f.amount||0),0);
-                    const weekOutcome = weekFin.filter(f=>!(f.type==='income'||f.type==='entrada')).reduce((s,f)=>s+parseFloat(f.amount||0),0);
-                    console.log('Total Entradas:', weekIncome, 'Total Saídas:', weekOutcome);
-                    setWeekFinance({income:weekIncome,outcome:weekOutcome});
+                    console.log('Registros hoje:', todayFin.length);
+                    todayFin.forEach(f=>console.log('Tipo:', f.type, 'Valor:', f.amount, 'Data:', (f.created_at||'').slice(0,10)));
+                    const todayOutcome = todayFin.filter(f=>!(f.type==='income'||f.type==='entrada')).reduce((s,f)=>s+parseFloat(f.amount||0),0);
+                    console.log('Total Saídas Hoje:', todayOutcome);
+                    
+                    // Gastos do mês
+                    const currentMonth = today.slice(0,7); // YYYY-MM
+                    const monthFin = finList.filter(f=>{
+                        const dt = (f.created_at||'').slice(0,10);
+                        return dt.startsWith(currentMonth);
+                    });
+                    const monthOutcome = monthFin.filter(f=>!(f.type==='income'||f.type==='entrada')).reduce((s,f)=>s+parseFloat(f.amount||0),0);
+                    console.log('Total Saídas Mês:', monthOutcome);
+                    
+                    setWeekFinance({income:0,outcome:todayOutcome,monthOutcome});
                     
                     // Board - Foto do dia
                     const boardPhotos = Array.isArray(boardData)?boardData:[];
+                    console.log('Board photos:', boardPhotos);
                     const todayPhoto = boardPhotos.find(p=>(p.photo_date||'').startsWith(today));
+                    console.log('Today photo:', todayPhoto);
                     setBoardPhoto(todayPhoto||null);
 
                     // Routine
@@ -260,8 +271,15 @@
             const uploadBoard=async()=>{
                 if(!boardFile) return;
                 const fd=new FormData(); fd.append('photo',boardFile); fd.append('photo_date',today);
-                await fetch('../modules/board.php?api=upload_photo',{method:'POST',body:fd,credentials:'same-origin'});
-                setBoardFile(null); setStatus('Foto enviada'); loadAll();
+                const res = await fetch('../modules/board.php?api=upload_photo',{method:'POST',body:fd,credentials:'same-origin'});
+                const result = await res.json();
+                console.log('Upload board result:', result);
+                if(result.success) {
+                    setBoardFile(null); setStatus('Foto enviada'); 
+                    await loadAll();
+                } else {
+                    setStatus('Erro no upload: ' + (result.error || 'desconhecido'));
+                }
             };
 
             const saveRoutine=async()=>{
@@ -411,9 +429,9 @@
                     {/* BOARD - IMAGEM DO DIA */}
                     <div className="card">
                         <h3 className="title" style={{fontSize:'15px',marginBottom:10}}>📸 Imagem do Dia</h3>
-                        {boardPhoto && (
+                        {boardPhoto && boardPhoto.image_path && (
                             <div style={{marginBottom:10,borderRadius:14,overflow:'hidden',border:'1px solid var(--border)'}}>
-                                <img src={`../uploads/board/${boardPhoto.filename}`} alt="Foto do dia" style={{width:'100%',display:'block'}} onError={(e)=>{console.error('Erro ao carregar imagem:',e); e.target.style.display='none';}} />
+                                <img src={boardPhoto.image_path} alt="Foto do dia" style={{width:'100%',display:'block'}} onError={(e)=>{console.error('Erro ao carregar imagem:', boardPhoto.image_path, e); e.target.style.display='none';}} />
                             </div>
                         )}
                         {!boardPhoto && <div className="label" style={{textAlign:'center',padding:20,color:'var(--muted)'}}>Nenhuma foto registrada hoje</div>}

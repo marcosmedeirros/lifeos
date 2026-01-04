@@ -41,17 +41,17 @@ if (isset($_GET['api'])) {
             // Debug log
             error_log("[DASHBOARD_STATS] Período calculado: $startOfWeek a $endOfWeek");
             
-            // Finanças da Semana
+            // Finanças do Dia (saídas)
             $fin_stmt = $pdo->prepare("
                 SELECT type, amount, DATE(created_at) as data
                 FROM finances 
-                WHERE user_id = ? AND DATE(created_at) BETWEEN ? AND ?
+                WHERE user_id = ? AND DATE(created_at) = CURDATE()
             ");
-            $fin_stmt->execute([$user_id, $startOfWeek, $endOfWeek]);
+            $fin_stmt->execute([$user_id]);
             $fin = $fin_stmt->fetchAll();
             
             $inc = 0; $out = 0; 
-            error_log("[DASHBOARD_STATS] Total de registros encontrados: " . count($fin));
+            error_log("[DASHBOARD_STATS] Total de registros encontrados HOJE: " . count($fin));
             foreach($fin as $f) { 
                 $amount = floatval($f['amount']);
                 $isIncome = in_array($f['type'], ['income', 'entrada']);
@@ -62,7 +62,7 @@ if (isset($_GET['api'])) {
                     $out += $amount;
                 }
             }
-            error_log("[DASHBOARD_STATS] Total Entradas: $inc, Total Saídas: $out");
+            error_log("[DASHBOARD_STATS] Total Entradas Hoje: $inc, Total Saídas Hoje: $out");
             
             // XP Total
             $xp_total = $pdo->query("SELECT total_xp FROM user_settings WHERE user_id = {$user_id}")->fetchColumn() ?: 0;
@@ -464,9 +464,9 @@ include 'includes/header.php';
             <p class="text-3xl font-bold text-white" id="dash-income">R$ 0,00</p>
         </div>
         
-        <!-- 2. Saídas (Semana) -->
+        <!-- 2. Saídas (Hoje) -->
         <div class="glass-card p-6 rounded-2xl border-l-4 border-gray-600">
-            <h3 class="text-gray-300 text-sm font-bold uppercase tracking-wider mb-1">📊 Saídas (Semana)</h3>
+            <h3 class="text-gray-300 text-sm font-bold uppercase tracking-wider mb-1">📊 Saídas (Hoje)</h3>
             <p class="text-3xl font-bold text-white" id="dash-outcome">R$ 0,00</p>
         </div>
         
