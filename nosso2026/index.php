@@ -169,7 +169,7 @@ else { $progress = round((($now - $yearStart)/($yearEnd - $yearStart))*100); }
     <div class="grid md:grid-cols-2 gap-6 mb-8">
       <!-- Lista de Mercado -->
       <div class="glass p-6 rounded-2xl">
-        <h3 class="text-xl font-bold mb-3">Mercado</h3>
+        <h3 class="text-xl font-bold mb-3">Compras</h3>
         <form method="post" class="flex gap-2 mb-3">
           <input type="hidden" name="add_market" value="1">
           <input name="item" class="flex-1 bg-[#1a1a1a] border border-[#333] rounded-lg p-2 text-white text-sm" placeholder="Item" required>
