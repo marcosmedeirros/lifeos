@@ -57,6 +57,11 @@ else { $progress = round((($now - $yearStart)/($yearEnd - $yearStart))*100); }
     .glass{background:#0a0a0a;border:1px solid #222}
     .btn{background:#fff;color:#000;padding:.75rem 1.25rem;border-radius:.75rem;font-weight:700}
     .section{scroll-margin-top:6rem}
+    input, select, textarea {
+      background:#1a1a1a !important;
+      border:1px solid #333 !important;
+      color:#fff !important;
+    }
   </style>
 </head>
 <body class="min-h-screen">
@@ -146,12 +151,12 @@ else { $progress = round((($now - $yearStart)/($yearEnd - $yearStart))*100); }
         <h3 class="text-xl font-bold mb-3">Mercado</h3>
         <form method="post" class="flex gap-2 mb-3">
           <input type="hidden" name="add_market" value="1">
-          <input name="item" class="flex-1 bg-black border border-[#222] rounded-lg p-2 text-white text-sm" placeholder="Item" required>
+          <input name="item" class="flex-1 bg-[#1a1a1a] border border-[#333] rounded-lg p-2 text-white text-sm" placeholder="Item" required>
           <button class="btn text-sm">OK</button>
         </form>
         <div class="space-y-2">
           <?php foreach($marketItems as $it): ?>
-          <form method="post" class="flex items-center justify-between bg-black border border-[#222] rounded-lg p-2">
+          <form method="post" class="flex items-center justify-between bg-[#1a1a1a] border border-[#333] rounded-lg p-2">
             <span class="text-sm font-semibold flex-1"><?= htmlspecialchars($it['item']) ?></span>
             <input type="hidden" name="done_market" value="1">
             <input type="hidden" name="id" value="<?= $it['id'] ?>">
@@ -169,12 +174,12 @@ else { $progress = round((($now - $yearStart)/($yearEnd - $yearStart))*100); }
         <h3 class="text-xl font-bold mb-3">Filmes</h3>
         <form method="post" class="flex gap-2 mb-3">
           <input type="hidden" name="add_movie" value="1">
-          <input name="title" class="flex-1 bg-black border border-[#222] rounded-lg p-2 text-white text-sm" placeholder="Título" required>
+          <input name="title" class="flex-1 bg-[#1a1a1a] border border-[#333] rounded-lg p-2 text-white text-sm" placeholder="Título" required>
           <button class="btn text-sm">OK</button>
         </form>
         <div class="space-y-2">
           <?php foreach($movieItems as $mv): ?>
-          <form method="post" class="flex items-center justify-between bg-black border border-[#222] rounded-lg p-2">
+          <form method="post" class="flex items-center justify-between bg-[#1a1a1a] border border-[#333] rounded-lg p-2">
             <span class="text-sm font-semibold flex-1 truncate"><?= htmlspecialchars($mv['title']) ?></span>
             <input type="hidden" name="del_movie" value="1">
             <input type="hidden" name="id" value="<?= $mv['id'] ?>">

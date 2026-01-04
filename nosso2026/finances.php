@@ -86,7 +86,7 @@ $monthNames = ['', 'Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set'
         $recent = $pdo->query("SELECT * FROM nosso2026_finances WHERE year=$year ORDER BY month DESC, id DESC LIMIT 20")->fetchAll();
         foreach($recent as $r):
         ?>
-        <div class="flex items-center justify-between bg-black border border-[#222] rounded-xl p-4">
+        <div class="flex items-center justify-between bg-[#1a1a1a] border border-[#333] rounded-xl p-4">
           <div class="flex-1">
             <p class="font-bold"><?= htmlspecialchars($r['category']) ?></p>
             <p class="text-xs text-[#999]"><?= $monthNames[$r['month']] ?> • <?= htmlspecialchars($r['description']) ?></p>
@@ -114,7 +114,7 @@ $monthNames = ['', 'Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set'
           <input type="hidden" name="year" value="<?= $year ?>">
           <div class="mb-4">
             <label class="block text-sm font-bold mb-2">Mês</label>
-            <select name="month" id="financeMonth" class="w-full bg-black border border-[#222] rounded-xl p-3 text-white">
+            <select name="month" id="financeMonth" class="w-full bg-[#1a1a1a] border border-[#333] rounded-xl p-3 text-white">
               <?php for($i=1;$i<=12;$i++): ?>
                 <option value="<?= $i ?>" <?= $i == date('m') ? 'selected' : '' ?>><?= $monthNames[$i] ?></option>
               <?php endfor; ?>
@@ -122,22 +122,22 @@ $monthNames = ['', 'Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set'
           </div>
           <div class="mb-4">
             <label class="block text-sm font-bold mb-2">Tipo</label>
-            <select name="type" id="financeType" class="w-full bg-black border border-[#222] rounded-xl p-3 text-white">
+            <select name="type" id="financeType" class="w-full bg-[#1a1a1a] border border-[#333] rounded-xl p-3 text-white">
               <option value="income">Entrada</option>
               <option value="expense">Saída</option>
             </select>
           </div>
           <div class="mb-4">
             <label class="block text-sm font-bold mb-2">Valor</label>
-            <input type="number" step="0.01" name="amount" id="financeAmount" class="w-full bg-black border border-[#222] rounded-xl p-3 text-white" required>
+            <input type="number" step="0.01" name="amount" id="financeAmount" class="w-full bg-[#1a1a1a] border border-[#333] rounded-xl p-3 text-white" required>
           </div>
           <div class="mb-4">
             <label class="block text-sm font-bold mb-2">Categoria</label>
-            <input name="category" id="financeCategory" class="w-full bg-black border border-[#222] rounded-xl p-3 text-white" placeholder="Ex: Mercado" required>
+            <input name="category" id="financeCategory" class="w-full bg-[#1a1a1a] border border-[#333] rounded-xl p-3 text-white" placeholder="Ex: Mercado" required>
           </div>
           <div class="mb-4">
             <label class="block text-sm font-bold mb-2">Descrição</label>
-            <input name="description" id="financeDescription" class="w-full bg-black border border-[#222] rounded-xl p-3 text-white" placeholder="Opcional">
+            <input name="description" id="financeDescription" class="w-full bg-[#1a1a1a] border border-[#333] rounded-xl p-3 text-white" placeholder="Opcional">
           </div>
           <div class="flex gap-3">
             <button type="submit" class="btn flex-1">💾 Salvar</button>

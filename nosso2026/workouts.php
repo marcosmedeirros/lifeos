@@ -131,11 +131,11 @@ $doneWorkouts = count(array_filter($workouts, fn($w) => $w['done']));
           <input type="hidden" name="id" id="workoutId">
           <div class="mb-4">
             <label class="block text-sm font-bold mb-2">Nome do treino</label>
-            <input name="name" id="workoutName" class="w-full bg-black border border-[#222] rounded-xl p-3 text-white" required>
+            <input name="name" id="workoutName" class="w-full bg-[#1a1a1a] border border-[#333] rounded-xl p-3 text-white" required>
           </div>
           <div class="mb-4">
             <label class="block text-sm font-bold mb-2">Data</label>
-            <input name="workout_date" id="workoutDate" type="date" class="w-full bg-black border border-[#222] rounded-xl p-3 text-white" required>
+            <input name="workout_date" id="workoutDate" type="date" class="w-full bg-[#1a1a1a] border border-[#333] rounded-xl p-3 text-white" required>
           </div>
           <div class="flex gap-3">
             <button type="submit" class="btn flex-1">💾 Salvar</button>
@@ -164,7 +164,6 @@ $doneWorkouts = count(array_filter($workouts, fn($w) => $w['done']));
         document.getElementById('workoutId').value = workout.id;
         document.getElementById('workoutName').value = workout.name;
         document.getElementById('workoutDate').value = workout.workout_date.split(' ')[0];
-        document.getElementById('workoutDone').checked = workout.done == 1;
         document.getElementById('formAction').name = 'edit';
         document.getElementById('formAction').value = '1';
         document.getElementById('deleteBtn').style.display = 'block';

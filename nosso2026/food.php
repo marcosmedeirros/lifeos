@@ -91,12 +91,12 @@ $recipes = $stmt->fetchAll();
         <div class="grid md:grid-cols-2 gap-4">
           <div>
             <label class="block text-sm font-bold mb-2">Nome da Receita</label>
-            <input name="name" class="w-full bg-black border border-[#222] rounded-xl p-3 text-white" placeholder="Ex: Frango grelhado" required>
+            <input name="name" class="w-full bg-[#1a1a1a] border border-[#333] rounded-xl p-3 text-white" placeholder="Ex: Frango grelhado" required>
           </div>
           <div class="grid grid-cols-3 gap-3">
             <div>
               <label class="block text-sm font-bold mb-2">Categoria</label>
-              <select name="category" class="w-full bg-black border border-[#222] rounded-xl p-3 text-white">
+              <select name="category" class="w-full bg-[#1a1a1a] border border-[#333] rounded-xl p-3 text-white">
                 <option value="cafe">Café</option>
                 <option value="almoco">Almoço</option>
                 <option value="jantar">Jantar</option>
@@ -105,21 +105,21 @@ $recipes = $stmt->fetchAll();
             </div>
             <div>
               <label class="block text-sm font-bold mb-2">Porções</label>
-              <input type="number" name="servings" class="w-full bg-black border border-[#222] rounded-xl p-3 text-white" placeholder="2">
+              <input type="number" name="servings" class="w-full bg-[#1a1a1a] border border-[#333] rounded-xl p-3 text-white" placeholder="2">
             </div>
             <div>
               <label class="block text-sm font-bold mb-2">Tempo (min)</label>
-              <input type="number" name="prep_time" class="w-full bg-black border border-[#222] rounded-xl p-3 text-white" placeholder="30">
+              <input type="number" name="prep_time" class="w-full bg-[#1a1a1a] border border-[#333] rounded-xl p-3 text-white" placeholder="30">
             </div>
           </div>
         </div>
         <div>
           <label class="block text-sm font-bold mb-2">Ingredientes</label>
-          <textarea name="ingredients" rows="4" class="w-full bg-black border border-[#222] rounded-xl p-3 text-white" placeholder="Liste os ingredientes, um por linha"></textarea>
+          <textarea name="ingredients" rows="4" class="w-full bg-[#1a1a1a] border border-[#333] rounded-xl p-3 text-white" placeholder="Liste os ingredientes, um por linha"></textarea>
         </div>
         <div>
           <label class="block text-sm font-bold mb-2">Modo de Preparo</label>
-          <textarea name="instructions" rows="4" class="w-full bg-black border border-[#222] rounded-xl p-3 text-white" placeholder="Descreva o passo a passo"></textarea>
+          <textarea name="instructions" rows="4" class="w-full bg-[#1a1a1a] border border-[#333] rounded-xl p-3 text-white" placeholder="Descreva o passo a passo"></textarea>
         </div>
         <div class="flex gap-3 items-center">
           <label class="font-bold">Criado por:</label>

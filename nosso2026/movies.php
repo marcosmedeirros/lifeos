@@ -45,9 +45,9 @@ $watched = $pdo->query("SELECT * FROM nosso2026_movies WHERE status='assistido' 
       <h2 class="text-2xl font-bold mb-4">Adicionar Filme</h2>
       <form method="post" class="grid md:grid-cols-4 gap-3">
         <input type="hidden" name="add" value="1">
-        <input name="title" class="md:col-span-2 bg-black border border-[#222] rounded-xl p-3 text-white" placeholder="Título" required>
-        <input type="date" name="planned_date" class="bg-black border border-[#222] rounded-xl p-3 text-white">
-        <input name="notes" class="bg-black border border-[#222] rounded-xl p-3 text-white" placeholder="Notas">
+        <input name="title" class="md:col-span-2 bg-[#1a1a1a] border border-[#333] rounded-xl p-3 text-white" placeholder="Título" required>
+        <input type="date" name="planned_date" class="bg-[#1a1a1a] border border-[#333] rounded-xl p-3 text-white">
+        <input name="notes" class="bg-[#1a1a1a] border border-[#333] rounded-xl p-3 text-white" placeholder="Notas">
         <button class="md:col-span-4 btn">🎬 Adicionar</button>
       </form>
     </section>
@@ -59,7 +59,7 @@ $watched = $pdo->query("SELECT * FROM nosso2026_movies WHERE status='assistido' 
         <h2 class="text-2xl font-bold mb-4">Quero Ver <span class="text-sm text-[#999] font-normal">(<?= count($planned) ?>)</span></h2>
         <div class="space-y-3">
           <?php foreach($planned as $m): ?>
-          <div class="bg-black border border-[#222] rounded-xl p-4">
+          <div class="bg-[#1a1a1a] border border-[#333] rounded-xl p-4">
             <p class="font-bold mb-1"><?= htmlspecialchars($m['title']) ?></p>
             <?php if($m['planned_date'] || $m['notes']): ?>
               <p class="text-xs text-[#999] mb-2">
@@ -89,7 +89,7 @@ $watched = $pdo->query("SELECT * FROM nosso2026_movies WHERE status='assistido' 
         <h2 class="text-2xl font-bold mb-4">Assistidos <span class="text-sm text-[#999] font-normal">(<?= count($watched) ?>)</span></h2>
         <div class="space-y-3">
           <?php foreach($watched as $m): ?>
-          <div class="bg-black border border-[#222] rounded-xl p-4">
+          <div class="bg-[#1a1a1a] border border-[#333] rounded-xl p-4">
             <div class="flex justify-between items-start mb-2">
               <p class="font-bold flex-1"><?= htmlspecialchars($m['title']) ?></p>
               <form method="post" class="ml-2">

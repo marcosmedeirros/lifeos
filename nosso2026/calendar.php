@@ -167,21 +167,21 @@ $monthNames = ['', 'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', '
         <div class="grid md:grid-cols-2 gap-3">
           <div>
             <label class="block text-sm font-semibold mb-1 text-gray-300">Título *</label>
-            <input name="title" class="w-full bg-black border border-[#222] rounded-xl p-3 text-white" placeholder="Ex: Aniversário, Dentista..." required>
+            <input name="title" class="w-full bg-[#1a1a1a] border border-[#333] rounded-xl p-3 text-white" placeholder="Ex: Aniversário, Dentista..." required>
           </div>
           <div>
             <label class="block text-sm font-semibold mb-1 text-gray-300">Descrição</label>
-            <input name="description" class="w-full bg-black border border-[#222] rounded-xl p-3 text-white" placeholder="Opcional">
+            <input name="description" class="w-full bg-[#1a1a1a] border border-[#333] rounded-xl p-3 text-white" placeholder="Opcional">
           </div>
         </div>
         <div class="grid md:grid-cols-3 gap-3">
           <div>
             <label class="block text-sm font-semibold mb-1 text-gray-300">📅 Data *</label>
-            <input name="start_date" type="date" class="w-full bg-black border border-[#222] rounded-xl p-3 text-white" value="<?= date('Y-m-d') ?>" required>
+            <input name="start_date" type="date" class="w-full bg-[#1a1a1a] border border-[#333] rounded-xl p-3 text-white" value="<?= date('Y-m-d') ?>" required>
           </div>
           <div>
             <label class="block text-sm font-semibold mb-1 text-gray-300">🕐 Hora</label>
-            <input name="start_time" type="time" class="w-full bg-black border border-[#222] rounded-xl p-3 text-white" placeholder="Ex: 14:30">
+            <input name="start_time" type="time" class="w-full bg-[#1a1a1a] border border-[#333] rounded-xl p-3 text-white" placeholder="Ex: 14:30">
             <p class="text-xs text-gray-500 mt-1">Deixe vazio para evento de dia inteiro</p>
           </div>
           <div class="flex items-end">

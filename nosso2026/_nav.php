@@ -1,7 +1,7 @@
 <?php
 // Navegação comum do módulo Nosso2026
 ?>
-<header class="glass sticky top-0 z-50" style="background:#000;color:#fff">
+<header class="glass sticky top-0 z-50" style="background:#0a0a0a;color:#fff;border-bottom:1px solid #222">
   <div class="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
     <div class="flex items-center gap-3">
       <div class="w-9 h-9 rounded-xl bg-white text-black flex items-center justify-center shadow-lg"><span class="font-bold">N26</span></div>
@@ -12,10 +12,9 @@
     <nav class="hidden md:flex items-center gap-4 text-sm">
       <a href="<?= n26_link('index.php') ?>" class="hover:text-gray-300">Dashboard</a>
       <a href="<?= n26_link('goals.php') ?>" class="hover:text-gray-300">Metas</a>
-      <a href="<?= n26_link('calendar.php') ?>" class="hover:text-gray-300">Compromissos</a>
+      <a href="<?= n26_link('calendar.php') ?>" class="hover:text-gray-300">Eventos</a>
       <a href="<?= n26_link('workouts.php') ?>" class="hover:text-gray-300">Treinos</a>
       <a href="<?= n26_link('finances.php') ?>" class="hover:text-gray-300">Finanças</a>
-      <a href="<?= n26_link('memories.php') ?>" class="hover:text-gray-300">Memórias</a>
     </nav>
     
     <!-- Mobile Hamburger Button -->
@@ -27,16 +26,14 @@
   </div>
   
   <!-- Mobile Menu (Hidden by default) -->
-  <nav id="n26-mobile-menu" class="hidden md:hidden bg-black border-t border-gray-800 max-h-[80vh] overflow-y-auto">
+  <nav id="n26-mobile-menu" class="hidden md:hidden border-t border-gray-800 max-h-[80vh] overflow-y-auto" style="background:#0a0a0a">
     <div class="px-4 py-2 space-y-1">
       <a href="<?= n26_link('index.php') ?>" class="block py-3 hover:bg-gray-900 rounded px-3 touch-manipulation">📊 Dashboard</a>
       <a href="<?= n26_link('goals.php') ?>" class="block py-3 hover:bg-gray-900 rounded px-3 touch-manipulation">🎯 Metas</a>
-      <a href="<?= n26_link('calendar.php') ?>" class="block py-3 hover:bg-gray-900 rounded px-3 touch-manipulation">📅 Compromissos</a>
+      <a href="<?= n26_link('calendar.php') ?>" class="block py-3 hover:bg-gray-900 rounded px-3 touch-manipulation">📅 Eventos</a>
       <a href="<?= n26_link('workouts.php') ?>" class="block py-3 hover:bg-gray-900 rounded px-3 touch-manipulation">💪 Treinos</a>
       <a href="<?= n26_link('finances.php') ?>" class="block py-3 hover:bg-gray-900 rounded px-3 touch-manipulation">💰 Finanças</a>
-      <a href="<?= n26_link('alimentacao.php') ?>" class="block py-3 hover:bg-gray-900 rounded px-3 touch-manipulation">🥗 Alimentação</a>
-      <a href="<?= n26_link('memories.php') ?>" class="block py-3 hover:bg-gray-900 rounded px-3 touch-manipulation">📸 Memórias</a>
-      <a href="<?= n26_link('food.php') ?>" class="block py-3 hover:bg-gray-900 rounded px-3 touch-manipulation">🍽️ Alimentação>
+      <a href="<?= n26_link('food.php') ?>" class="block py-3 hover:bg-gray-900 rounded px-3 touch-manipulation">🍽️ Alimentação</a>
       <a href="<?= n26_link('movies.php') ?>" class="block py-3 hover:bg-gray-900 rounded px-3 touch-manipulation">🎬 Filmes</a>
     </div>
   </nav>
