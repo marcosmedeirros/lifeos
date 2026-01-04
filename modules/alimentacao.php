@@ -475,7 +475,7 @@ include __DIR__ . '/../includes/header.php';
                                 id="json_data" 
                                 name="json_data" 
                                 class="form-input" 
-                                placeholder='{"data":"2026-01-04","perfil":"Nome","score_do_dia":8.5,"justificativa_nota":"...","saude_hormonal":{"tsh_base":2.3,"levoide_38mcg_status":"OK"},"performance_fisica":{"creatina_scoops":1,"agua_total_litros":2,"treinos":[{"tipo":"Corrida","distancia_km":4,"kcal_total":180}]},"nutricao":{"proteina_total_estimada_g":125,"meta_diaria_g":150},"disciplina_mental":{"controle_doce":"10/10"}}'
+                                placeholder='{"data":"2026-01-04","perfil":"Marcos","score_do_dia":8.8,"status":"Update de Hidratação","saude_hormonal":{"tsh_base":2.31,"levoide_38mcg_status":"OK","centrum_status":"Aguardando"},"performance_fisica":{"creatina_scoops":1,"agua_total_litros":2,"meta_agua_litros":3,"treinos":[{"tipo":"Corrida","distancia":"3.9km","kcal":184}]},"nutricao":{"proteina_total_estimada_g":125,"meta_diaria_g":150,"refeicoes":{"cafe":"ovos","almoco":"frango"}},"coach_feedback":"Volume de treino ótimo"}'
                                 required></textarea>
                             <div class="help-text">
                                 O JSON deve conter pelo menos o campo "data" no formato YYYY-MM-DD.
@@ -529,9 +529,14 @@ include __DIR__ . '/../includes/header.php';
                             <div class="card-coach" style="margin-top:10px;">🧠 <?= htmlspecialchars($entry['justificativa_nota']) ?></div>
                         <?php endif; ?>
 
-                        <?php if (!empty($entry['perfil'])): ?>
-                            <div class="card-date-small" style="margin-top:6px;color:#b3b3b3;">
-                                Perfil: <?= htmlspecialchars($entry['perfil']) ?>
+                        <?php if (!empty($entry['perfil']) || !empty($entry['status'])): ?>
+                            <div class="card-date-small" style="margin-top:6px;color:#b3b3b3;display:flex;flex-wrap:wrap;gap:10px;align-items:center;">
+                                <?php if (!empty($entry['perfil'])): ?>
+                                    <span>Perfil: <?= htmlspecialchars($entry['perfil']) ?></span>
+                                <?php endif; ?>
+                                <?php if (!empty($entry['status'])): ?>
+                                    <span style="padding:4px 10px;border-radius:999px;border:1px solid rgba(255,255,255,0.2);color:#fff;">Status: <?= htmlspecialchars($entry['status']) ?></span>
+                                <?php endif; ?>
                             </div>
                         <?php endif; ?>
 
@@ -583,8 +588,11 @@ include __DIR__ . '/../includes/header.php';
                                                     <div class="title" style="font-size:13px;margin-bottom:4px;"><?= htmlspecialchars($t['tipo'] ?? 'Treino') ?></div>
                                                     <div class="meta" style="gap:12px;font-size:12px;">
                                                         <?php if (!empty($t['duracao_min'])): ?><span>⏱ <?= htmlspecialchars($t['duracao_min']) ?> min</span><?php endif; ?>
+                                                        <?php if (!empty($t['duracao'])): ?><span>⏱ <?= htmlspecialchars($t['duracao']) ?></span><?php endif; ?>
                                                         <?php if (!empty($t['distancia_km'])): ?><span>📍 <?= htmlspecialchars($t['distancia_km']) ?> km</span><?php endif; ?>
+                                                        <?php if (!empty($t['distancia'])): ?><span>📍 <?= htmlspecialchars($t['distancia']) ?></span><?php endif; ?>
                                                         <?php if (!empty($t['kcal_total'])): ?><span>🔥 <?= htmlspecialchars($t['kcal_total']) ?> kcal</span><?php endif; ?>
+                                                        <?php if (!empty($t['kcal'])): ?><span>🔥 <?= htmlspecialchars($t['kcal']) ?> kcal</span><?php endif; ?>
                                                     </div>
                                                 </div>
                                             <?php endforeach; ?>
@@ -605,12 +613,28 @@ include __DIR__ . '/../includes/header.php';
                         <div class="card-section">
                             <div class="card-section-title">🥗 Nutrição</div>
                             <?php foreach ($entry['nutricao'] as $key => $value): ?>
-                                <div class="card-stat">
-                                    <span class="card-stat-label"><?= htmlspecialchars(str_replace('_', ' ', ucfirst($key))) ?>:</span>
-                                    <span class="card-stat-value"><?= is_bool($value) ? ($value ? '✓' : '✗') : htmlspecialchars($value) ?></span>
-                                </div>
+                                <?php if ($key === 'refeicoes' && is_array($value)): ?>
+                                    <div class="card-stat" style="flex-direction:column;align-items:flex-start;gap:6px;">
+                                        <span class="card-stat-label">Refeições:</span>
+                                        <div style="display:flex;flex-direction:column;gap:4px;width:100%;">
+                                            <?php foreach ($value as $refKey => $refVal): ?>
+                                                <div style="font-size:13px;color:#ddd;display:flex;gap:6px;"><strong style="min-width:60px;text-transform:capitalize;"><?= htmlspecialchars($refKey) ?>:</strong> <span><?= htmlspecialchars($refVal) ?></span></div>
+                                            <?php endforeach; ?>
+                                        </div>
+                                    </div>
+                                <?php else: ?>
+                                    <div class="card-stat">
+                                        <span class="card-stat-label"><?= htmlspecialchars(str_replace('_', ' ', ucfirst($key))) ?>:</span>
+                                        <span class="card-stat-value"><?= is_bool($value) ? ($value ? '✓' : '✗') : htmlspecialchars($value) ?></span>
+                                    </div>
+                                <?php endif; ?>
                             <?php endforeach; ?>
                         </div>
+                        <?php endif; ?>
+
+                        <!-- Coach Feedback -->
+                        <?php if (!empty($entry['coach_feedback'])): ?>
+                            <div class="card-coach" style="margin-top:10px;">🏅 <?= htmlspecialchars($entry['coach_feedback']) ?></div>
                         <?php endif; ?>
 
                         <!-- Disciplina Mental -->
