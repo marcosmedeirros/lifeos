@@ -79,9 +79,15 @@ include __DIR__ . '/../includes/header.php';
         /* Estilos específicos para cards de nutrição */
         .nutrition-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
             gap: 20px;
             margin-top: 30px;
+        }
+
+        @media (min-width: 1200px) {
+            .nutrition-grid {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+            }
         }
 
         .nutrition-card-small {
