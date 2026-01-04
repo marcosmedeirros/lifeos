@@ -193,7 +193,7 @@ $monthNames = ['', 'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', '
 
     <!-- Modal de Evento - VERSÃO ATUALIZADA <?= time() ?> -->
     <div id="eventModal" style="display:none !important; position:fixed; top:0; left:0; right:0; bottom:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:9999; overflow-y:auto; padding:20px;" onclick="closeModal()">
-      <div style="margin:40px auto; max-width:500px; background:rgba(20,20,40,0.95); backdrop-filter:blur(10px); border:1px solid #333; border-radius:20px; color:white; padding:32px; position:relative;" onclick="event.stopPropagation()">
+      <div style="margin:40px auto; max-width:500px; background:#0a0a0a; backdrop-filter:blur(10px); border:1px solid #333; border-radius:20px; color:white; padding:32px; position:relative;" onclick="event.stopPropagation()">
         <button type="button" onclick="closeModal()" style="position:absolute; top:16px; right:16px; background:transparent; border:none; cursor:pointer; font-size:24px; color:#999; width:32px; height:32px;">
             ❌
         </button>
@@ -206,25 +206,25 @@ $monthNames = ['', 'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', '
           <!-- CAMPO TÍTULO -->
           <div style="margin-bottom:20px;">
             <label style="display:block; color:#aaa; font-size:13px; margin-bottom:6px;">Título do Evento</label>
-            <input name="title" id="eventTitle" type="text" placeholder="Nome do Evento" style="width:100%; background:#000; border:1px solid #444; border-radius:12px; padding:14px; color:white; font-size:16px;" required>
+            <input name="title" id="eventTitle" type="text" placeholder="Nome do Evento" style="width:100%; background:#1a1a1a; border:1px solid #333; border-radius:12px; padding:14px; color:white; font-size:16px;" required>
           </div>
           
           <!-- CAMPOS DATA E HORA -->
           <div style="display:grid; grid-template-columns:60% 40%; gap:12px; margin-bottom:20px;">
             <div>
               <label style="display:block; color:#aaa; font-size:13px; margin-bottom:6px;">📅 Data</label>
-              <input name="start_date" id="eventDateOnly" type="date" style="width:100%; background:#000; border:1px solid #444; border-radius:12px; padding:14px; color:white; font-size:16px;" required>
+              <input name="start_date" id="eventDateOnly" type="date" style="width:100%; background:#1a1a1a; border:1px solid #333; border-radius:12px; padding:14px; color:white; font-size:16px;" required>
             </div>
             <div>
               <label style="display:block; color:#aaa; font-size:13px; margin-bottom:6px;">🕐 Hora</label>
-              <input name="start_time" id="eventTimeOnly" type="time" style="width:100%; background:#000; border:1px solid #444; border-radius:12px; padding:14px; color:white; font-size:16px;">
+              <input name="start_time" id="eventTimeOnly" type="time" style="width:100%; background:#1a1a1a; border:1px solid #333; border-radius:12px; padding:14px; color:white; font-size:16px;">
             </div>
           </div>
           
           <!-- CAMPO DESCRIÇÃO -->
           <div style="margin-bottom:24px;">
             <label style="display:block; color:#aaa; font-size:13px; margin-bottom:6px;">Descrição (opcional)</label>
-            <textarea name="description" id="eventDesc" placeholder="Adicione detalhes sobre o evento..." style="width:100%; background:#000; border:1px solid #444; border-radius:12px; padding:14px; color:white; font-size:16px; resize:vertical; min-height:80px;" rows="3"></textarea>
+            <textarea name="description" id="eventDesc" placeholder="Adicione detalhes sobre o evento..." style="width:100%; background:#1a1a1a; border:1px solid #333; border-radius:12px; padding:14px; color:white; font-size:16px; resize:vertical; min-height:80px;" rows="3"></textarea>
           </div>
           
           <!-- BOTÕES -->

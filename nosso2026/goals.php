@@ -25,11 +25,11 @@ $filter_diff  = $_GET['difficulty'] ?? '';
 $sql = "SELECT * FROM nosso2026_goals WHERE 1=1";
 if ($filter_owner) $sql .= " AND owner=".$pdo->quote($filter_owner);
 if ($filter_diff) $sql .= " AND difficulty=".$pdo->quote($filter_diff);
-$sql .= " ORDER BY owner, difficulty, id DESC";
+$sql .= " ORDER BY difficulty, id DESC";
 $goals = $pdo->query($sql)->fetchAll();
 
-function goalsBy($owner){
-    global $goals; return array_filter($goals, fn($g) => $g['owner']===$owner);
+function goalsByDifficulty($diff){
+    global $goals; return array_filter($goals, fn($g) => $g['difficulty']===$diff);
 }
 ?>
 <!DOCTYPE html>
@@ -62,21 +62,25 @@ function goalsBy($owner){
       <button onclick="openModal()" class="btn">🌟 + Meta</button>
     </div>
 
-    <div class="glass p-6 rounded-2xl">
-      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <?php foreach ($goals as $g): ?>
-        <div class="bg-slate-900/60 border border-slate-800 rounded-xl p-4 cursor-pointer hover:bg-slate-800/60" onclick="openEdit(<?= htmlspecialchars(json_encode($g)) ?>)">
-          <p class="font-semibold mb-2"><?= htmlspecialchars($g['title']) ?></p>
-          <p class="text-xs text-slate-400 mb-3">Dificuldade: <span class="badge b-<?= $g['difficulty'] ?>"><?= $g['difficulty'] ?></span></p>
-          <div class="flex items-center gap-3">
-            <div class="flex-1 bg-[#1a1a1a] rounded-full h-2">
-              <div class="bg-white h-2 rounded-full" style="width:<?= $g['progress'] ?>%"></div>
+    <div class="grid md:grid-cols-3 gap-6">
+      <?php foreach ([['facil','Fáceis'],['medio','Médias'],['dificil','Difíceis']] as [$diff,$label]): ?>
+      <section class="glass p-6 rounded-2xl">
+        <h2 class="text-xl font-bold mb-4"><?= $label ?></h2>
+        <div class="space-y-4">
+          <?php foreach (goalsByDifficulty($diff) as $g): ?>
+          <div class="bg-[#1a1a1a] border border-[#333] rounded-xl p-4 cursor-pointer hover:bg-[#252525]" onclick="openEdit(<?= htmlspecialchars(json_encode($g)) ?>)">
+            <p class="font-semibold mb-2"><?= htmlspecialchars($g['title']) ?></p>
+            <div class="flex items-center gap-3 mt-3">
+              <div class="flex-1 bg-[#0a0a0a] rounded-full h-2">
+                <div class="bg-white h-2 rounded-full" style="width:<?= $g['progress'] ?>%"></div>
+              </div>
+              <span class="text-sm font-bold"><?= $g['progress'] ?>%</span>
             </div>
-            <span class="text-sm font-bold"><?= $g['progress'] ?>%</span>
           </div>
+          <?php endforeach; ?>
         </div>
-        <?php endforeach; ?>
-      </div>
+      </section>
+      <?php endforeach; ?>
     </div>
 
       <!-- Modal de Meta -->
