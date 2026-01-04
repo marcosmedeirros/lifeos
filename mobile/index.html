@@ -187,12 +187,17 @@
                     const finSummary = finData?.summary||{income:0,outcome:0,balance:0,total_balance:0};
                     const finList = finData?.list||[];
                     const {start:weekStart,end:weekEnd}=getWeekRange();
+                    console.log('Período da semana:', weekStart, 'a', weekEnd);
+                    console.log('Total de registros financeiros:', finList.length);
                     const weekFin = finList.filter(f=>{
                         const dt = (f.created_at||'').slice(0,10);
                         return dt>=weekStart && dt<=weekEnd;
                     });
+                    console.log('Registros na semana:', weekFin.length);
+                    weekFin.forEach(f=>console.log('Tipo:', f.type, 'Valor:', f.amount, 'Data:', (f.created_at||'').slice(0,10)));
                     const weekIncome = weekFin.filter(f=>f.type==='income'||f.type==='entrada').reduce((s,f)=>s+parseFloat(f.amount||0),0);
                     const weekOutcome = weekFin.filter(f=>!(f.type==='income'||f.type==='entrada')).reduce((s,f)=>s+parseFloat(f.amount||0),0);
+                    console.log('Total Entradas:', weekIncome, 'Total Saídas:', weekOutcome);
                     setWeekFinance({income:weekIncome,outcome:weekOutcome});
                     
                     // Board - Foto do dia

@@ -51,14 +51,18 @@ if (isset($_GET['api'])) {
             $fin = $fin_stmt->fetchAll();
             
             $inc = 0; $out = 0; 
+            error_log("Total de registros financeiros encontrados: " . count($fin));
             foreach($fin as $f) { 
                 $amount = floatval($f['amount']);
-                if(in_array($f['type'], ['income', 'entrada'])) {
+                $isIncome = in_array($f['type'], ['income', 'entrada']);
+                error_log("Tipo: {$f['type']}, Valor: {$amount}, É entrada? " . ($isIncome ? 'SIM' : 'NÃO'));
+                if($isIncome) {
                     $inc += $amount;
                 } else {
                     $out += $amount;
                 }
             }
+            error_log("Total Entradas: $inc, Total Saídas: $out");
             
             // XP Total
             $xp_total = $pdo->query("SELECT total_xp FROM user_settings WHERE user_id = {$user_id}")->fetchColumn() ?: 0;
@@ -118,8 +122,18 @@ if (isset($_GET['api'])) {
                 exit;
             }
 
-            $startOfWeek = date('Y-m-d', strtotime('monday this week'));
-            $endOfWeek = date('Y-m-d', strtotime('sunday this week'));
+            // Usa o mesmo cálculo de semana do dashboard
+            $now = new DateTime();
+            $dayOfWeek = $now->format('w');
+            if ($dayOfWeek == 0) {
+                $daysToMonday = -6;
+            } else {
+                $daysToMonday = -($dayOfWeek - 1);
+            }
+            $monday = (clone $now)->modify("$daysToMonday days");
+            $sunday = (clone $monday)->modify('+6 days');
+            $startOfWeek = $monday->format('Y-m-d');
+            $endOfWeek = $sunday->format('Y-m-d');
 
             // Finanças da Semana
             $fin_stmt = $pdo->prepare("
