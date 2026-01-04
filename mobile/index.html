@@ -151,7 +151,7 @@
                     const oneDay = 1000 * 60 * 60 * 24;
                     const dayOfYear = Math.floor(diff / oneDay);
                     
-                    const [eventsData,actsData,habitsData,finData,routineData,stravaData,messagesData,boardData] = await Promise.all([
+                    const [eventsData,actsData,habitsData,finData,routineData,stravaData,messagesData,boardData,dashStats] = await Promise.all([
                         api('../modules/google_agenda.php?api=list_events'),
                         api(`../modules/activities.php?api=get_activities&start=${today}&end=${today}`),
                         api(`../modules/habits.php?api=get_habits&month=${today.slice(0,7)}`),
@@ -159,7 +159,8 @@
                         api(`../modules/routine.php?api=get_routine_day&date=${today}`),
                         api('../modules/strava.php?api=get_strava_data'),
                         fetch('../mensagens_365.json').then(r=>r.json()).catch(()=>[]),
-                        api('../modules/board.php?api=get_photos')
+                        api('../modules/board.php?api=get_photos'),
+                        api('../index.php?api=dashboard_stats')
                     ]);
                     
                     // Busca mensagem do dia
@@ -183,23 +184,15 @@
                         try { return (h.checked_dates?JSON.parse(h.checked_dates):[]).includes(today); } catch(e){ return false; }
                     }).length;
 
-                    // Finance
+                    // Finance - usar os dados do dashboard_stats que já calcula corretamente
                     const finSummary = finData?.summary||{income:0,outcome:0,balance:0,total_balance:0};
+                    const weekIncomeFromStats = dashStats?.income_week || 0;
+                    const weekOutcomeFromStats = dashStats?.outcome_week || 0;
+                    console.log('Gastos da semana (do dashboard_stats):', weekOutcomeFromStats);
+                    
+                    // Gastos do mês - mantém o cálculo local
                     const finList = finData?.list||[];
-                    
-                    // Gastos do dia
-                    console.log('Total de registros financeiros:', finList.length);
-                    const todayFin = finList.filter(f=>{
-                        const dt = (f.created_at||'').slice(0,10);
-                        return dt === today;
-                    });
-                    console.log('Registros hoje:', todayFin.length);
-                    todayFin.forEach(f=>console.log('Tipo:', f.type, 'Valor:', f.amount, 'Data:', (f.created_at||'').slice(0,10)));
-                    const todayOutcome = todayFin.filter(f=>!(f.type==='income'||f.type==='entrada')).reduce((s,f)=>s+parseFloat(f.amount||0),0);
-                    console.log('Total Saídas Hoje:', todayOutcome);
-                    
-                    // Gastos do mês
-                    const currentMonth = today.slice(0,7); // YYYY-MM
+                    const currentMonth = today.slice(0,7);
                     const monthFin = finList.filter(f=>{
                         const dt = (f.created_at||'').slice(0,10);
                         return dt.startsWith(currentMonth);
@@ -207,7 +200,7 @@
                     const monthOutcome = monthFin.filter(f=>!(f.type==='income'||f.type==='entrada')).reduce((s,f)=>s+parseFloat(f.amount||0),0);
                     console.log('Total Saídas Mês:', monthOutcome);
                     
-                    setWeekFinance({income:0,outcome:todayOutcome,monthOutcome});
+                    setWeekFinance({income:weekIncomeFromStats,outcome:weekOutcomeFromStats,monthOutcome});
                     
                     // Board - Foto do dia
                     const boardPhotos = Array.isArray(boardData)?boardData:[];
@@ -418,11 +411,6 @@
                             <input className="input" type="number" step="0.01" placeholder="Valor" value={finAmount} onChange={e=>setFinAmount(e.target.value)} />
                             <input className="input" placeholder="Descrição" value={finDesc} onChange={e=>setFinDesc(e.target.value)} />
                             <button className="action" onClick={addFinance}>Adicionar</button>
-                        </div>
-                        <div className="label" style={{marginBottom:6}}>Gastos da semana</div>
-                        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8}}>
-                            <div className="item"><div className="label">Entradas</div><div className="title" style={{color:'#16a34a'}}>{fmtMoney(weekFinance.income)}</div></div>
-                            <div className="item"><div className="label">Saídas</div><div className="title" style={{color:'#dc2626'}}>{fmtMoney(weekFinance.outcome)}</div></div>
                         </div>
                     </div>
 
