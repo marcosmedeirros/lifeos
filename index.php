@@ -26,18 +26,21 @@ if (isset($_GET['api'])) {
             
             // Finanças da Semana
             $fin_stmt = $pdo->prepare("
-                SELECT type, SUM(amount) as total 
+                SELECT type, amount
                 FROM finances 
-                WHERE DATE(created_at) BETWEEN ? AND ? 
-                GROUP BY type
+                WHERE DATE(created_at) BETWEEN ? AND ?
             ");
             $fin_stmt->execute([$startOfWeek, $endOfWeek]);
             $fin = $fin_stmt->fetchAll();
             
             $inc = 0; $out = 0; 
             foreach($fin as $f) { 
-                if(in_array($f['type'], ['income', 'entrada'])) $inc += floatval($f['total']); 
-                else $out += floatval($f['total']); 
+                $amount = floatval($f['amount']);
+                if(in_array($f['type'], ['income', 'entrada'])) {
+                    $inc += $amount;
+                } else {
+                    $out += $amount;
+                }
             }
             
             // XP Total
@@ -103,18 +106,21 @@ if (isset($_GET['api'])) {
 
             // Finanças da Semana
             $fin_stmt = $pdo->prepare("
-                SELECT type, SUM(amount) as total 
+                SELECT type, amount
                 FROM finances 
-                WHERE DATE(created_at) BETWEEN ? AND ? 
-                GROUP BY type
+                WHERE DATE(created_at) BETWEEN ? AND ?
             ");
             $fin_stmt->execute([$startOfWeek, $endOfWeek]);
             $fin = $fin_stmt->fetchAll();
 
             $inc = 0; $out = 0; 
             foreach($fin as $f) { 
-                if(in_array($f['type'], ['income', 'entrada'])) $inc += floatval($f['total']); 
-                else $out += floatval($f['total']); 
+                $amount = floatval($f['amount']);
+                if(in_array($f['type'], ['income', 'entrada'])) {
+                    $inc += $amount;
+                } else {
+                    $out += $amount;
+                }
             }
 
             // XP Total

@@ -192,7 +192,7 @@
                         return dt>=weekStart && dt<=today;
                     });
                     const weekIncome = weekFin.filter(f=>f.type==='income'||f.type==='entrada').reduce((s,f)=>s+parseFloat(f.amount||0),0);
-                    const weekOutcome = weekFin.filter(f=>f.type==='expense'||f.type==='saida').reduce((s,f)=>s+parseFloat(f.amount||0),0);
+                    const weekOutcome = weekFin.filter(f=>!(f.type==='income'||f.type==='entrada')).reduce((s,f)=>s+parseFloat(f.amount||0),0);
                     setWeekFinance({income:weekIncome,outcome:weekOutcome});
                     
                     // Board - Foto do dia
@@ -279,7 +279,7 @@
                             <div className="item"><div className="label">Eventos hoje</div><div className="title" style={{fontSize:20}}>{summary.today.events}</div></div>
                             <div className="item"><div className="label">Atividades</div><div className="title" style={{fontSize:20}}>{summary.today.doneActivities}/{summary.today.activities}</div></div>
                             <div className="item"><div className="label">Hábitos feitos</div><div className="title" style={{fontSize:20}}>{summary.today.habitsDone}</div></div>
-                            <div className="item"><div className="label">Balanço</div><div className="title" style={{fontSize:18}}>{fmtMoney(summary.finance.balance||0)}</div></div>
+                            <div className="item"><div className="label">Gastos Semana</div><div className="title" style={{fontSize:18,color:'#dc2626'}}>{fmtMoney(weekFinance.outcome||0)}</div></div>
                             <div className="item"><div className="label">Rotina</div><div className="title" style={{fontSize:18}}>{summary.routine.mood}</div></div>
                             <div className="item"><div className="label">Treinou?</div><div className="title" style={{fontSize:18}}>{summary.strava.trainedToday?'✅ Sim':'❌ Não'}</div></div>
                         </div>
@@ -405,15 +405,13 @@
 
                     {/* BOARD - IMAGEM DO DIA */}
                     <div className="card">
-                        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:10}}>
-                            <h3 className="title" style={{fontSize:'15px',margin:0}}>📸 Imagem do Dia</h3>
-                            <span className="badge" style={{background:'rgba(220,38,38,0.18)',color:'#ef4444',borderColor:'rgba(220,38,38,0.4)'}}>-{fmtMoney(weekFinance.outcome)}</span>
-                        </div>
+                        <h3 className="title" style={{fontSize:'15px',marginBottom:10}}>📸 Imagem do Dia</h3>
                         {boardPhoto && (
                             <div style={{marginBottom:10,borderRadius:14,overflow:'hidden',border:'1px solid var(--border)'}}>
-                                <img src={`../uploads/board/${boardPhoto.filename}`} alt="Foto do dia" style={{width:'100%',display:'block'}} />
+                                <img src={`../uploads/board/${boardPhoto.filename}`} alt="Foto do dia" style={{width:'100%',display:'block'}} onError={(e)=>{console.error('Erro ao carregar imagem:',e); e.target.style.display='none';}} />
                             </div>
                         )}
+                        {!boardPhoto && <div className="label" style={{textAlign:'center',padding:20,color:'var(--muted)'}}>Nenhuma foto registrada hoje</div>}
                         <input className="input" type="file" accept="image/*" onChange={e=>setBoardFile(e.target.files[0])} style={{marginBottom:8}} />
                         <button className="action" onClick={uploadBoard}>Enviar Foto</button>
                     </div>
