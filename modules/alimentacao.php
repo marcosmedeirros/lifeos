@@ -65,72 +65,19 @@ function format_date($date_str) {
     }
     return $date_str;
 }
+
+$page_title = 'Alimentação • LifeOS';
+include __DIR__ . '/../includes/header.php';
 ?>
-<!DOCTYPE html>
-<html lang="pt-BR" class="dark">
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#000000">
-    <title>Alimentação • LifeOS</title>
-    <link rel="icon" href="<?php echo BASE_PATH; ?>/assets/images/favicon.ico">
+
+<div class="flex min-h-screen w-full">
+    <?php include __DIR__ . '/../includes/sidebar.php'; ?>
     
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['Outfit', 'sans-serif'],
-                    }
-                }
-            }
-        }
-    </script>
-    
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <div class="flex-1 p-2 md:p-4 content-wrap transition-all duration-300">
+        <div class="main-shell">
     
     <style>
-        body {
-            background: #000000;
-            min-height: 100vh;
-            color: #fff;
-        }
-
-        .glass-sidebar {
-            background: rgba(20, 20, 30, 0.8);
-            backdrop-filter: blur(10px);
-            border-right: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .nav-btn {
-            background: transparent;
-            border-radius: 0.75rem;
-            color: rgba(255, 255, 255, 0.8);
-            text-decoration: none;
-            transition: all 0.3s ease;
-            border: 1px solid transparent;
-        }
-
-        .nav-btn:hover {
-            background: rgba(255, 255, 255, 0.1);
-            color: #fff;
-            border-color: rgba(255, 255, 255, 0.2);
-        }
-
-        .nav-btn.active {
-            background: rgba(234, 179, 8, 0.2);
-            color: #fbbf24;
-            border-color: rgba(234, 179, 8, 0.5);
-            font-weight: 600;
-        }
-
+        /* Estilos específicos para cards de nutrição */
         .nutrition-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -268,29 +215,6 @@ function format_date($date_str) {
             padding: 12px 16px;
             border-radius: 8px;
             margin-bottom: 20px;
-        }
-
-        .main-content {
-            margin-left: 288px;
-            min-height: 100vh;
-            padding: 40px;
-        }
-
-        @media (max-width: 768px) {
-            .main-content {
-                margin-left: 0;
-                padding: 20px;
-                padding-top: 80px;
-            }
-
-            .nutrition-grid {
-                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            }
-        }
-
-        .touch-manipulation {
-            touch-action: manipulation;
-            -webkit-tap-highlight-color: rgba(255, 255, 255, 0.1);
         }
 
         /* Modal styles */
@@ -508,12 +432,17 @@ function format_date($date_str) {
 <body class="dark">
     <?php require_once __DIR__ . '/../includes/sidebar.php'; ?>
 
-    <div class="main-content">
-        <div class="max-w-7xl mx-auto">
+    <div class="flex-1 p-2 md:p-4 content-wrap transition-all duration-300">
+        <div class="main-shell">
             <!-- Header -->
-            <div class="mb-8">
-                <h1 class="text-4xl font-bold mb-2">🥗 Alimentação & Saúde</h1>
-                <p class="text-gray-400">Acompanhe seus registros diários</p>
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+                <div>
+                    <h2 class="text-2xl md:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-yellow-500">🥗 Alimentação & Saúde</h2>
+                    <p class="text-gray-400 text-sm mt-1">Acompanhe seus registros diários</p>
+                </div>
+                <button class="btn-open-modal" onclick="openModal()">
+                    <span>➕</span> Adicionar Registro via JSON
+                </button>
             </div>
 
             <!-- Success Banner -->
@@ -531,11 +460,6 @@ function format_date($date_str) {
                 </div>
                 <?php unset($_SESSION['msg_error']); ?>
             <?php endif; ?>
-
-            <!-- Add New Record Button -->
-            <button class="btn-open-modal" onclick="openModal()">
-                <span>➕</span> Adicionar Registro via JSON
-            </button>
 
             <!-- Modal -->
             <div id="addJsonModal" class="modal">
@@ -664,7 +588,7 @@ function format_date($date_str) {
     </div>
 
     <script>
-        // Modal event listeners - Add after DOM is ready
+        // Modal event listeners
         document.addEventListener('DOMContentLoaded', function() {
             const modal = document.getElementById('addJsonModal');
             
@@ -696,38 +620,8 @@ function format_date($date_str) {
                     }
                 });
             }
-
-            // Mobile menu functionality
-            const menuToggle = document.getElementById('menu-toggle');
-            const menuClose = document.getElementById('menu-close');
-            const sidebar = document.getElementById('sidebar');
-            const overlay = document.getElementById('menu-overlay');
-
-            function openMenu() {
-                sidebar.classList.remove('-translate-x-full');
-                overlay.classList.remove('hidden');
-                document.body.style.overflow = 'hidden';
-            }
-
-            function closeMenu() {
-                sidebar.classList.add('-translate-x-full');
-                overlay.classList.add('hidden');
-                document.body.style.overflow = '';
-            }
-
-            menuToggle?.addEventListener('click', openMenu);
-            menuClose?.addEventListener('click', closeMenu);
-            overlay?.addEventListener('click', closeMenu);
-
-            // Close menu when clicking a link
-            document.querySelectorAll('#sidebar a').forEach(link => {
-                link.addEventListener('click', () => {
-                    if (window.innerWidth < 768) {
-                        closeMenu();
-                    }
-                });
-            });
         });
+    </script>
     </script>
 </body>
 </html>
