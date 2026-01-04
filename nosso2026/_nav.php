@@ -34,9 +34,9 @@
       <a href="<?= n26_link('calendar.php') ?>" class="block py-3 hover:bg-gray-900 rounded px-3 touch-manipulation">📅 Compromissos</a>
       <a href="<?= n26_link('workouts.php') ?>" class="block py-3 hover:bg-gray-900 rounded px-3 touch-manipulation">💪 Treinos</a>
       <a href="<?= n26_link('finances.php') ?>" class="block py-3 hover:bg-gray-900 rounded px-3 touch-manipulation">💰 Finanças</a>
+      <a href="<?= n26_link('alimentacao.php') ?>" class="block py-3 hover:bg-gray-900 rounded px-3 touch-manipulation">🥗 Alimentação</a>
       <a href="<?= n26_link('memories.php') ?>" class="block py-3 hover:bg-gray-900 rounded px-3 touch-manipulation">📸 Memórias</a>
-      <a href="<?= n26_link('food.php') ?>" class="block py-3 hover:bg-gray-900 rounded px-3 touch-manipulation">🍽️ Alimentação</a>
-      <a href="<?= n26_link('market.php') ?>" class="block py-3 hover:bg-gray-900 rounded px-3 touch-manipulation">🛒 Mercado</a>
+      <a href="<?= n26_link('food.php') ?>" class="block py-3 hover:bg-gray-900 rounded px-3 touch-manipulation">🍽️ Alimentação>
       <a href="<?= n26_link('movies.php') ?>" class="block py-3 hover:bg-gray-900 rounded px-3 touch-manipulation">🎬 Filmes</a>
     </div>
   </nav>

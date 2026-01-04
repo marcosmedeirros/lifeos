@@ -1,0 +1,18 @@
+[
+    {
+        "data": "2026-01-04",
+        "status_saude": {
+            "tsh_base": 2.311,
+            "b12_base": 318,
+            "levoide_ok": true,
+            "centrum_status": "Aguardando entrega (quarta-feira)"
+        },
+        "performance": {
+            "agua_ml": 500,
+            "creatina_ok": true,
+            "treino": "Descanso ativo \/ Organização",
+            "proteina_estimada_g": 12
+        },
+        "analise_coach": "Café da manhã evoluiu. Foco em manter o TSH estável até a chegada do Centrum."
+    }
+]

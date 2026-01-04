@@ -1,0 +1,733 @@
+<?php
+// ARQUIVO: alimentacao.php - Página de Alimentação & Saúde
+require_once __DIR__ . '/../includes/auth.php';
+require_login(); // Requer login obrigatório
+
+$page = 'alimentacao'; // Para ativar a aba na sidebar
+
+// Caminho do arquivo de dados
+$nutrition_file = __DIR__ . '/../data/nutrition_data.json';
+
+// Criar arquivo se não existir
+if (!file_exists($nutrition_file)) {
+    file_put_contents($nutrition_file, json_encode([]));
+}
+
+// Carregar dados
+$nutrition_data = json_decode(file_get_contents($nutrition_file), true) ?? [];
+
+// Ordenar por data (mais recente primeiro)
+usort($nutrition_data, fn($a, $b) => strtotime($b['data'] ?? '0') - strtotime($a['data'] ?? '0'));
+
+// Processar POST
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
+    if ($_POST['action'] === 'delete') {
+        $date_to_delete = $_POST['date'] ?? '';
+        $nutrition_data = array_filter($nutrition_data, fn($item) => $item['data'] !== $date_to_delete);
+        file_put_contents($nutrition_file, json_encode(array_values($nutrition_data), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+        usort($nutrition_data, fn($a, $b) => strtotime($b['data'] ?? '0') - strtotime($a['data'] ?? '0'));
+        $_SESSION['msg_success'] = "Registro removido com sucesso!";
+        header('Location: alimentacao.php');
+        exit;
+    } elseif ($_POST['action'] === 'add_json') {
+        $json_input = $_POST['json_data'] ?? '';
+        try {
+            $new_entry = json_decode($json_input, true);
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                $_SESSION['msg_error'] = "JSON inválido: " . json_last_error_msg();
+            } else {
+                // Validar se tem pelo menos uma data
+                if (!isset($new_entry['data'])) {
+                    $_SESSION['msg_error'] = "O JSON deve conter o campo 'data'";
+                } else {
+                    // Remover entrada com mesma data se existir
+                    $nutrition_data = array_filter($nutrition_data, fn($item) => $item['data'] !== $new_entry['data']);
+                    $nutrition_data[] = $new_entry;
+                    file_put_contents($nutrition_file, json_encode(array_values($nutrition_data), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+                    usort($nutrition_data, fn($a, $b) => strtotime($b['data'] ?? '0') - strtotime($a['data'] ?? '0'));
+                    $_SESSION['msg_success'] = "Novo registro adicionado com sucesso!";
+                }
+            }
+        } catch (Exception $e) {
+            $_SESSION['msg_error'] = "Erro ao processar JSON: " . $e->getMessage();
+        }
+        header('Location: alimentacao.php');
+        exit;
+    }
+}
+
+// Formatar data legível
+function format_date($date_str) {
+    $date = DateTime::createFromFormat('Y-m-d', $date_str);
+    if ($date) {
+        setlocale(LC_TIME, 'pt_BR.UTF-8');
+        return strftime('%d/%m/%Y', $date->getTimestamp());
+    }
+    return $date_str;
+}
+?>
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#000000">
+    <title>Alimentação • LifeOS</title>
+    <link rel="icon" href="<?php echo BASE_PATH; ?>/assets/images/favicon.ico">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Outfit', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body {
+            background: #000000;
+            min-height: 100vh;
+            color: #fff;
+        }
+
+        .glass-sidebar {
+            background: rgba(20, 20, 30, 0.8);
+            backdrop-filter: blur(10px);
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-btn {
+            background: transparent;
+            border-radius: 0.75rem;
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+        }
+
+        .nav-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .nav-btn.active {
+            background: rgba(234, 179, 8, 0.2);
+            color: #fbbf24;
+            border-color: rgba(234, 179, 8, 0.5);
+            font-weight: 600;
+        }
+
+        .nutrition-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .nutrition-card-small {
+            background: rgba(30, 30, 50, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .nutrition-card-small:hover {
+            border-color: rgba(251, 191, 36, 0.5);
+            background: rgba(30, 30, 50, 0.95);
+        }
+
+        .card-date {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 16px;
+            color: #fbbf24;
+        }
+
+        .card-date-small {
+            font-size: 12px;
+            color: #9ca3af;
+            margin-top: 4px;
+        }
+
+        .card-section {
+            margin-bottom: 16px;
+        }
+
+        .card-section-title {
+            font-size: 12px;
+            color: #60a5fa;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .card-stat {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            margin-bottom: 6px;
+            color: #ddd;
+        }
+
+        .card-stat-label {
+            color: #9ca3af;
+        }
+
+        .card-stat-value {
+            font-weight: 500;
+            color: #fff;
+        }
+
+        .badge-small {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 500;
+        }
+
+        .badge-true {
+            background: rgba(34, 197, 94, 0.2);
+            color: #86efac;
+        }
+
+        .badge-false {
+            background: rgba(239, 68, 68, 0.2);
+            color: #fca5a5;
+        }
+
+        .card-coach {
+            background: rgba(139, 92, 246, 0.15);
+            padding: 10px;
+            border-radius: 6px;
+            border-left: 3px solid #a78bfa;
+            font-size: 13px;
+            color: #ddd;
+            line-height: 1.5;
+            margin-top: 12px;
+        }
+
+        .btn-delete {
+            background: rgba(239, 68, 68, 0.2);
+            color: #fca5a5;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            margin-top: 12px;
+            width: 100%;
+            transition: all 0.3s ease;
+        }
+
+        .btn-delete:hover {
+            background: rgba(239, 68, 68, 0.3);
+            border-color: rgba(239, 68, 68, 0.5);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #9ca3af;
+        }
+
+        .empty-state p {
+            font-size: 16px;
+        }
+
+        .success-banner {
+            background: rgba(34, 197, 94, 0.2);
+            border: 1px solid rgba(34, 197, 94, 0.5);
+            color: #86efac;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .error-banner {
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid rgba(239, 68, 68, 0.5);
+            color: #fca5a5;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .main-content {
+            margin-left: 288px;
+            min-height: 100vh;
+            padding: 40px;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                margin-left: 0;
+                padding: 20px;
+                padding-top: 80px;
+            }
+
+            .nutrition-grid {
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            }
+        }
+
+        .touch-manipulation {
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, rgba(15, 15, 25, 0.98) 0%, rgba(20, 20, 35, 0.98) 100%);
+            border: 1px solid rgba(96, 165, 250, 0.3);
+            padding: 40px;
+            border-radius: 16px;
+            max-width: 650px;
+            width: 90%;
+            max-height: 85vh;
+            overflow-y: auto;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.7), 0 0 40px rgba(96, 165, 250, 0.1);
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 28px;
+            border-bottom: 2px solid rgba(96, 165, 250, 0.2);
+            padding-bottom: 20px;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-size: 24px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+
+        .close-modal {
+            color: #9ca3af;
+            font-size: 32px;
+            font-weight: bold;
+            cursor: pointer;
+            background: none;
+            border: none;
+            padding: 0;
+            line-height: 1;
+            transition: all 0.2s ease;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+        }
+
+        .close-modal:hover {
+            color: #60a5fa;
+            background: rgba(96, 165, 250, 0.1);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 12px;
+            color: #60a5fa;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            font-weight: 700;
+        }
+
+        #json_data {
+            min-height: 240px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            resize: vertical;
+            background: rgba(15, 15, 25, 0.9);
+            border: 2px solid rgba(96, 165, 250, 0.3);
+            color: #e5e7eb;
+            padding: 16px;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            line-height: 1.6;
+        }
+
+        #json_data::placeholder {
+            color: #6b7280;
+        }
+
+        #json_data:focus {
+            outline: none;
+            border-color: #60a5fa;
+            background: rgba(15, 15, 25, 0.95);
+            box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.15), 0 0 20px rgba(96, 165, 250, 0.2);
+        }
+
+        .btn-add-json {
+            background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
+            color: #fff;
+            border: 2px solid transparent;
+            padding: 14px 28px;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .btn-add-json:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(96, 165, 250, 0.4);
+            border-color: #60a5fa;
+        }
+
+        .btn-add-json:active {
+            transform: translateY(-1px);
+        }
+
+        .btn-open-modal {
+            background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
+            color: #fff;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .btn-open-modal:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(96, 165, 250, 0.3);
+        }
+
+        .help-text {
+            color: #9ca3af;
+            font-size: 12px;
+            margin-top: 10px;
+            line-height: 1.6;
+        }
+
+        .example-json {
+            background: linear-gradient(135deg, rgba(15, 15, 25, 0.95) 0%, rgba(20, 20, 35, 0.95) 100%);
+            border: 1px solid rgba(96, 165, 250, 0.2);
+            padding: 14px;
+            border-radius: 8px;
+            font-size: 12px;
+            color: #d1d5db;
+            font-family: 'Courier New', monospace;
+            margin-top: 12px;
+            overflow-x: auto;
+            line-height: 1.5;
+        }
+    </style>
+    <script>
+        // Modal functions - Definidas globalmente para serem acessíveis no onclick
+        function openModal() {
+            const modal = document.getElementById('addJsonModal');
+            if (modal) {
+                modal.classList.add('show');
+                document.body.style.overflow = 'hidden';
+            }
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('addJsonModal');
+            if (modal) {
+                modal.classList.remove('show');
+                document.body.style.overflow = '';
+                const form = document.getElementById('jsonForm');
+                if (form) form.reset();
+            }
+        }
+    </script>
+</head>
+<body class="dark">
+    <?php require_once __DIR__ . '/../includes/sidebar.php'; ?>
+
+    <div class="main-content">
+        <div class="max-w-7xl mx-auto">
+            <!-- Header -->
+            <div class="mb-8">
+                <h1 class="text-4xl font-bold mb-2">🥗 Alimentação & Saúde</h1>
+                <p class="text-gray-400">Acompanhe seus registros diários</p>
+            </div>
+
+            <!-- Success Banner -->
+            <?php if (isset($_SESSION['msg_success'])): ?>
+                <div class="success-banner">
+                    ✓ <?= htmlspecialchars($_SESSION['msg_success']) ?>
+                </div>
+                <?php unset($_SESSION['msg_success']); ?>
+            <?php endif; ?>
+
+            <!-- Error Banner -->
+            <?php if (isset($_SESSION['msg_error'])): ?>
+                <div class="error-banner">
+                    ✕ <?= htmlspecialchars($_SESSION['msg_error']) ?>
+                </div>
+                <?php unset($_SESSION['msg_error']); ?>
+            <?php endif; ?>
+
+            <!-- Add New Record Button -->
+            <button class="btn-open-modal" onclick="openModal()">
+                <span>➕</span> Adicionar Registro via JSON
+            </button>
+
+            <!-- Modal -->
+            <div id="addJsonModal" class="modal">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2>Adicionar Novo Registro</h2>
+                        <button class="close-modal" onclick="closeModal()">&times;</button>
+                    </div>
+                    
+                    <form method="POST" id="jsonForm">
+                        <input type="hidden" name="action" value="add_json">
+                        
+                        <div class="form-group">
+                            <label for="json_data">Cole seu JSON aqui:</label>
+                            <textarea 
+                                id="json_data" 
+                                name="json_data" 
+                                class="form-input" 
+                                placeholder='{"data": "2025-01-04", "status_saude": {"agua": 8}, "performance": {"treino": true}}'
+                                required></textarea>
+                            <div class="help-text">
+                                O JSON deve conter pelo menos o campo "data" no formato YYYY-MM-DD.
+                            </div>
+                            <div class="example-json">
+{
+  "data": "2025-01-04",
+  "status_saude": {
+    "agua": 8,
+    "sono": 7.5,
+    "stress": "baixo"
+  },
+  "performance": {
+    "treino": true,
+    "energia": 8
+  },
+  "analise_coach": "Muito bom! Continue assim."
+}
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn-add-json">Adicionar Registro</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Nutrition Grid -->
+            <div class="nutrition-grid">
+                <?php if (empty($nutrition_data)): ?>
+                    <div class="empty-state" style="grid-column: 1/-1;">
+                        <p style="font-size: 24px; margin-bottom: 12px;">📭</p>
+                        <p>Nenhum registro ainda.</p>
+                        <p style="font-size: 13px; margin-top: 8px; color: #6b7280;">Clique em "Adicionar Registro via JSON" para começar</p>
+                    </div>
+                <?php else: ?>
+                    <?php foreach ($nutrition_data as $entry): ?>
+                    <div class="nutrition-card-small">
+                        <div class="card-date">
+                            <?= htmlspecialchars(format_date($entry['data'] ?? '')) ?>
+                            <div class="card-date-small"><?= htmlspecialchars($entry['data'] ?? '') ?></div>
+                        </div>
+
+                        <!-- Status de Saúde -->
+                        <?php if (isset($entry['status_saude']) && is_array($entry['status_saude'])): ?>
+                        <div class="card-section">
+                            <div class="card-section-title">📊 Saúde</div>
+                            <?php foreach ($entry['status_saude'] as $key => $value): ?>
+                                <div class="card-stat">
+                                    <span class="card-stat-label"><?= htmlspecialchars(str_replace('_', ' ', ucfirst($key))) ?>:</span>
+                                    <span class="card-stat-value">
+                                        <?php if (is_bool($value)): ?>
+                                            <span class="badge-small <?= $value ? 'badge-true' : 'badge-false' ?>">
+                                                <?= $value ? '✓' : '✗' ?>
+                                            </span>
+                                        <?php elseif (is_numeric($value)): ?>
+                                            <?= htmlspecialchars($value) ?>
+                                        <?php else: ?>
+                                            <?= htmlspecialchars(substr($value, 0, 20)) ?><?= strlen($value) > 20 ? '...' : '' ?>
+                                        <?php endif; ?>
+                                    </span>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                        <?php endif; ?>
+
+                        <!-- Performance -->
+                        <?php if (isset($entry['performance']) && is_array($entry['performance'])): ?>
+                        <div class="card-section">
+                            <div class="card-section-title">⚡ Performance</div>
+                            <?php foreach ($entry['performance'] as $key => $value): ?>
+                                <div class="card-stat">
+                                    <span class="card-stat-label"><?= htmlspecialchars(str_replace('_', ' ', ucfirst($key))) ?>:</span>
+                                    <span class="card-stat-value">
+                                        <?php if (is_bool($value)): ?>
+                                            <span class="badge-small <?= $value ? 'badge-true' : 'badge-false' ?>">
+                                                <?= $value ? '✓' : '✗' ?>
+                                            </span>
+                                        <?php elseif (is_numeric($value)): ?>
+                                            <?= htmlspecialchars($value) ?>
+                                        <?php else: ?>
+                                            <?= htmlspecialchars(substr($value, 0, 20)) ?><?= strlen($value) > 20 ? '...' : '' ?>
+                                        <?php endif; ?>
+                                    </span>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                        <?php endif; ?>
+
+                        <!-- Análise do Coach -->
+                        <?php if (isset($entry['analise_coach'])): ?>
+                        <div class="card-coach">
+                            👨‍🏫 <?= htmlspecialchars(substr($entry['analise_coach'], 0, 100)) ?><?= strlen($entry['analise_coach']) > 100 ? '...' : '' ?>
+                        </div>
+                        <?php endif; ?>
+
+                        <!-- Botão Delete -->
+                        <form method="POST" style="display:inline; width:100%;" onsubmit="return confirm('Remover este registro?')">
+                            <input type="hidden" name="action" value="delete">
+                            <input type="hidden" name="date" value="<?= htmlspecialchars($entry['data'] ?? '') ?>">
+                            <button type="submit" class="btn-delete">🗑️ Remover</button>
+                        </form>
+                    </div>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Modal event listeners - Add after DOM is ready
+        document.addEventListener('DOMContentLoaded', function() {
+            const modal = document.getElementById('addJsonModal');
+            
+            // Close modal when clicking outside
+            window.addEventListener('click', function(event) {
+                if (event.target === modal) {
+                    closeModal();
+                }
+            });
+
+            // Close modal on Escape key
+            document.addEventListener('keydown', function(event) {
+                if (event.key === 'Escape') {
+                    closeModal();
+                }
+            });
+
+            // Form validation
+            const jsonForm = document.getElementById('jsonForm');
+            if (jsonForm) {
+                jsonForm.addEventListener('submit', function(e) {
+                    const jsonInput = document.getElementById('json_data').value.trim();
+                    try {
+                        JSON.parse(jsonInput);
+                    } catch (error) {
+                        e.preventDefault();
+                        alert('JSON inválido: ' + error.message);
+                        return false;
+                    }
+                });
+            }
+
+            // Mobile menu functionality
+            const menuToggle = document.getElementById('menu-toggle');
+            const menuClose = document.getElementById('menu-close');
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('menu-overlay');
+
+            function openMenu() {
+                sidebar.classList.remove('-translate-x-full');
+                overlay.classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
+            }
+
+            function closeMenu() {
+                sidebar.classList.add('-translate-x-full');
+                overlay.classList.add('hidden');
+                document.body.style.overflow = '';
+            }
+
+            menuToggle?.addEventListener('click', openMenu);
+            menuClose?.addEventListener('click', closeMenu);
+            overlay?.addEventListener('click', closeMenu);
+
+            // Close menu when clicking a link
+            document.querySelectorAll('#sidebar a').forEach(link => {
+                link.addEventListener('click', () => {
+                    if (window.innerWidth < 768) {
+                        closeMenu();
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

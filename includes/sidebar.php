@@ -63,6 +63,9 @@
             <a href="<?php echo BASE_PATH; ?>/modules/notes.php" class="nav-btn <?php echo ($page === 'notes') ? 'active' : ''; ?> text-left px-4 py-3 flex items-center gap-3">
                 <i class="fas fa-sticky-note w-5 text-center"></i> <span>Notas</span>
             </a>
+            <a href="<?php echo BASE_PATH; ?>/modules/alimentacao.php" class="nav-btn <?php echo ($page === 'alimentacao') ? 'active' : ''; ?> text-left px-4 py-3 flex items-center gap-3">
+                <i class="fas fa-apple-alt w-5 text-center"></i> <span>Alimentação</span>
+            </a>
         </div>
         
         <!-- Área do usuário e logout -->
