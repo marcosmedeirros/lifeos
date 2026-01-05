@@ -5,19 +5,25 @@ require_login(); // Requer login obrigatório
 
 $page = 'alimentacao'; // Para ativar a aba na sidebar
 
-// Caminho do arquivo de dados
-$nutrition_file = __DIR__ . '/../data/nutrition_data.json';
+// Caminho dos arquivos de dados
+$nutrition_file = __DIR__ . '/../data/nutrition_data.json'; // Diário (score/saúde)
+$food_file      = __DIR__ . '/../data/nutrition_food.json'; // Alimentação detalhada
 
-// Criar arquivo se não existir
+// Criar arquivos se não existirem
 if (!file_exists($nutrition_file)) {
     file_put_contents($nutrition_file, json_encode([]));
+}
+if (!file_exists($food_file)) {
+    file_put_contents($food_file, json_encode([]));
 }
 
 // Carregar dados
 $nutrition_data = json_decode(file_get_contents($nutrition_file), true) ?? [];
+$food_data      = json_decode(file_get_contents($food_file), true) ?? [];
 
 // Ordenar por data (mais recente primeiro)
 usort($nutrition_data, fn($a, $b) => strtotime($b['data'] ?? '0') - strtotime($a['data'] ?? '0'));
+usort($food_data, fn($a, $b) => strtotime($b['data'] ?? '0') - strtotime($a['data'] ?? '0'));
 
 // Processar POST
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
@@ -36,11 +42,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             if (json_last_error() !== JSON_ERROR_NONE) {
                 $_SESSION['msg_error'] = "JSON inválido: " . json_last_error_msg();
             } else {
-                // Validar se tem pelo menos uma data
                 if (!isset($new_entry['data'])) {
                     $_SESSION['msg_error'] = "O JSON deve conter o campo 'data'";
                 } else {
-                    // Remover entrada com mesma data se existir
                     $nutrition_data = array_filter($nutrition_data, fn($item) => $item['data'] !== $new_entry['data']);
                     $nutrition_data[] = $new_entry;
                     file_put_contents($nutrition_file, json_encode(array_values($nutrition_data), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
@@ -51,6 +55,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         } catch (Exception $e) {
             $_SESSION['msg_error'] = "Erro ao processar JSON: " . $e->getMessage();
         }
+        header('Location: alimentacao.php');
+        exit;
+    } elseif ($_POST['action'] === 'add_food_json') {
+        $json_input = $_POST['json_food'] ?? '';
+        try {
+            $new_entry = json_decode($json_input, true);
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                $_SESSION['msg_error'] = "JSON inválido: " . json_last_error_msg();
+            } else {
+                if (!isset($new_entry['data'])) {
+                    $_SESSION['msg_error'] = "O JSON deve conter o campo 'data'";
+                } else {
+                    $food_data = array_filter($food_data, fn($item) => $item['data'] !== $new_entry['data']);
+                    $food_data[] = $new_entry;
+                    file_put_contents($food_file, json_encode(array_values($food_data), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+                    usort($food_data, fn($a, $b) => strtotime($b['data'] ?? '0') - strtotime($a['data'] ?? '0'));
+                    $_SESSION['msg_success'] = "Registro de alimentação adicionado!";
+                }
+            }
+        } catch (Exception $e) {
+            $_SESSION['msg_error'] = "Erro ao processar JSON: " . $e->getMessage();
+        }
+        header('Location: alimentacao.php');
+        exit;
+    } elseif ($_POST['action'] === 'delete_food') {
+        $date_to_delete = $_POST['date'] ?? '';
+        $food_data = array_filter($food_data, fn($item) => $item['data'] !== $date_to_delete);
+        file_put_contents($food_file, json_encode(array_values($food_data), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+        usort($food_data, fn($a, $b) => strtotime($b['data'] ?? '0') - strtotime($a['data'] ?? '0'));
+        $_SESSION['msg_success'] = "Registro de alimentação removido!";
         header('Location: alimentacao.php');
         exit;
     }
@@ -89,6 +123,12 @@ include __DIR__ . '/../includes/header.php';
                 grid-template-columns: repeat(3, minmax(0, 1fr));
             }
         }
+
+        .tab-buttons {display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;}
+        .tab-buttons button {background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.12);color:#fff;padding:10px 14px;border-radius:10px;font-weight:700;cursor:pointer;transition:all .2s ease;}
+        .tab-buttons button.active {background:rgba(255,255,255,0.12);border-color:rgba(255,255,255,0.22);}
+        .tab-content {display:none;}
+        .tab-content.active {display:block;}
 
         .nutrition-card-small {
             background: rgba(30, 30, 30, 0.8);
@@ -464,6 +504,12 @@ include __DIR__ . '/../includes/header.php';
                 <?php unset($_SESSION['msg_error']); ?>
             <?php endif; ?>
 
+            <div class="tab-buttons">
+                <button class="tab-btn active" data-tab="tab-daily">Registro diário</button>
+                <button class="tab-btn" data-tab="tab-food">Alimentação</button>
+            </div>
+
+            <div id="tab-daily" class="tab-content active">
             <!-- Modal -->
             <div id="addJsonModal" class="modal">
                 <div class="modal-content">
@@ -673,6 +719,77 @@ include __DIR__ . '/../includes/header.php';
                     <?php endforeach; ?>
                 <?php endif; ?>
             </div>
+            </div><!-- tab-daily -->
+
+            <div id="tab-food" class="tab-content">
+                <div class="glass-card p-4 rounded-xl mb-4">
+                    <h3 class="text-lg font-bold text-white mb-2">🍽️ Alimentação (JSON)</h3>
+                    <form method="POST" class="space-y-3">
+                        <input type="hidden" name="action" value="add_food_json">
+                        <textarea name="json_food" class="form-input" style="min-height:160px;" placeholder='{"data":"2026-01-04","refeicoes":{"cafe":"ovos"},"observacoes":"..."}' required></textarea>
+                        <div class="help-text">Inclua o campo "data" (YYYY-MM-DD). O restante é livre.</div>
+                        <button type="submit" class="btn-add-json">Salvar Alimentação</button>
+                    </form>
+                </div>
+
+                <div class="nutrition-grid">
+                    <?php if (empty($food_data)): ?>
+                        <div class="empty-state" style="grid-column: 1/-1;">
+                            <p style="font-size: 24px; margin-bottom: 12px;">📭</p>
+                            <p>Nenhum registro de alimentação.</p>
+                        </div>
+                    <?php else: ?>
+                        <?php foreach ($food_data as $entry): ?>
+                            <div class="nutrition-card-small">
+                                <div class="card-date" style="margin-bottom:8px;">
+                                    <?= htmlspecialchars(format_date($entry['data'] ?? '')) ?>
+                                    <div class="card-date-small"><?= htmlspecialchars($entry['data'] ?? '') ?></div>
+                                </div>
+                                <?php if (!empty($entry['perfil'])): ?>
+                                    <div class="card-date-small" style="margin-bottom:8px;">Perfil: <?= htmlspecialchars($entry['perfil']) ?></div>
+                                <?php endif; ?>
+
+                                <?php foreach ($entry as $key => $value): ?>
+                                    <?php if ($key === 'data' || $key === 'perfil') continue; ?>
+                                    <?php if (is_array($value)): ?>
+                                        <div class="card-section">
+                                            <div class="card-section-title"><?= htmlspecialchars(str_replace('_',' ', ucfirst($key))) ?></div>
+                                            <?php foreach ($value as $k2 => $v2): ?>
+                                                <?php if (is_array($v2)): ?>
+                                                    <div class="card-stat" style="flex-direction:column;align-items:flex-start;gap:6px;">
+                                                        <span class="card-stat-label"><?= htmlspecialchars(str_replace('_',' ', ucfirst($k2))) ?>:</span>
+                                                        <div style="font-size:13px;color:#ddd;display:flex;flex-direction:column;gap:4px;">
+                                                            <?php foreach ($v2 as $k3 => $v3): ?>
+                                                                <span><strong><?= htmlspecialchars(str_replace('_',' ', ucfirst($k3))) ?>:</strong> <?= htmlspecialchars(is_scalar($v3)?$v3:json_encode($v3, JSON_UNESCAPED_UNICODE)) ?></span>
+                                                            <?php endforeach; ?>
+                                                        </div>
+                                                    </div>
+                                                <?php else: ?>
+                                                    <div class="card-stat">
+                                                        <span class="card-stat-label"><?= htmlspecialchars(str_replace('_',' ', ucfirst($k2))) ?>:</span>
+                                                        <span class="card-stat-value"><?= htmlspecialchars(is_scalar($v2)?$v2:json_encode($v2, JSON_UNESCAPED_UNICODE)) ?></span>
+                                                    </div>
+                                                <?php endif; ?>
+                                            <?php endforeach; ?>
+                                        </div>
+                                    <?php else: ?>
+                                        <div class="card-stat">
+                                            <span class="card-stat-label"><?= htmlspecialchars(str_replace('_',' ', ucfirst($key))) ?>:</span>
+                                            <span class="card-stat-value"><?= htmlspecialchars($value) ?></span>
+                                        </div>
+                                    <?php endif; ?>
+                                <?php endforeach; ?>
+
+                                <form method="POST" style="display:inline; width:100%;" onsubmit="return confirm('Remover este registro?')">
+                                    <input type="hidden" name="action" value="delete_food">
+                                    <input type="hidden" name="date" value="<?= htmlspecialchars($entry['data'] ?? '') ?>">
+                                    <button type="submit" class="btn-delete">🗑️ Remover</button>
+                                </form>
+                            </div>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </div>
+            </div><!-- tab-food -->
         </div>
     </div>
 
@@ -681,21 +798,18 @@ include __DIR__ . '/../includes/header.php';
         document.addEventListener('DOMContentLoaded', function() {
             const modal = document.getElementById('addJsonModal');
             
-            // Close modal when clicking outside
             window.addEventListener('click', function(event) {
                 if (event.target === modal) {
                     closeModal();
                 }
             });
 
-            // Close modal on Escape key
             document.addEventListener('keydown', function(event) {
                 if (event.key === 'Escape') {
                     closeModal();
                 }
             });
 
-            // Form validation
             const jsonForm = document.getElementById('jsonForm');
             if (jsonForm) {
                 jsonForm.addEventListener('submit', function(e) {
@@ -709,8 +823,20 @@ include __DIR__ . '/../includes/header.php';
                     }
                 });
             }
+
+            // Tabs
+            const tabButtons = document.querySelectorAll('.tab-btn');
+            const tabs = document.querySelectorAll('.tab-content');
+            tabButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    tabButtons.forEach(b=>b.classList.remove('active'));
+                    tabs.forEach(t=>t.classList.remove('active'));
+                    btn.classList.add('active');
+                    const target = document.getElementById(btn.dataset.tab);
+                    if (target) target.classList.add('active');
+                });
+            });
         });
-    </script>
     </script>
 </body>
 </html>
