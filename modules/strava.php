@@ -429,17 +429,19 @@ loadStrava();
 
             <div class="mb-6">
                 <label class="block text-sm font-bold text-white mb-2">Treinos da Semana (JSON Array de 7 dias):</label>
-                <textarea id="training_dias" required rows="12" placeholder='[
-  {"dia": "Segunda", "treino": "Peito e Tríceps"},
-  {"dia": "Terça", "treino": "Costas e Bíceps"},
-  {"dia": "Quarta", "treino": "Pernas"},
-  {"dia": "Quinta", "treino": "Ombros"},
-  {"dia": "Sexta", "treino": "Cardio"},
-  {"dia": "Sábado", "treino": "Treino funcional"},
-  {"dia": "Domingo", "treino": "Descanso"}
+                <textarea id="training_dias" required rows="16" placeholder='[
+  {
+    "dia": "Segunda-feira",
+    "foco": "Push (Peito/Ombro/Tríceps)",
+    "exercicios": [
+      {"nome": "Supino Reto", "series": 4, "reps": 10, "peso_sugerido": "18kg"},
+      {"nome": "Desenvolvimento", "series": 3, "reps": 12, "peso_sugerido": "10kg"}
+    ]
+  },
+  ...
 ]'
                     class="w-full bg-[#0c0f1a] border border-gray-700 rounded-xl px-4 py-3 text-white font-mono text-sm focus:border-[#fc4c02] focus:outline-none"></textarea>
-                <p class="text-xs text-gray-400 mt-2">Deve ser um array com exatamente 7 objetos, cada um com "dia" e "treino"</p>
+                <p class="text-xs text-gray-400 mt-2">Array com 7 dias: cada dia deve ter "dia", "foco" e "exercicios" (array com nome, series, reps, peso_sugerido)</p>
             </div>
 
             <div class="flex gap-3">
@@ -491,8 +493,12 @@ async function submitTraining(e) {
         
         // Validar estrutura de cada dia
         for (let i = 0; i < dias.length; i++) {
-            if (!dias[i].dia || !dias[i].treino) {
-                alert(`Dia ${i + 1} está incompleto! Cada dia deve ter "dia" e "treino".`);
+            if (!dias[i].dia || !dias[i].foco || !dias[i].exercicios) {
+                alert(`Dia ${i + 1} está incompleto! Cada dia deve ter "dia", "foco" e "exercicios".`);
+                return;
+            }
+            if (!Array.isArray(dias[i].exercicios)) {
+                alert(`Dia ${i + 1}: "exercicios" deve ser um array!`);
                 return;
             }
         }
@@ -572,12 +578,32 @@ async function loadTrainingData() {
         data.sort((a, b) => new Date(b.semana) - new Date(a.semana));
         
         grid.innerHTML = data.map(item => {
-            const diasHtml = item.dias.map(d => `
-                <div class="flex border-b border-gray-700/30 last:border-0 py-3">
-                    <div class="w-24 font-bold text-[#fc4c02] text-sm">${d.dia}:</div>
-                    <div class="flex-1 text-gray-300">${d.treino}</div>
-                </div>
-            `).join('');
+            const diasHtml = item.dias.map(d => {
+                const exerciciosHtml = d.exercicios.map(ex => `
+                    <div class="flex items-start gap-3 text-sm py-2 border-b border-gray-800/30 last:border-0">
+                        <i class="fas fa-dumbbell text-[#fc4c02] text-xs mt-1"></i>
+                        <div class="flex-1">
+                            <div class="font-semibold text-gray-200">${ex.nome}</div>
+                            <div class="text-xs text-gray-400 mt-1">
+                                <span class="bg-gray-800/60 px-2 py-0.5 rounded mr-1">${ex.series}x${ex.reps}</span>
+                                <span class="text-[#fc4c02]">${ex.peso_sugerido}</span>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+                
+                return `
+                    <div class="border border-gray-700/40 rounded-lg p-4 mb-3 bg-black/20">
+                        <div class="flex items-center gap-2 mb-3 pb-2 border-b border-gray-700/30">
+                            <div class="font-bold text-white text-base">${d.dia}</div>
+                            <div class="flex-1 text-sm text-gray-400 italic">— ${d.foco}</div>
+                        </div>
+                        <div class="space-y-1">
+                            ${exerciciosHtml}
+                        </div>
+                    </div>
+                `;
+            }).join('');
             
             return `
                 <div class="glass-card p-6 rounded-2xl border border-gray-700/40 hover:border-[#fc4c02]/50 transition">
@@ -598,7 +624,7 @@ async function loadTrainingData() {
                         </div>
                     </div>
                     
-                    <div class="space-y-1">
+                    <div>
                         ${diasHtml}
                     </div>
                 </div>
