@@ -534,17 +534,36 @@ include __DIR__ . '/../includes/header.php';
                             </div>
                             <div class="example-json">
 {
-  "data": "2025-01-04",
-  "status_saude": {
-    "agua": 8,
-    "sono": 7.5,
-    "stress": "baixo"
+  "data": "2026-01-04",
+  "perfil": "Marcos Crestani Medeiros",
+  "score_do_dia": 8.8,
+  "status": "Update de Hidratação",
+  "saude_hormonal": {
+    "tsh_base": 2.311,
+    "levoide_38mcg_status": "OK",
+    "b12_status_pg_ml": 318,
+    "centrum_status": "Aguardando entrega (07/01)"
   },
-  "performance": {
-    "treino": true,
-    "energia": 8
+  "performance_fisica": {
+    "creatina_scoops": 1,
+    "agua_total_litros": 2.0,
+    "meta_agua_litros": 3.0,
+    "treinos": [
+      { "tipo": "Funcional Força", "duracao": "27min", "kcal": 173 },
+      { "tipo": "Corrida", "distancia": "3.9km", "kcal": 184 }
+    ]
   },
-  "analise_coach": "Muito bom! Continue assim."
+  "nutricao": {
+    "proteina_total_estimada_g": 125,
+    "meta_diaria_g": 150,
+    "refeicoes": {
+      "cafe": "2 ovos, 2 paes de queijo",
+      "almoco": "Risoto (frango + tomate)",
+      "tarde": "Bolinho whey (2 scups) + 2 ovos",
+      "janta": "Arroz, carne bovina, salsichao"
+    }
+  },
+  "coach_feedback": "Volume de treino excepcional. Esforço extra na agua."
 }
                             </div>
                         </div>
