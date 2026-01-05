@@ -78,7 +78,56 @@ if (isset($_GET['api'])) {
             exit;
         }
 
-        // 3. GET DATA (Para o Frontend)
+        // 3. ADD TRAINING SCHEDULE (Adicionar Treino Semanal)
+        if ($action === 'add_training_json') {
+            header('Content-Type: application/json');
+            $week_date = $_POST['week_date'] ?? null;
+            $dias_json = $_POST['dias_json'] ?? null;
+            
+            if (!$week_date || !$dias_json) {
+                echo json_encode(['success' => false, 'error' => 'Dados incompletos']);
+                exit;
+            }
+            
+            $training_file = __DIR__ . '/../data/strava_training.json';
+            $training_data = file_exists($training_file) ? json_decode(file_get_contents($training_file), true) : [];
+            
+            $training_data[] = [
+                'semana' => $week_date,
+                'dias' => json_decode($dias_json, true),
+                'created_at' => date('Y-m-d H:i:s')
+            ];
+            
+            file_put_contents($training_file, json_encode($training_data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+            echo json_encode(['success' => true]);
+            exit;
+        }
+        
+        // 4. DELETE TRAINING WEEK (Deletar Semana de Treino)
+        if ($action === 'delete_training') {
+            header('Content-Type: application/json');
+            $week_date = $_POST['week_date'] ?? null;
+            
+            if (!$week_date) {
+                echo json_encode(['success' => false, 'error' => 'Data da semana não fornecida']);
+                exit;
+            }
+            
+            $training_file = __DIR__ . '/../data/strava_training.json';
+            if (file_exists($training_file)) {
+                $training_data = json_decode(file_get_contents($training_file), true);
+                $training_data = array_filter($training_data, function($item) use ($week_date) {
+                    return $item['semana'] !== $week_date;
+                });
+                $training_data = array_values($training_data);
+                file_put_contents($training_file, json_encode($training_data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+            }
+            
+            echo json_encode(['success' => true]);
+            exit;
+        }
+
+        // 5. GET DATA (Para o Frontend)
         if ($action === 'get_strava_data') {
             $auth = $pdo->query("SELECT * FROM strava_auth WHERE user_id = 1")->fetch();
             $authUrl = "https://www.strava.com/oauth/authorize?client_id=$client_id&response_type=code&redirect_uri=$redirect_uri&approval_prompt=force&scope=activity:read_all";
@@ -345,6 +394,230 @@ async function loadStrava() {
 }
 
 loadStrava();
+</script>
+
+<!-- SEÇÃO DE TREINO SEMANAL -->
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 mt-8 border-t border-gray-700/30">
+    <div class="flex justify-between items-center mb-6">
+        <h2 class="text-2xl font-bold text-white flex items-center gap-3">
+            <i class="fas fa-dumbbell text-[#fc4c02]"></i> Treino Semanal
+        </h2>
+        <button onclick="openTrainingModal()" class="bg-[#fc4c02] hover:bg-orange-600 text-white px-4 py-2 rounded-xl font-bold shadow-lg transition flex items-center gap-2">
+            <i class="fas fa-plus"></i> Adicionar Semana
+        </button>
+    </div>
+
+    <div id="training-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- Cards serão inseridos aqui via JavaScript -->
+    </div>
+</div>
+
+<!-- Modal de Treino -->
+<div id="trainingModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden flex items-center justify-center z-50" onclick="if(event.target === this) closeTrainingModal()">
+    <div class="bg-[#12182b] rounded-2xl border border-gray-700/50 p-8 max-w-3xl w-full mx-4 shadow-2xl">
+        <div class="flex justify-between items-center mb-6">
+            <h3 class="text-2xl font-bold text-white">Cadastrar Treino da Semana</h3>
+            <button onclick="closeTrainingModal()" class="text-gray-400 hover:text-white text-2xl">&times;</button>
+        </div>
+
+        <form id="trainingForm" onsubmit="submitTraining(event)">
+            <div class="mb-6">
+                <label class="block text-sm font-bold text-white mb-2">Segunda-feira da semana:</label>
+                <input type="date" id="training_week_date" required 
+                    class="w-full bg-[#0c0f1a] border border-gray-700 rounded-xl px-4 py-3 text-white focus:border-[#fc4c02] focus:outline-none">
+            </div>
+
+            <div class="mb-6">
+                <label class="block text-sm font-bold text-white mb-2">Treinos da Semana (JSON Array de 7 dias):</label>
+                <textarea id="training_dias" required rows="12" placeholder='[
+  {"dia": "Segunda", "treino": "Peito e Tríceps"},
+  {"dia": "Terça", "treino": "Costas e Bíceps"},
+  {"dia": "Quarta", "treino": "Pernas"},
+  {"dia": "Quinta", "treino": "Ombros"},
+  {"dia": "Sexta", "treino": "Cardio"},
+  {"dia": "Sábado", "treino": "Treino funcional"},
+  {"dia": "Domingo", "treino": "Descanso"}
+]'
+                    class="w-full bg-[#0c0f1a] border border-gray-700 rounded-xl px-4 py-3 text-white font-mono text-sm focus:border-[#fc4c02] focus:outline-none"></textarea>
+                <p class="text-xs text-gray-400 mt-2">Deve ser um array com exatamente 7 objetos, cada um com "dia" e "treino"</p>
+            </div>
+
+            <div class="flex gap-3">
+                <button type="submit" class="flex-1 bg-[#fc4c02] hover:bg-orange-600 text-white font-bold py-3 rounded-xl transition">
+                    <i class="fas fa-save mr-2"></i> Salvar
+                </button>
+                <button type="button" onclick="closeTrainingModal()" class="flex-1 bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 rounded-xl transition">
+                    Cancelar
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+// Funções do Modal de Treino
+function openTrainingModal() {
+    document.getElementById('trainingModal').classList.remove('hidden');
+    document.getElementById('trainingForm').reset();
+}
+
+function closeTrainingModal() {
+    document.getElementById('trainingModal').classList.add('hidden');
+}
+
+function editTrainingWeek(semana, dias) {
+    openTrainingModal();
+    document.getElementById('training_week_date').value = semana;
+    document.getElementById('training_dias').value = JSON.stringify(dias, null, 2);
+    
+    // Adicionar handler para deletar a semana antiga antes de adicionar nova
+    const form = document.getElementById('trainingForm');
+    form.dataset.editing = semana;
+}
+
+async function submitTraining(e) {
+    e.preventDefault();
+    
+    const weekDate = document.getElementById('training_week_date').value;
+    const diasText = document.getElementById('training_dias').value;
+    
+    // Validar JSON
+    try {
+        const dias = JSON.parse(diasText);
+        if (!Array.isArray(dias) || dias.length !== 7) {
+            alert('O JSON deve ser um array com exatamente 7 dias!');
+            return;
+        }
+        
+        // Validar estrutura de cada dia
+        for (let i = 0; i < dias.length; i++) {
+            if (!dias[i].dia || !dias[i].treino) {
+                alert(`Dia ${i + 1} está incompleto! Cada dia deve ter "dia" e "treino".`);
+                return;
+            }
+        }
+    } catch (err) {
+        alert('JSON inválido: ' + err.message);
+        return;
+    }
+    
+    // Se estiver editando, deletar a semana antiga primeiro
+    const form = e.target;
+    if (form.dataset.editing) {
+        await fetch('?api=delete_training', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+            body: `week_date=${encodeURIComponent(form.dataset.editing)}`
+        });
+        delete form.dataset.editing;
+    }
+    
+    // Adicionar nova semana
+    const formData = new FormData();
+    formData.append('week_date', weekDate);
+    formData.append('dias_json', diasText);
+    
+    const response = await fetch('?api=add_training_json', {
+        method: 'POST',
+        body: formData
+    });
+    
+    const result = await response.json();
+    
+    if (result.success) {
+        closeTrainingModal();
+        loadTrainingData();
+    } else {
+        alert('Erro ao salvar: ' + (result.error || 'Desconhecido'));
+    }
+}
+
+async function deleteTraining(semana) {
+    if (!confirm(`Deletar treinos da semana de ${formatDate(semana)}?`)) return;
+    
+    const formData = new FormData();
+    formData.append('week_date', semana);
+    
+    await fetch('?api=delete_training', {
+        method: 'POST',
+        body: formData
+    });
+    
+    loadTrainingData();
+}
+
+function formatDate(dateStr) {
+    const [year, month, day] = dateStr.split('-');
+    return `${day}/${month}/${year}`;
+}
+
+async function loadTrainingData() {
+    try {
+        const response = await fetch('../data/strava_training.json');
+        const data = await response.json();
+        
+        const grid = document.getElementById('training-grid');
+        
+        if (!data || data.length === 0) {
+            grid.innerHTML = `
+                <div class="col-span-full text-center py-12 text-gray-400">
+                    <i class="fas fa-dumbbell text-5xl mb-4 opacity-50"></i>
+                    <p>Nenhum treino cadastrado ainda.</p>
+                </div>
+            `;
+            return;
+        }
+        
+        // Ordenar por data (mais recente primeiro)
+        data.sort((a, b) => new Date(b.semana) - new Date(a.semana));
+        
+        grid.innerHTML = data.map(item => {
+            const diasHtml = item.dias.map(d => `
+                <div class="flex border-b border-gray-700/30 last:border-0 py-3">
+                    <div class="w-24 font-bold text-[#fc4c02] text-sm">${d.dia}:</div>
+                    <div class="flex-1 text-gray-300">${d.treino}</div>
+                </div>
+            `).join('');
+            
+            return `
+                <div class="glass-card p-6 rounded-2xl border border-gray-700/40 hover:border-[#fc4c02]/50 transition">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <h3 class="text-lg font-bold text-white mb-1">Semana de ${formatDate(item.semana)}</h3>
+                            <p class="text-xs text-gray-400">Cadastrado em ${new Date(item.created_at).toLocaleDateString('pt-BR')}</p>
+                        </div>
+                        <div class="flex gap-2">
+                            <button onclick='editTrainingWeek("${item.semana}", ${JSON.stringify(item.dias).replace(/'/g, "&apos;")})' 
+                                class="text-blue-400 hover:text-blue-300 transition" title="Editar">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button onclick='deleteTraining("${item.semana}")' 
+                                class="text-red-400 hover:text-red-300 transition" title="Deletar">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="space-y-1">
+                        ${diasHtml}
+                    </div>
+                </div>
+            `;
+        }).join('');
+        
+    } catch (err) {
+        console.log('Nenhum dado de treino encontrado ou erro ao carregar:', err);
+        document.getElementById('training-grid').innerHTML = `
+            <div class="col-span-full text-center py-12 text-gray-400">
+                <i class="fas fa-dumbbell text-5xl mb-4 opacity-50"></i>
+                <p>Nenhum treino cadastrado ainda.</p>
+            </div>
+        `;
+    }
+}
+
+// Carregar dados ao iniciar
+loadTrainingData();
 </script>
 
 <?php require_once __DIR__ . '/../includes/footer.php'; ?>
