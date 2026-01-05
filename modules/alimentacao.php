@@ -59,19 +59,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         exit;
     } elseif ($_POST['action'] === 'add_food_json') {
         $json_input = $_POST['json_food'] ?? '';
+        $week_date = $_POST['week_date'] ?? ''; // Data da semana (segunda-feira)
         try {
             $new_entry = json_decode($json_input, true);
             if (json_last_error() !== JSON_ERROR_NONE) {
                 $_SESSION['msg_error'] = "JSON inválido: " . json_last_error_msg();
             } else {
-                if (!isset($new_entry['data'])) {
-                    $_SESSION['msg_error'] = "O JSON deve conter o campo 'data'";
+                if (empty($week_date)) {
+                    $_SESSION['msg_error'] = "Informe a data da semana (segunda-feira)";
                 } else {
-                    $food_data = array_filter($food_data, fn($item) => $item['data'] !== $new_entry['data']);
-                    $food_data[] = $new_entry;
+                    // Remover entrada com mesma semana se existir
+                    $food_data = array_filter($food_data, fn($item) => ($item['semana'] ?? '') !== $week_date);
+                    $food_data[] = ['semana' => $week_date, 'dias' => $new_entry];
                     file_put_contents($food_file, json_encode(array_values($food_data), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
-                    usort($food_data, fn($a, $b) => strtotime($b['data'] ?? '0') - strtotime($a['data'] ?? '0'));
-                    $_SESSION['msg_success'] = "Registro de alimentação adicionado!";
+                    usort($food_data, fn($a, $b) => strtotime($b['semana'] ?? '0') - strtotime($a['semana'] ?? '0'));
+                    $_SESSION['msg_success'] = "Registro de alimentação semanal salvo!";
                 }
             }
         } catch (Exception $e) {
@@ -80,10 +82,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         header('Location: alimentacao.php');
         exit;
     } elseif ($_POST['action'] === 'delete_food') {
-        $date_to_delete = $_POST['date'] ?? '';
-        $food_data = array_filter($food_data, fn($item) => $item['data'] !== $date_to_delete);
+        $week_to_delete = $_POST['week'] ?? '';
+        $food_data = array_filter($food_data, fn($item) => ($item['semana'] ?? '') !== $week_to_delete);
         file_put_contents($food_file, json_encode(array_values($food_data), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
-        usort($food_data, fn($a, $b) => strtotime($b['data'] ?? '0') - strtotime($a['data'] ?? '0'));
+        usort($food_data, fn($a, $b) => strtotime($b['semana'] ?? '0') - strtotime($a['semana'] ?? '0'));
         $_SESSION['msg_success'] = "Registro de alimentação removido!";
         header('Location: alimentacao.php');
         exit;
@@ -741,69 +743,98 @@ include __DIR__ . '/../includes/header.php';
             </div><!-- tab-daily -->
 
             <div id="tab-food" class="tab-content">
-                <div class="glass-card p-4 rounded-xl mb-4">
-                    <h3 class="text-lg font-bold text-white mb-2">🍽️ Alimentação (JSON)</h3>
-                    <form method="POST" class="space-y-3">
-                        <input type="hidden" name="action" value="add_food_json">
-                        <textarea name="json_food" class="form-input" style="min-height:160px;" placeholder='{"data":"2026-01-04","refeicoes":{"cafe":"ovos"},"observacoes":"..."}' required></textarea>
-                        <div class="help-text">Inclua o campo "data" (YYYY-MM-DD). O restante é livre.</div>
-                        <button type="submit" class="btn-add-json">Salvar Alimentação</button>
-                    </form>
+                <button class="btn-open-modal" onclick="openFoodModal()">
+                    <span>➕</span> Adicionar Semana de Alimentação
+                </button>
+
+                <!-- Modal Food -->
+                <div id="addFoodModal" class="modal">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h2>Alimentação Semanal</h2>
+                            <button class="close-modal" onclick="closeFoodModal()">&times;</button>
+                        </div>
+                        
+                        <form method="POST" id="foodForm">
+                            <input type="hidden" name="action" value="add_food_json">
+                            <input type="hidden" name="week_date" id="food_week_date">
+                            
+                            <div class="form-group">
+                                <label for="food_week_input">Data da semana (segunda-feira):</label>
+                                <input type="date" id="food_week_input" class="form-input" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="json_food">Cole o JSON da semana (array com 7 dias):</label>
+                                <textarea 
+                                    id="json_food" 
+                                    name="json_food" 
+                                    class="form-input" 
+                                    style="min-height:320px;"
+                                    required></textarea>
+                                <div class="help-text">
+                                    Array com 7 objetos (Segunda a Domingo), cada um com: dia, cafe, almoco, lanche, janta.
+                                </div>
+                                <div class="example-json" style="font-size:11px;max-height:200px;overflow-y:auto;">
+[
+  {"dia":"Segunda-feira","cafe":"Omelete de 2 ovos","almoco":"Strogonoff...","lanche":"Sanduíche...","janta":"Strogonoff..."},
+  {"dia":"Terça-feira","cafe":"Omelete...","almoco":"Frango...","lanche":"Bolo...","janta":"Frango..."},
+  {"dia":"Quarta-feira","cafe":"...","almoco":"...","lanche":"...","janta":"..."},
+  {"dia":"Quinta-feira","cafe":"...","almoco":"...","lanche":"...","janta":"..."},
+  {"dia":"Sexta-feira","cafe":"...","almoco":"...","lanche":"...","janta":"..."},
+  {"dia":"Sábado","cafe":"...","almoco":"...","lanche":"...","janta":"..."},
+  {"dia":"Domingo","cafe":"...","almoco":"...","lanche":"...","janta":"..."}
+]
+                                </div>
+                            </div>
+
+                            <button type="submit" class="btn-add-json">Salvar Semana</button>
+                        </form>
+                    </div>
                 </div>
 
                 <div class="nutrition-grid">
                     <?php if (empty($food_data)): ?>
                         <div class="empty-state" style="grid-column: 1/-1;">
                             <p style="font-size: 24px; margin-bottom: 12px;">📭</p>
-                            <p>Nenhum registro de alimentação.</p>
+                            <p>Nenhum registro de alimentação semanal.</p>
                         </div>
                     <?php else: ?>
-                        <?php foreach ($food_data as $entry): ?>
-                            <div class="nutrition-card-small">
-                                <div class="card-date" style="margin-bottom:8px;">
-                                    <?= htmlspecialchars(format_date($entry['data'] ?? '')) ?>
-                                    <div class="card-date-small"><?= htmlspecialchars($entry['data'] ?? '') ?></div>
+                        <?php foreach ($food_data as $weekEntry): ?>
+                            <?php 
+                                $semana = $weekEntry['semana'] ?? '';
+                                $dias = $weekEntry['dias'] ?? [];
+                            ?>
+                            <!-- Card da semana -->
+                            <div class="nutrition-card-small" style="grid-column:1/-1;max-width:100%;">
+                                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+                                    <div class="card-date">
+                                        Semana de <?= htmlspecialchars(format_date($semana)) ?>
+                                        <div class="card-date-small"><?= htmlspecialchars($semana) ?></div>
+                                    </div>
+                                    <div style="display:flex;gap:8px;">
+                                        <button class="btn-open-modal" style="padding:8px 16px;margin:0;font-size:13px;" onclick='editFoodWeek(<?= json_encode($semana) ?>, <?= json_encode($dias, JSON_UNESCAPED_UNICODE) ?>)'>✏️ Editar</button>
+                                        <form method="POST" style="display:inline;" onsubmit="return confirm('Remover esta semana?')">
+                                            <input type="hidden" name="action" value="delete_food">
+                                            <input type="hidden" name="week" value="<?= htmlspecialchars($semana) ?>">
+                                            <button type="submit" class="btn-delete" style="width:auto;margin:0;padding:8px 16px;">🗑️</button>
+                                        </form>
+                                    </div>
                                 </div>
-                                <?php if (!empty($entry['perfil'])): ?>
-                                    <div class="card-date-small" style="margin-bottom:8px;">Perfil: <?= htmlspecialchars($entry['perfil']) ?></div>
-                                <?php endif; ?>
 
-                                <?php foreach ($entry as $key => $value): ?>
-                                    <?php if ($key === 'data' || $key === 'perfil') continue; ?>
-                                    <?php if (is_array($value)): ?>
-                                        <div class="card-section">
-                                            <div class="card-section-title"><?= htmlspecialchars(str_replace('_',' ', ucfirst($key))) ?></div>
-                                            <?php foreach ($value as $k2 => $v2): ?>
-                                                <?php if (is_array($v2)): ?>
-                                                    <div class="card-stat" style="flex-direction:column;align-items:flex-start;gap:6px;">
-                                                        <span class="card-stat-label"><?= htmlspecialchars(str_replace('_',' ', ucfirst($k2))) ?>:</span>
-                                                        <div style="font-size:13px;color:#ddd;display:flex;flex-direction:column;gap:4px;">
-                                                            <?php foreach ($v2 as $k3 => $v3): ?>
-                                                                <span><strong><?= htmlspecialchars(str_replace('_',' ', ucfirst($k3))) ?>:</strong> <?= htmlspecialchars(is_scalar($v3)?$v3:json_encode($v3, JSON_UNESCAPED_UNICODE)) ?></span>
-                                                            <?php endforeach; ?>
-                                                        </div>
-                                                    </div>
-                                                <?php else: ?>
-                                                    <div class="card-stat">
-                                                        <span class="card-stat-label"><?= htmlspecialchars(str_replace('_',' ', ucfirst($k2))) ?>:</span>
-                                                        <span class="card-stat-value"><?= htmlspecialchars(is_scalar($v2)?$v2:json_encode($v2, JSON_UNESCAPED_UNICODE)) ?></span>
-                                                    </div>
-                                                <?php endif; ?>
-                                            <?php endforeach; ?>
+                                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px;">
+                                    <?php foreach ($dias as $dia): ?>
+                                        <div class="item" style="padding:14px;border-radius:12px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);">
+                                            <div class="title" style="font-size:14px;margin-bottom:10px;color:#fff;"><?= htmlspecialchars($dia['dia'] ?? '') ?></div>
+                                            <div style="display:flex;flex-direction:column;gap:6px;font-size:12px;color:#ddd;">
+                                                <div><strong style="color:#ccc;">☕ Café:</strong> <?= htmlspecialchars($dia['cafe'] ?? '') ?></div>
+                                                <div><strong style="color:#ccc;">🍽️ Almoço:</strong> <?= htmlspecialchars($dia['almoco'] ?? '') ?></div>
+                                                <div><strong style="color:#ccc;">🥤 Lanche:</strong> <?= htmlspecialchars($dia['lanche'] ?? '') ?></div>
+                                                <div><strong style="color:#ccc;">🌙 Janta:</strong> <?= htmlspecialchars($dia['janta'] ?? '') ?></div>
+                                            </div>
                                         </div>
-                                    <?php else: ?>
-                                        <div class="card-stat">
-                                            <span class="card-stat-label"><?= htmlspecialchars(str_replace('_',' ', ucfirst($key))) ?>:</span>
-                                            <span class="card-stat-value"><?= htmlspecialchars($value) ?></span>
-                                        </div>
-                                    <?php endif; ?>
-                                <?php endforeach; ?>
-
-                                <form method="POST" style="display:inline; width:100%;" onsubmit="return confirm('Remover este registro?')">
-                                    <input type="hidden" name="action" value="delete_food">
-                                    <input type="hidden" name="date" value="<?= htmlspecialchars($entry['data'] ?? '') ?>">
-                                    <button type="submit" class="btn-delete">🗑️ Remover</button>
-                                </form>
+                                    <?php endforeach; ?>
+                                </div>
                             </div>
                         <?php endforeach; ?>
                     <?php endif; ?>
@@ -854,6 +885,77 @@ include __DIR__ . '/../includes/header.php';
                     const target = document.getElementById(btn.dataset.tab);
                     if (target) target.classList.add('active');
                 });
+            });
+        });
+
+        // Food modal functions
+        function openFoodModal() {
+            const modal = document.getElementById('addFoodModal');
+            if (modal) {
+                modal.classList.add('show');
+                document.body.style.overflow = 'hidden';
+                // Set current Monday
+                const today = new Date();
+                const day = today.getDay();
+                const diff = today.getDate() - day + (day === 0 ? -6 : 1);
+                const monday = new Date(today.setDate(diff));
+                const mondayStr = monday.toISOString().split('T')[0];
+                document.getElementById('food_week_input').value = mondayStr;
+                document.getElementById('food_week_date').value = mondayStr;
+            }
+        }
+
+        function closeFoodModal() {
+            const modal = document.getElementById('addFoodModal');
+            if (modal) {
+                modal.classList.remove('show');
+                document.body.style.overflow = '';
+                document.getElementById('foodForm').reset();
+            }
+        }
+
+        function editFoodWeek(semana, dias) {
+            openFoodModal();
+            document.getElementById('food_week_input').value = semana;
+            document.getElementById('food_week_date').value = semana;
+            document.getElementById('json_food').value = JSON.stringify(dias, null, 2);
+        }
+
+        // Update hidden field when date changes
+        document.addEventListener('DOMContentLoaded', function() {
+            const weekInput = document.getElementById('food_week_input');
+            if (weekInput) {
+                weekInput.addEventListener('change', function() {
+                    document.getElementById('food_week_date').value = this.value;
+                });
+            }
+
+            // Food form validation
+            const foodForm = document.getElementById('foodForm');
+            if (foodForm) {
+                foodForm.addEventListener('submit', function(e) {
+                    const jsonInput = document.getElementById('json_food').value.trim();
+                    try {
+                        const parsed = JSON.parse(jsonInput);
+                        if (!Array.isArray(parsed) || parsed.length !== 7) {
+                            e.preventDefault();
+                            alert('O JSON deve ser um array com exatamente 7 dias.');
+                            return false;
+                        }
+                    } catch (error) {
+                        e.preventDefault();
+                        alert('JSON inválido: ' + error.message);
+                        return false;
+                    }
+                });
+            }
+
+            // Close food modal on escape or outside click
+            window.addEventListener('click', function(event) {
+                const foodModal = document.getElementById('addFoodModal');
+                if (event.target === foodModal) {
+                    closeFoodModal();
+                }
             });
         });
     </script>
