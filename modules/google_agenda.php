@@ -288,8 +288,72 @@ if (isset($_GET['api'])) {
         }
         
         if ($action === 'update_event') {
-            $stmt = $pdo->prepare("UPDATE events SET title = ?, start_date = ? WHERE id = ? AND user_id = ?");
-            $stmt->execute([$data['title'], $data['start_date'], $data['id'], $user_id]);
+            // Buscar evento local
+            $stmt = $pdo->prepare("SELECT google_event_id FROM events WHERE id = ? AND user_id = ?");
+            $stmt->execute([$data['id'], $user_id]);
+            $event = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$event) {
+                echo json_encode(['error' => 'Evento não encontrado']);
+                exit;
+            }
+
+            // Atualizar no Google se existir
+            if (!empty($event['google_event_id'])) {
+                if (!$access_token) {
+                    echo json_encode(['error' => 'Não autenticado no Google']);
+                    exit;
+                }
+
+                $startDateTime = str_replace('T', ' ', $data['start_date']) . ':00';
+                try {
+                    $dt = new DateTime($startDateTime, new DateTimeZone('America/Sao_Paulo'));
+                    $startIso = $dt->format('c');
+                    $endDateTime = clone $dt;
+                    $endDateTime->add(new DateInterval('PT1H'));
+                    $endIso = $endDateTime->format('c');
+                } catch (Exception $e) {
+                    echo json_encode(['error' => 'Erro ao processar data: ' . $e->getMessage()]);
+                    exit;
+                }
+
+                $event_data = [
+                    'summary' => $data['title'],
+                    'description' => $data['description'] ?? '',
+                    'start' => [
+                        'dateTime' => $startIso,
+                        'timeZone' => 'America/Sao_Paulo'
+                    ],
+                    'end' => [
+                        'dateTime' => $endIso,
+                        'timeZone' => 'America/Sao_Paulo'
+                    ]
+                ];
+
+                $google_event_id = $event['google_event_id'];
+                $update_url = "https://www.googleapis.com/calendar/v3/calendars/primary/events/{$google_event_id}";
+
+                $ch = curl_init($update_url);
+                curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PATCH');
+                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                    "Authorization: Bearer {$access_token}",
+                    "Content-Type: application/json"
+                ]);
+                curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($event_data));
+                $response = curl_exec($ch);
+                $http_status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+                curl_close($ch);
+
+                if ($http_status >= 300) {
+                    echo json_encode(['error' => 'Erro ao atualizar no Google Calendar', 'status' => $http_status, 'response' => substr((string)$response, 0, 200)]);
+                    exit;
+                }
+            }
+
+            // Atualizar localmente
+            $stmt = $pdo->prepare("UPDATE events SET title = ?, start_date = ?, description = ? WHERE id = ? AND user_id = ?");
+            $stmt->execute([$data['title'], $data['start_date'], $data['description'] ?? '', $data['id'], $user_id]);
             echo json_encode(['success' => true]);
             exit;
         }
@@ -428,6 +492,7 @@ include __DIR__ . '/../includes/header.php';
             <input type="hidden" id="event-id">
             <input type="text" id="event-title" placeholder="Título do evento" required class="w-full">
             <input type="datetime-local" id="event-date" required class="w-full">
+            <textarea id="event-desc" class="w-full mt-3 bg-black/40 border border-gray-600/30 rounded-xl p-3 text-white" rows="3" placeholder="Descrição (opcional)"></textarea>
             <div class="flex gap-3">
                 <button type="submit" class="flex-1 bg-white hover:bg-gray-100 text-black py-3 rounded-xl font-bold" id="btn-save-event">
                     Salvar
@@ -575,7 +640,8 @@ function renderCalendarGrid(events) {
             const time = new Date(ev.start_date).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
             const eventEl = document.createElement('div');
             eventEl.className = 'cursor-pointer text-xs px-2 py-1 rounded-md bg-white/20 text-gray-100 border-l-2 border-white hover:bg-white/30 transition truncate mb-1';
-            eventEl.title = `${time} - ${ev.title}`;
+            const desc = ev.description ? `\n${ev.description}` : '';
+            eventEl.title = `${time} - ${ev.title}${desc}`;
             eventEl.innerHTML = `<span class="opacity-70 text-[10px] mr-1">${time}</span>${ev.title}`;
             eventEl.onclick = (e) => {
                 e.stopPropagation();
@@ -623,6 +689,7 @@ function editEvent(ev) {
     document.getElementById('event-id').value = ev.id;
     document.getElementById('event-title').value = ev.title;
     document.getElementById('event-date').value = ev.start_date.replace(' ', 'T');
+    document.getElementById('event-desc').value = ev.description || '';
     document.getElementById('modal-event-title').textContent = 'Editar Evento';
     document.getElementById('btn-delete-event').classList.remove('hidden');
     document.getElementById('btn-save-event').textContent = 'Atualizar';
@@ -652,6 +719,7 @@ function createEventModal() {
     document.getElementById('event-id').value = '';
     document.getElementById('event-title').value = '';
     document.getElementById('event-date').value = getLocalDateTimeValue();
+    document.getElementById('event-desc').value = '';
     document.getElementById('modal-event-title').textContent = 'Novo Evento';
     document.getElementById('btn-delete-event').classList.add('hidden');
     document.getElementById('btn-save-event').textContent = 'Salvar';
@@ -664,7 +732,8 @@ async function submitEvent(e) {
     const eventId = document.getElementById('event-id').value;
     const data = {
         title: document.getElementById('event-title').value,
-        start_date: document.getElementById('event-date').value
+        start_date: document.getElementById('event-date').value,
+        description: document.getElementById('event-desc').value
     };
     
     try {
