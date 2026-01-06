@@ -258,9 +258,33 @@ require_once __DIR__ . '/../includes/header.php';
         <div class="main-shell">
             <div class="flex justify-between items-center mb-8">
                 <h2 class="text-3xl font-bold text-white flex items-center gap-3">
-                    <i class="fab fa-strava text-[#fc4c02]"></i> Treinos
+                    <i class="fab fa-dumbbell text-[#fc4c02]"></i> Treinos 2026
                 </h2>
                 <div id="strava-connect-btn" class="hidden"></div>
+            </div>
+            
+            <!-- Cards de Estatísticas de Treinos -->
+            <div id="training-stats" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 hidden">
+                <div class="glass-card p-6 rounded-2xl border-l-4 border-[#fc4c02]">
+                    <p class="text-xs uppercase text-slate-400 font-bold mb-2">Total Geral</p>
+                    <p class="text-4xl font-bold text-[#fc4c02]"><span id="training-total">0</span></p>
+                    <p class="text-xs text-gray-400 mt-2">treinos em 2026</p>
+                </div>
+                <div class="glass-card p-6 rounded-2xl border-l-4 border-purple-500">
+                    <p class="text-xs uppercase text-slate-400 font-bold mb-2">Musculação</p>
+                    <p class="text-4xl font-bold text-purple-400"><span id="training-strength">0</span></p>
+                    <p class="text-xs text-gray-400 mt-2">treinos de força</p>
+                </div>
+                <div class="glass-card p-6 rounded-2xl border-l-4 border-blue-500">
+                    <p class="text-xs uppercase text-slate-400 font-bold mb-2">Corridas</p>
+                    <p class="text-4xl font-bold text-blue-400"><span id="training-running">0</span></p>
+                    <p class="text-xs text-gray-400 mt-2">treinos de cardio</p>
+                </div>
+                <div class="glass-card p-6 rounded-2xl border-l-4 border-green-500">
+                    <p class="text-xs uppercase text-slate-400 font-bold mb-2">Outros Esportes</p>
+                    <p class="text-4xl font-bold text-green-400"><span id="training-other">0</span></p>
+                    <p class="text-xs text-gray-400 mt-2">treinos diversos</p>
+                </div>
             </div>
             
             <div id="strava-stats" class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 hidden">
@@ -588,6 +612,7 @@ async function loadTrainingData() {
         const data2026 = data.filter(item => item.semana.startsWith('2026'));
         
         if (!data2026 || data2026.length === 0) {
+            document.getElementById('training-stats').classList.add('hidden');
             grid.innerHTML = `
                 <div class="col-span-full text-center py-12 text-gray-400">
                     <i class="fas fa-dumbbell text-5xl mb-4 opacity-50"></i>
@@ -596,6 +621,55 @@ async function loadTrainingData() {
             `;
             return;
         }
+        
+        // Função para categorizar treino
+        function categorizarTreino(foco) {
+            const foco_lower = foco.toLowerCase();
+            
+            // Musculação / Força
+            if (foco_lower.includes('push') || foco_lower.includes('pull') || 
+                foco_lower.includes('perna') || foco_lower.includes('peito') ||
+                foco_lower.includes('costas') || foco_lower.includes('ombro') ||
+                foco_lower.includes('braço') || foco_lower.includes('força') ||
+                foco_lower.includes('smith') || foco_lower.includes('press') ||
+                foco_lower.includes('rosca') || foco_lower.includes('supino') ||
+                foco_lower.includes('leg') || foco_lower.includes('funcional')) {
+                return 'strength';
+            }
+            
+            // Corridas / Cardio
+            if (foco_lower.includes('corrida') || foco_lower.includes('hiit') ||
+                foco_lower.includes('cardio') || foco_lower.includes('ritmo') ||
+                foco_lower.includes('jejum')) {
+                return 'running';
+            }
+            
+            // Outros esportes
+            return 'other';
+        }
+        
+        // Contar treinos por categoria
+        let totalCount = 0;
+        let strengthCount = 0;
+        let runningCount = 0;
+        let otherCount = 0;
+        
+        data2026.forEach(item => {
+            item.dias.forEach(dia => {
+                const categoria = categorizarTreino(dia.foco);
+                totalCount++;
+                if (categoria === 'strength') strengthCount++;
+                else if (categoria === 'running') runningCount++;
+                else otherCount++;
+            });
+        });
+        
+        // Mostrar cards de estatísticas
+        document.getElementById('training-stats').classList.remove('hidden');
+        document.getElementById('training-total').innerText = totalCount;
+        document.getElementById('training-strength').innerText = strengthCount;
+        document.getElementById('training-running').innerText = runningCount;
+        document.getElementById('training-other').innerText = otherCount;
         
         // Agrupar por mês
         const monthlyGroups = {};
@@ -610,9 +684,6 @@ async function loadTrainingData() {
         // Ordenar meses
         const sortedMonths = Object.keys(monthlyGroups).sort().reverse();
         
-        // Contar total de treinos
-        const totalWorkouts = data2026.reduce((sum, item) => sum + item.dias.length, 0);
-        
         // Montar HTML
         grid.innerHTML = sortedMonths.map(monthKey => {
             const weeks = monthlyGroups[monthKey];
@@ -620,33 +691,64 @@ async function loadTrainingData() {
             const monthNames = ['','Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
             const monthLabel = monthNames[parseInt(month)] + ' de ' + year;
             
-            // Contar exercícios deste mês
-            const monthWorkoutCount = weeks.reduce((sum, week) => sum + week.dias.length, 0);
+            // Contar exercícios por categoria neste mês
+            let monthStrengthCount = 0;
+            let monthRunningCount = 0;
+            let monthOtherCount = 0;
+            let monthTotalCount = 0;
+            
+            weeks.forEach(week => {
+                week.dias.forEach(dia => {
+                    const categoria = categorizarTreino(dia.foco);
+                    monthTotalCount++;
+                    if (categoria === 'strength') monthStrengthCount++;
+                    else if (categoria === 'running') monthRunningCount++;
+                    else monthOtherCount++;
+                });
+            });
             
             return `
                 <div class="glass-card p-6 rounded-2xl border border-gray-700/40 hover:border-[#fc4c02]/50 transition cursor-pointer" onclick="toggleMonthDetails('${monthKey}')">
                     <div class="flex justify-between items-start mb-4">
                         <div>
                             <h3 class="text-xl font-bold text-white mb-1">${monthLabel}</h3>
-                            <p class="text-sm text-gray-400">${monthWorkoutCount} treinos • ${weeks.length} semana(s)</p>
+                            <p class="text-sm text-gray-400">${monthTotalCount} treinos • ${weeks.length} semana(s)</p>
                         </div>
                         <div class="text-right">
-                            <div class="text-3xl font-bold text-[#fc4c02]">${monthWorkoutCount}</div>
-                            <div class="text-xs text-gray-400">treinos</div>
+                            <div class="text-3xl font-bold text-[#fc4c02]">${monthTotalCount}</div>
+                            <div class="text-xs text-gray-400">total</div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex gap-3 mb-4 text-sm">
+                        <div class="flex-1 p-2 bg-purple-500/20 rounded-lg">
+                            <div class="text-purple-400 font-bold">${monthStrengthCount}</div>
+                            <div class="text-xs text-gray-400">força</div>
+                        </div>
+                        <div class="flex-1 p-2 bg-blue-500/20 rounded-lg">
+                            <div class="text-blue-400 font-bold">${monthRunningCount}</div>
+                            <div class="text-xs text-gray-400">corridas</div>
+                        </div>
+                        <div class="flex-1 p-2 bg-green-500/20 rounded-lg">
+                            <div class="text-green-400 font-bold">${monthOtherCount}</div>
+                            <div class="text-xs text-gray-400">outros</div>
                         </div>
                     </div>
                     
                     <div id="month-${monthKey}" class="month-details hidden">
                         ${weeks.map((week, idx) => {
                             const exerciciosHtml = week.dias.map(d => {
+                                const categoria = categorizarTreino(d.foco);
+                                const catColor = categoria === 'strength' ? 'purple' : categoria === 'running' ? 'blue' : 'green';
+                                const catIcon = categoria === 'strength' ? '💪' : categoria === 'running' ? '🏃' : '⚽';
                                 const exerciciosCount = (d.exercicios || []).length;
                                 return `
                                     <div class="flex items-start gap-3 text-sm py-2 border-b border-gray-800/30 last:border-0">
-                                        <i class="fas fa-dumbbell text-[#fc4c02] text-xs mt-1"></i>
+                                        <span class="text-lg">${catIcon}</span>
                                         <div class="flex-1">
                                             <div class="font-semibold text-gray-200">${d.dia}</div>
                                             <div class="text-xs text-gray-400 mt-1">${d.foco}</div>
-                                            <div class="text-xs text-[#fc4c02] mt-1">${exerciciosCount} exercícios</div>
+                                            <div class="text-xs text-${catColor}-400 mt-1">${exerciciosCount} exercícios</div>
                                         </div>
                                     </div>
                                 `;
@@ -676,18 +778,9 @@ async function loadTrainingData() {
             `;
         }).join('');
         
-        // Adicionar informação de total na parte superior
-        const header = document.querySelector('h2') || document.getElementById('training-grid')?.previousElementSibling;
-        if (header && !document.getElementById('total-workouts-badge')) {
-            const badge = document.createElement('span');
-            badge.id = 'total-workouts-badge';
-            badge.className = 'bg-[#fc4c02] text-white px-3 py-1 rounded-full text-sm font-bold ml-3';
-            badge.innerText = `Total: ${totalWorkouts} treinos`;
-            header.appendChild(badge);
-        }
-        
     } catch (err) {
         console.log('Nenhum dado de treino encontrado ou erro ao carregar:', err);
+        document.getElementById('training-stats').classList.add('hidden');
         document.getElementById('training-grid').innerHTML = `
             <div class="col-span-full text-center py-12 text-gray-400">
                 <i class="fas fa-dumbbell text-5xl mb-4 opacity-50"></i>
