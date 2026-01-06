@@ -258,7 +258,7 @@ require_once __DIR__ . '/../includes/header.php';
             </div>
             
             <!-- Cards de Estatísticas de Treinos -->
-            <div id="training-stats" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 hidden">
+            <div id="training-stats" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8 hidden">
                 <div class="glass-card p-6 rounded-2xl border-l-4 border-[#fc4c02]">
                     <p class="text-xs uppercase text-slate-400 font-bold mb-2">Total Geral</p>
                     <p class="text-4xl font-bold text-[#fc4c02]"><span id="training-total">0</span></p>
