@@ -68,13 +68,28 @@ if (isset($_GET['api'])) {
             $xp_total = $pdo->query("SELECT total_xp FROM user_settings WHERE user_id = {$user_id}")->fetchColumn() ?: 0;
             
             // Eventos da Semana
-            $events_week_stmt = $pdo->prepare("
-                SELECT id, title, start_date FROM events 
-                WHERE DATE(start_date) BETWEEN ? AND ? 
-                ORDER BY start_date LIMIT 5
-            ");
-            $events_week_stmt->execute([$startOfWeek, $endOfWeek]);
-            $events_list = $events_week_stmt->fetchAll();
+                $startDateTime = $startOfWeek . ' 00:00:00';
+                $endDateTime = $endOfWeek . ' 23:59:59';
+
+                // Eventos futuros desta semana (descarta o que já passou)
+                $events_week_stmt = $pdo->prepare("
+                    SELECT id, title, start_date FROM events 
+                    WHERE user_id = ? 
+                      AND start_date BETWEEN ? AND ? 
+                      AND start_date >= NOW() 
+                    ORDER BY start_date LIMIT 5
+                ");
+                $events_week_stmt->execute([$user_id, $startDateTime, $endDateTime]);
+                $events_list = $events_week_stmt->fetchAll();
+
+                // Próximo evento global (Google/Events) ignorando os que já passaram
+                $next_event_stmt = $pdo->prepare("
+                    SELECT id, title, start_date FROM events 
+                    WHERE user_id = ? AND start_date >= NOW() 
+                    ORDER BY start_date ASC LIMIT 1
+                ");
+                $next_event_stmt->execute([$user_id]);
+                $next_event = $next_event_stmt->fetch(PDO::FETCH_ASSOC) ?: null;
 
             // Atividades de Hoje
             $activities_count = $pdo->query("SELECT COUNT(*) FROM activities WHERE day_date = CURDATE() AND status = 0")->fetchColumn();
@@ -107,7 +122,8 @@ if (isset($_GET['api'])) {
                 'habits_week' => $habits_week,
                 'activities_count' => $activities_count,
                 'strava_count' => $strava_count,
-                'events_week' => $events_list,
+                    'events_week' => $events_list,
+                    'next_event' => $next_event,
                 'activities_today' => $activities_today
             ]); 
             exit;
@@ -599,8 +615,8 @@ async function loadDashboard() {
     // Próximo Evento
     let nextEventTitle = 'Nenhum evento';
     let nextEventTime = 'Sem data';
-    if (data.events_week.length > 0) {
-        const upcomingEvent = data.events_week[0];
+    let upcomingEvent = data.next_event || (data.events_week.length ? data.events_week[0] : null);
+    if (upcomingEvent) {
         const eventDate = new Date(upcomingEvent.start_date);
         nextEventTitle = upcomingEvent.title;
         nextEventTime = eventDate.toLocaleDateString('pt-BR', { weekday: 'short' }) + ', ' + 

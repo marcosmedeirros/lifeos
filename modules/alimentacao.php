@@ -5,197 +5,202 @@ require_login(); // Requer login obrigatório
 
 $page = 'alimentacao'; // Para ativar a aba na sidebar
 
-// Caminho dos arquivos de dados
-$nutrition_file = __DIR__ . '/../data/nutrition_data.json'; // Diário (score/saúde)
-$food_file      = __DIR__ . '/../data/nutrition_food.json'; // Alimentação detalhada
+// Caminho dos arquivos de dados (apenas para alimentação semanal)
+$food_file = __DIR__ . '/../data/nutrition_food.json';
 
-// Criar arquivos se não existirem
-if (!file_exists($nutrition_file)) {
-    file_put_contents($nutrition_file, json_encode([]));
-}
+// Criar arquivos se não existirem (alimentação semanal)
 if (!file_exists($food_file)) {
     file_put_contents($food_file, json_encode([]));
 }
 
-// Carregar dados
-$nutrition_data = json_decode(file_get_contents($nutrition_file), true) ?? [];
-$food_data      = json_decode(file_get_contents($food_file), true) ?? [];
+// Tabela para registros diários (JSON) no banco
+function ensureNutritionEntriesTable(PDO $pdo) {
+    $pdo->exec("CREATE TABLE IF NOT EXISTS nutrition_entries (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        user_id INT NOT NULL,
+        day_date DATE NOT NULL,
+        payload LONGTEXT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        KEY idx_user_date (user_id, day_date),
+        KEY idx_created (created_at)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
+}
+ensureNutritionEntriesTable($pdo);
 
-// Ordenar por data (mais recente primeiro) e por ordem de criação
-usort($nutrition_data, function($a, $b) {
-    $dateDiff = strtotime($b['data'] ?? '0') - strtotime($a['data'] ?? '0');
-    if ($dateDiff !== 0) return $dateDiff;
-    return strtotime($b['created_at'] ?? '0') - strtotime($a['created_at'] ?? '0');
-});
+// Carregar dados diários do banco (mais recentes primeiro)
+$stmtDaily = $pdo->prepare("SELECT id, day_date, payload, created_at FROM nutrition_entries WHERE user_id = ? ORDER BY day_date DESC, created_at DESC");
+$stmtDaily->execute([$user_id]);
+$nutrition_data = $stmtDaily->fetchAll(PDO::FETCH_ASSOC);
+
+// Alimentação semanal segue em arquivo
+$food_data = json_decode(file_get_contents($food_file), true) ?? [];
 usort($food_data, fn($a, $b) => strtotime($b['data'] ?? '0') - strtotime($a['data'] ?? '0'));
 
 // Processar POST
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
-        if ($_POST['action'] === 'delete') {
-        $date_to_delete = $_POST['date'] ?? '';
-        $nutrition_data = array_filter($nutrition_data, fn($item) => $item['data'] !== $date_to_delete);
-        file_put_contents($nutrition_file, json_encode(array_values($nutrition_data), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
-        usort($nutrition_data, fn($a, $b) => strtotime($b['data'] ?? '0') - strtotime($a['data'] ?? '0'));
-        $_SESSION['msg_success'] = "Registro removido com sucesso!";
-        header('Location: alimentacao.php');
-        exit;
-    } elseif ($_POST['action'] === 'add_json') {
-        $json_input = $_POST['json_data'] ?? '';
-        try {
-            $new_entry = json_decode($json_input, true);
-            if (json_last_error() !== JSON_ERROR_NONE) {
-                $_SESSION['msg_error'] = "JSON inválido: " . json_last_error_msg();
-            } else {
-                if (!isset($new_entry['data'])) {
-                    $_SESSION['msg_error'] = "O JSON deve conter o campo 'data'";
-                } else {
-                    // Recarrega o arquivo para evitar sobrescrita por cache da página
-                    $nutrition_data = json_decode(file_get_contents($nutrition_file), true) ?? [];
-                    // Marca horário de criação para permitir múltiplos registros no mesmo dia
-                    if (empty($new_entry['created_at'])) {
-                        $new_entry['created_at'] = date('c');
-                    }
-                    // Adicionar novo registro (NÃO substituir existentes do mesmo dia)
-                    $nutrition_data[] = $new_entry;
-                    file_put_contents($nutrition_file, json_encode(array_values($nutrition_data), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
-                    usort($nutrition_data, function($a, $b) {
-                        $dateDiff = strtotime($b['data'] ?? '0') - strtotime($a['data'] ?? '0');
-                        if ($dateDiff !== 0) return $dateDiff;
-                        return strtotime($b['created_at'] ?? '0') - strtotime($a['created_at'] ?? '0');
-                    });
-                    $_SESSION['msg_success'] = "Novo registro adicionado com sucesso!";
-                }
-            }
-        } catch (Exception $e) {
-            $_SESSION['msg_error'] = "Erro ao processar JSON: " . $e->getMessage();
-        }
-        header('Location: alimentacao.php');
-        exit;
-    } elseif ($_POST['action'] === 'add_food_json') {
-        $json_input = $_POST['json_food'] ?? '';
-        $week_date = $_POST['week_date'] ?? ''; // Data da semana (segunda-feira)
-        try {
-            $new_entry = json_decode($json_input, true);
-            if (json_last_error() !== JSON_ERROR_NONE) {
-                $_SESSION['msg_error'] = "JSON inválido: " . json_last_error_msg();
-            } else {
-                if (empty($week_date)) {
-                    $_SESSION['msg_error'] = "Informe a data da semana (segunda-feira)";
-                } else {
-                    // Remover entrada com mesma semana se existir
-                    $food_data = array_filter($food_data, fn($item) => ($item['semana'] ?? '') !== $week_date);
-                    $food_data[] = ['semana' => $week_date, 'dias' => $new_entry];
-                    file_put_contents($food_file, json_encode(array_values($food_data), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
-                    usort($food_data, fn($a, $b) => strtotime($b['semana'] ?? '0') - strtotime($a['semana'] ?? '0'));
-                    $_SESSION['msg_success'] = "Registro de alimentação semanal salvo!";
-                }
-            }
-        } catch (Exception $e) {
-            $_SESSION['msg_error'] = "Erro ao processar JSON: " . $e->getMessage();
-        }
-        header('Location: alimentacao.php');
-        exit;
-    } elseif ($_POST['action'] === 'delete_food') {
-        $week_to_delete = $_POST['week'] ?? '';
-        $food_data = array_filter($food_data, fn($item) => ($item['semana'] ?? '') !== $week_to_delete);
-        file_put_contents($food_file, json_encode(array_values($food_data), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
-        usort($food_data, fn($a, $b) => strtotime($b['semana'] ?? '0') - strtotime($a['semana'] ?? '0'));
-        $_SESSION['msg_success'] = "Registro de alimentação removido!";
-        header('Location: alimentacao.php');
-        exit;
-    }
-}
+    if ($_POST['action'] === 'delete') {
+        $entry_id = intval($_POST['entry_id'] ?? 0);
+        if ($entry_id > 0) {
+            $delStmt = $pdo->prepare("DELETE FROM nutrition_entries WHERE id = ? AND user_id = ?");
+            $delStmt->execute([$entry_id, $user_id]);
+                    <?php foreach ($nutrition_data as $entry): ?>
+                    <?php $payload = json_decode($entry['payload'] ?? '[]', true) ?: []; $displayDate = $entry['day_date'] ?? ($payload['data'] ?? ''); ?>
+                    <div class="nutrition-card-small">
+                        <div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start;">
+                            <div class="card-date" style="margin-bottom:0;">
+                                <?= htmlspecialchars(format_date($displayDate)) ?>
+                                <div class="card-date-small"><?= htmlspecialchars($displayDate) ?></div>
+                            </div>
+                            <?php if (isset($payload['score_do_dia'])): ?>
+                                <div style="text-align:right;">
+                                    <div style="font-size:26px;font-weight:800;line-height:1;color:#fff;">
+                                        <?= htmlspecialchars($payload['score_do_dia']) ?></div>
+                                    <div class="card-date-small" style="text-transform:uppercase;letter-spacing:0.6px;">Nota do dia</div>
+                                </div>
+                            <?php endif; ?>
+                        </div>
+                        <?php if (!empty($payload['justificativa_nota'])): ?>
+                            <div class="card-coach" style="margin-top:10px;">🧠 <?= htmlspecialchars($payload['justificativa_nota']) ?></div>
+                        <?php endif; ?>
 
-// Formatar data legível
-function format_date($date_str) {
-    $date = DateTime::createFromFormat('Y-m-d', $date_str);
-    if ($date) {
-        setlocale(LC_TIME, 'pt_BR.UTF-8');
-        return strftime('%d/%m/%Y', $date->getTimestamp());
-    }
-    return $date_str;
-}
+                        <?php if (!empty($payload['perfil']) || !empty($payload['status'])): ?>
+                            <div class="card-date-small" style="margin-top:6px;color:#b3b3b3;display:flex;flex-wrap:wrap;gap:10px;align-items:center;">
+                                <?php if (!empty($payload['perfil'])): ?>
+                                    <span>Perfil: <?= htmlspecialchars($payload['perfil']) ?></span>
+                                <?php endif; ?>
+                                <?php if (!empty($payload['status'])): ?>
+                                    <span style="padding:4px 10px;border-radius:999px;border:1px solid rgba(255,255,255,0.2);color:#fff;">Status: <?= htmlspecialchars($payload['status']) ?></span>
+                                <?php endif; ?>
+                            </div>
+                        <?php endif; ?>
 
-$page_title = 'Alimentação • LifeOS';
-include __DIR__ . '/../includes/header.php';
-?>
+                        <!-- Saúde Hormonal -->
+                        <?php if (!empty($payload['saude_hormonal']) && is_array($payload['saude_hormonal'])): ?>
+                        <div class="card-section">
+                            <div class="card-section-title">🩺 Saúde Hormonal</div>
+                            <?php foreach ($payload['saude_hormonal'] as $key => $value): ?>
+                                <div class="card-stat">
+                                    <span class="card-stat-label"><?= htmlspecialchars(str_replace('_', ' ', ucfirst($key))) ?>:</span>
+                                    <span class="card-stat-value">
+                                        <?php if (is_bool($value)): ?>
+                                            <span class="badge-small <?= $value ? 'badge-true' : 'badge-false' ?>"><?= $value ? '✓' : '✗' ?></span>
+                                        <?php elseif (is_numeric($value)): ?>
+                                            <?= htmlspecialchars($value) ?>
+                                        <?php else: ?>
+                                            <?= htmlspecialchars($value) ?>
+                                        <?php endif; ?>
+                                    </span>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                        <?php endif; ?>
 
-<div class="flex min-h-screen w-full">
-    <?php include __DIR__ . '/../includes/sidebar.php'; ?>
-    
-    <div class="flex-1 p-2 md:p-4 content-wrap transition-all duration-300">
-        <div class="main-shell">
-    <style>
-        /* Estilos específicos para cards de nutrição */
-        .nutrition-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-            gap: 20px;
-            margin-top: 30px;
-        }
+                        <!-- Micronutrientes -->
+                        <?php if (!empty($payload['micronutrientes']) && is_array($payload['micronutrientes'])): ?>
+                        <div class="card-section">
+                            <div class="card-section-title">💊 Micronutrientes</div>
+                            <?php foreach ($payload['micronutrientes'] as $key => $value): ?>
+                                <div class="card-stat">
+                                    <span class="card-stat-label"><?= htmlspecialchars(str_replace('_', ' ', ucfirst($key))) ?>:</span>
+                                    <span class="card-stat-value"><?= is_bool($value) ? ($value ? '✓' : '✗') : htmlspecialchars($value) ?></span>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                        <?php endif; ?>
 
-        @media (min-width: 1200px) {
-            .nutrition-grid {
-                grid-template-columns: repeat(3, minmax(0, 1fr));
-            }
-        }
+                        <!-- Performance Física -->
+                        <?php if (!empty($payload['performance_fisica']) && is_array($payload['performance_fisica'])): ?>
+                        <div class="card-section">
+                            <div class="card-section-title">⚡ Performance Física</div>
+                            <?php foreach ($payload['performance_fisica'] as $key => $value): ?>
+                                <?php if ($key === 'treinos' && is_array($value)): ?>
+                                    <div class="card-stat" style="flex-direction:column;align-items:flex-start;gap:6px;">
+                                        <span class="card-stat-label">Treinos:</span>
+                                        <div style="display:flex;flex-direction:column;gap:6px;width:100%;">
+                                            <?php foreach ($value as $t): ?>
+                                                <div class="item" style="padding:10px;border-radius:10px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);">
+                                                    <div class="title" style="font-size:13px;margin-bottom:4px;">
+                                                        <?= htmlspecialchars($t['tipo'] ?? 'Treino') ?></div>
+                                                    <div class="meta" style="gap:12px;font-size:12px;">
+                                                        <?php if (!empty($t['duracao_min'])): ?><span>⏱ <?= htmlspecialchars($t['duracao_min']) ?> min</span><?php endif; ?>
+                                                        <?php if (!empty($t['duracao'])): ?><span>⏱ <?= htmlspecialchars($t['duracao']) ?></span><?php endif; ?>
+                                                        <?php if (!empty($t['distancia_km'])): ?><span>📍 <?= htmlspecialchars($t['distancia_km']) ?> km</span><?php endif; ?>
+                                                        <?php if (!empty($t['distancia'])): ?><span>📍 <?= htmlspecialchars($t['distancia']) ?></span><?php endif; ?>
+                                                        <?php if (!empty($t['kcal_total'])): ?><span>🔥 <?= htmlspecialchars($t['kcal_total']) ?> kcal</span><?php endif; ?>
+                                                        <?php if (!empty($t['kcal'])): ?><span>🔥 <?= htmlspecialchars($t['kcal']) ?> kcal</span><?php endif; ?>
+                                                    </div>
+                                                </div>
+                                            <?php endforeach; ?>
+                                        </div>
+                                    </div>
+                                <?php else: ?>
+                                    <div class="card-stat">
+                                        <span class="card-stat-label"><?= htmlspecialchars(str_replace('_', ' ', ucfirst($key))) ?>:</span>
+                                        <span class="card-stat-value"><?= is_bool($value) ? ($value ? '✓' : '✗') : htmlspecialchars($value) ?></span>
+                                    </div>
+                                <?php endif; ?>
+                            <?php endforeach; ?>
+                        </div>
+                        <?php endif; ?>
 
-        .tab-buttons {display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;}
-        .tab-buttons button {background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.12);color:#fff;padding:10px 14px;border-radius:10px;font-weight:700;cursor:pointer;transition:all .2s ease;}
-        .tab-buttons button.active {background:rgba(255,255,255,0.12);border-color:rgba(255,255,255,0.22);}
-        .tab-content {display:none;}
-        .tab-content.active {display:block;}
+                        <!-- Nutrição -->
+                        <?php if (!empty($payload['nutricao']) && is_array($payload['nutricao'])): ?>
+                        <div class="card-section">
+                            <div class="card-section-title">🥗 Nutrição</div>
+                            <?php foreach ($payload['nutricao'] as $key => $value): ?>
+                                <?php if ($key === 'refeicoes' && is_array($value)): ?>
+                                    <div class="card-stat" style="flex-direction:column;align-items:flex-start;gap:6px;">
+                                        <span class="card-stat-label">Refeições:</span>
+                                        <div style="display:flex;flex-direction:column;gap:4px;width:100%;">
+                                            <?php foreach ($value as $refKey => $refVal): ?>
+                                                <div style="font-size:13px;color:#ddd;display:flex;gap:6px;"><strong style="min-width:60px;text-transform:capitalize;">
+                                                    <?= htmlspecialchars($refKey) ?>:</strong> <span><?= htmlspecialchars($refVal) ?></span></div>
+                                            <?php endforeach; ?>
+                                        </div>
+                                    </div>
+                                <?php else: ?>
+                                    <div class="card-stat">
+                                        <span class="card-stat-label"><?= htmlspecialchars(str_replace('_', ' ', ucfirst($key))) ?>:</span>
+                                        <span class="card-stat-value"><?= is_bool($value) ? ($value ? '✓' : '✗') : htmlspecialchars($value) ?></span>
+                                    </div>
+                                <?php endif; ?>
+                            <?php endforeach; ?>
+                        </div>
+                        <?php endif; ?>
 
-        .nutrition-card-small {
-            background: rgba(30, 30, 30, 0.8);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            border-radius: 12px;
-            padding: 20px;
-            transition: all 0.3s ease;
-        }
+                        <!-- Coach Feedback -->
+                        <?php if (!empty($payload['coach_feedback'])): ?>
+                            <div class="card-coach" style="margin-top:10px;">🏅 <?= htmlspecialchars($payload['coach_feedback']) ?></div>
+                        <?php endif; ?>
 
-        .nutrition-card-small:hover {
-            border-color: rgba(255, 255, 255, 0.3);
-            background: rgba(30, 30, 30, 0.95);
-        }
+                        <!-- Disciplina Mental -->
+                        <?php if (!empty($payload['disciplina_mental']) && is_array($payload['disciplina_mental'])): ?>
+                        <div class="card-section">
+                            <div class="card-section-title">🧘 Disciplina Mental</div>
+                            <?php foreach ($payload['disciplina_mental'] as $key => $value): ?>
+                                <div class="card-stat">
+                                    <span class="card-stat-label"><?= htmlspecialchars(str_replace('_', ' ', ucfirst($key))) ?>:</span>
+                                    <span class="card-stat-value"><?= is_bool($value) ? ($value ? '✓' : '✗') : htmlspecialchars($value) ?></span>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                        <?php endif; ?>
 
-        .card-date {
-            font-size: 18px;
-            font-weight: bold;
-            margin-bottom: 16px;
-            color: #ffffff;
-        }
+                        <!-- Análise do Coach -->
+                        <?php if (isset($payload['analise_coach'])): ?>
+                        <div class="card-coach">
+                            👨‍🏫 <?= htmlspecialchars(substr($payload['analise_coach'], 0, 100)) ?><?= strlen($payload['analise_coach']) > 100 ? '...' : '' ?>
+                        </div>
+                        <?php endif; ?>
 
-        .card-date-small {
-            font-size: 12px;
-            color: #999999;
-            margin-top: 4px;
-        }
-
-        .card-section {
-            margin-bottom: 16px;
-        }
-
-        .card-section-title {
-            font-size: 12px;
-            color: #cccccc;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            font-weight: 600;
-            margin-bottom: 10px;
-        }
-
-        .card-stat {
-            display: flex;
-            justify-content: space-between;
-            font-size: 13px;
-            margin-bottom: 6px;
-            color: #ddd;
-        }
-
-        .card-stat-label {
-            color: #999999;
+                        <!-- Botão Delete -->
+                        <form method="POST" style="display:inline; width:100%;" onsubmit="return confirm('Remover este registro?')">
+                            <input type="hidden" name="action" value="delete">
+                            <input type="hidden" name="entry_id" value="<?= htmlspecialchars($entry['id']) ?>">
+                            <button type="submit" class="btn-delete">🗑️ Remover</button>
+                        </form>
+                    </div>
+                    <?php endforeach; ?>
         }
 
         .card-stat-value {
@@ -536,6 +541,12 @@ include __DIR__ . '/../includes/header.php';
                     
                     <form method="POST" id="jsonForm">
                         <input type="hidden" name="action" value="add_json">
+
+                        <div class="form-group">
+                            <label for="entry_date">Data do registro</label>
+                            <input type="date" id="entry_date" name="entry_date" class="form-input" required>
+                            <div class="help-text">Selecione o dia para o qual o JSON se aplica.</div>
+                        </div>
                         
                         <div class="form-group">
                             <label for="json_data">Cole seu JSON aqui:</label>

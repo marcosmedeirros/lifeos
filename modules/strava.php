@@ -274,11 +274,6 @@ require_once __DIR__ . '/../includes/header.php';
                     <p class="text-4xl font-bold text-blue-400"><span id="training-running">0</span></p>
                     <p class="text-xs text-gray-400 mt-2">treinos de cardio</p>
                 </div>
-                <div class="glass-card p-6 rounded-2xl border-l-4 border-green-500">
-                    <p class="text-xs uppercase text-slate-400 font-bold mb-2">Outros Esportes</p>
-                    <p class="text-4xl font-bold text-green-400"><span id="training-other">0</span></p>
-                    <p class="text-xs text-gray-400 mt-2">treinos diversos</p>
-                </div>
             </div>
             
             <!-- Estatísticas Mensais -->
@@ -363,7 +358,6 @@ async function loadStrava() {
             document.getElementById('training-total').innerText = res.year_summary.total;
             document.getElementById('training-running').innerText = res.year_summary.running;
             document.getElementById('training-strength').innerText = res.year_summary.strength;
-            document.getElementById('training-other').innerText = res.year_summary.other;
             trainingSection.classList.remove('hidden');
         } else {
             trainingSection.classList.add('hidden');
