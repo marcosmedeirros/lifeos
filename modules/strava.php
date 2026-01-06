@@ -119,6 +119,24 @@ if (isset($_GET['api'])) {
             $totalKm = 0;
             $totalTime = 0;
 
+            $yearFilter = 2026;
+            $yearTotals = [
+                'total' => 0,
+                'running' => 0,
+                'strength' => 0,
+                'other' => 0
+            ];
+
+            // Categoria por tipo do Strava
+            $typeToCategory = function($type) {
+                $t = strtolower($type);
+                $running = ['run', 'virtualrun', 'trailrun'];
+                $strength = ['workout', 'weighttraining', 'strengthtraining', 'crossfit'];
+                if (in_array($t, $running)) return 'running';
+                if (in_array($t, $strength)) return 'strength';
+                return 'other';
+            };
+
             $meses = [
                 '01'=>'Janeiro', '02'=>'Fevereiro', '03'=>'Março', '04'=>'Abril',
                 '05'=>'Maio', '06'=>'Junho', '07'=>'Julho', '08'=>'Agosto',
@@ -150,23 +168,34 @@ if (isset($_GET['api'])) {
 
                     $monthKey = date('Y-m', strtotime($act['start_date']));
                     $monthNum = date('m', strtotime($act['start_date']));
-                    $yearNum = date('Y', strtotime($act['start_date']));
+                    $yearNum = (int)date('Y', strtotime($act['start_date']));
 
-                    if (!isset($monthlyStats[$monthKey])) {
-                        $monthlyStats[$monthKey] = [
-                            'label' => $meses[$monthNum] . '/' . $yearNum,
-                            'total_dist' => 0,
-                            'count' => 0,
-                            'types' => []
-                        ];
+                    if ($yearNum === $yearFilter) {
+                        if (!isset($monthlyStats[$monthKey])) {
+                            $monthlyStats[$monthKey] = [
+                                'label' => $meses[$monthNum] . '/' . $yearNum,
+                                'year' => $yearNum,
+                                'month' => (int)$monthNum,
+                                'total_dist' => 0,
+                                'count' => 0,
+                                'types' => []
+                            ];
+                        }
+
+                        $monthlyStats[$monthKey]['total_dist'] += $distKm;
+                        $monthlyStats[$monthKey]['count']++;
+                        
+                        $type = $act['type'];
+                        if(!isset($monthlyStats[$monthKey]['types'][$type])) $monthlyStats[$monthKey]['types'][$type] = 0;
+                        $monthlyStats[$monthKey]['types'][$type]++;
+
+                        // Totais anuais
+                        $yearTotals['total']++;
+                        $cat = $typeToCategory($type);
+                        if (isset($yearTotals[$cat])) {
+                            $yearTotals[$cat]++;
+                        }
                     }
-
-                    $monthlyStats[$monthKey]['total_dist'] += $distKm;
-                    $monthlyStats[$monthKey]['count']++;
-                    
-                    $type = $act['type'];
-                    if(!isset($monthlyStats[$monthKey]['types'][$type])) $monthlyStats[$monthKey]['types'][$type] = 0;
-                    $monthlyStats[$monthKey]['types'][$type]++;
                 }
             }
 
@@ -175,6 +204,13 @@ if (isset($_GET['api'])) {
                 $data['total_dist_fmt'] = number_format($data['total_dist'], 1, ',', '.');
                 $formattedStats[] = $data;
             }
+
+            usort($formattedStats, function($a, $b) {
+                if (($a['year'] ?? 0) !== ($b['year'] ?? 0)) {
+                    return ($b['year'] ?? 0) - ($a['year'] ?? 0);
+                }
+                return ($b['month'] ?? 0) - ($a['month'] ?? 0);
+            });
 
             $hours = floor($totalTime / 3600);
             $minutes = floor(($totalTime % 3600) / 60);
@@ -187,7 +223,14 @@ if (isset($_GET['api'])) {
                     'total_activities' => count($activities)
                 ],
                 'monthly' => array_values($formattedStats),
-                'list' => array_slice($list, 0, 10)
+                'list' => array_slice($list, 0, 10),
+                'year_summary' => [
+                    'year' => $yearFilter,
+                    'total' => $yearTotals['total'],
+                    'running' => $yearTotals['running'],
+                    'strength' => $yearTotals['strength'],
+                    'other' => $yearTotals['other']
+                ]
             ]);
             exit;
         }
@@ -209,7 +252,7 @@ require_once __DIR__ . '/../includes/header.php';
         <div class="main-shell">
             <div class="flex justify-between items-center mb-8">
                 <h2 class="text-3xl font-bold text-white flex items-center gap-3">
-                    <i class="fab fa-dumbbell text-[#fc4c02]"></i> Treinos 2026
+                    <i class="fab fa-dumbbell text-[#fc4c02]"></i> Strava 2026
                 </h2>
                 <div id="strava-connect-btn" class="hidden"></div>
             </div>
@@ -256,7 +299,7 @@ require_once __DIR__ . '/../includes/header.php';
             <!-- Estatísticas Mensais -->
             <div id="strava-monthly" class="mb-8 hidden">
                 <h3 class="text-xl font-bold text-white mb-4 flex items-center gap-2">
-                    <i class="fas fa-calendar-alt text-[#fc4c02]"></i> Atividades por Mês
+                    <i class="fas fa-calendar-alt text-[#fc4c02]"></i> Atividades por Mês (2026)
                 </h3>
                 <div id="monthly-stats-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     <!-- Cards mensais serão inseridos aqui -->
@@ -325,6 +368,7 @@ async function loadStrava() {
         btnContainer.classList.remove('hidden');
         
         document.getElementById('strava-stats').classList.add('hidden');
+        document.getElementById('training-stats').classList.add('hidden');
         document.getElementById('strava-list').innerHTML = '<tr><td colspan="5" class="p-10 text-center text-gray-500 flex flex-col items-center gap-2"><i class="fab fa-strava text-4xl text-gray-700"></i><span>Conecte sua conta para ver suas atividades recentes.</span></td></tr>';
     } else {
         document.getElementById('strava-connect-btn').classList.add('hidden');
@@ -333,6 +377,18 @@ async function loadStrava() {
         document.getElementById('strava-total-km').innerText = res.summary.total_km;
         document.getElementById('strava-total-time').innerText = res.summary.total_time;
         document.getElementById('strava-total-activities').innerText = res.summary.total_activities;
+
+        // Totais 2026 por tipo
+        const trainingSection = document.getElementById('training-stats');
+        if (res.year_summary) {
+            document.getElementById('training-total').innerText = res.year_summary.total;
+            document.getElementById('training-running').innerText = res.year_summary.running;
+            document.getElementById('training-strength').innerText = res.year_summary.strength;
+            document.getElementById('training-other').innerText = res.year_summary.other;
+            trainingSection.classList.remove('hidden');
+        } else {
+            trainingSection.classList.add('hidden');
+        }
         
         // Renderizar estatísticas mensais
         if (res.monthly && res.monthly.length > 0) {
@@ -354,6 +410,8 @@ async function loadStrava() {
                     </div>
                 `;
             }).join('');
+        } else {
+            document.getElementById('strava-monthly').classList.add('hidden');
         }
         
         document.getElementById('strava-list').innerHTML = res.list.map(a => `

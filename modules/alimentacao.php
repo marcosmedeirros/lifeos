@@ -21,8 +21,12 @@ if (!file_exists($food_file)) {
 $nutrition_data = json_decode(file_get_contents($nutrition_file), true) ?? [];
 $food_data      = json_decode(file_get_contents($food_file), true) ?? [];
 
-// Ordenar por data (mais recente primeiro)
-usort($nutrition_data, fn($a, $b) => strtotime($b['data'] ?? '0') - strtotime($a['data'] ?? '0'));
+// Ordenar por data (mais recente primeiro) e por ordem de criação
+usort($nutrition_data, function($a, $b) {
+    $dateDiff = strtotime($b['data'] ?? '0') - strtotime($a['data'] ?? '0');
+    if ($dateDiff !== 0) return $dateDiff;
+    return strtotime($b['created_at'] ?? '0') - strtotime($a['created_at'] ?? '0');
+});
 usort($food_data, fn($a, $b) => strtotime($b['data'] ?? '0') - strtotime($a['data'] ?? '0'));
 
 // Processar POST
@@ -45,10 +49,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                 if (!isset($new_entry['data'])) {
                     $_SESSION['msg_error'] = "O JSON deve conter o campo 'data'";
                 } else {
+                    // Recarrega o arquivo para evitar sobrescrita por cache da página
+                    $nutrition_data = json_decode(file_get_contents($nutrition_file), true) ?? [];
+                    // Marca horário de criação para permitir múltiplos registros no mesmo dia
+                    if (empty($new_entry['created_at'])) {
+                        $new_entry['created_at'] = date('c');
+                    }
                     // Adicionar novo registro (NÃO substituir existentes do mesmo dia)
                     $nutrition_data[] = $new_entry;
                     file_put_contents($nutrition_file, json_encode(array_values($nutrition_data), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
-                    usort($nutrition_data, fn($a, $b) => strtotime($b['data'] ?? '0') - strtotime($a['data'] ?? '0'));
+                    usort($nutrition_data, function($a, $b) {
+                        $dateDiff = strtotime($b['data'] ?? '0') - strtotime($a['data'] ?? '0');
+                        if ($dateDiff !== 0) return $dateDiff;
+                        return strtotime($b['created_at'] ?? '0') - strtotime($a['created_at'] ?? '0');
+                    });
                     $_SESSION['msg_success'] = "Novo registro adicionado com sucesso!";
                 }
             }
