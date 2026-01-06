@@ -4,7 +4,7 @@ require_once __DIR__ . '/../includes/auth.php';
 require_login();
 
 $page = 'alimentacao';
-$user_id = $_SESSION['user_id'];
+$user_id = $_SESSION['user_id'] ?? 1;
 
 // Caminho do arquivo (apenas para alimentação semanal)
 $food_file = __DIR__ . '/../data/nutrition_food.json';
@@ -36,62 +36,62 @@ usort($food_data, fn($a, $b) => strtotime($b['semana'] ?? '0') - strtotime($a['s
 
 // Processar POST
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
-    if ($_POST['action'] === 'delete') {
-        $entry_id = intval($_POST['entry_id'] ?? 0);
-        if ($entry_id > 0) {
-            $delStmt = $pdo->prepare("DELETE FROM nutrition_entries WHERE id = ? AND user_id = ?");
-            $delStmt->execute([$entry_id, $user_id]);
-            $_SESSION['msg_success'] = 'Registro removido com sucesso!';
-        } else {
-            $_SESSION['msg_error'] = 'ID inválido para exclusão.';
-        }
-        header('Location: alimentacao.php');
-        exit;
-    } elseif ($_POST['action'] === 'add_json') {
-        $entry_date = $_POST['entry_date'] ?? '';
-        $json_input = $_POST['json_data'] ?? '';
-        if (empty($entry_date)) {
-            $_SESSION['msg_error'] = 'Selecione a data do registro.';
-        } else {
-            $decoded = json_decode($json_input, true);
+    try {
+        if ($_POST['action'] === 'delete') {
+            $entry_id = intval($_POST['entry_id'] ?? 0);
+            if ($entry_id > 0) {
+                $delStmt = $pdo->prepare("DELETE FROM nutrition_entries WHERE id = ? AND user_id = ?");
+                $delStmt->execute([$entry_id, $user_id]);
+                $_SESSION['msg_success'] = 'Registro removido com sucesso!';
+            } else {
+                $_SESSION['msg_error'] = 'ID inválido para exclusão.';
+            }
+        } elseif ($_POST['action'] === 'add_json') {
+            $entry_date = $_POST['entry_date'] ?? '';
+            $json_input = $_POST['json_data'] ?? '';
+            if (empty($entry_date)) {
+                $_SESSION['msg_error'] = 'Selecione a data do registro.';
+            } else {
+                $decoded = json_decode($json_input, true);
+                if (json_last_error() !== JSON_ERROR_NONE) {
+                    $_SESSION['msg_error'] = 'JSON inválido: ' . json_last_error_msg();
+                } else {
+                    if (empty($decoded['data'])) {
+                        $decoded['data'] = $entry_date;
+                    }
+                    $payload = json_encode($decoded, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+                    $ins = $pdo->prepare("INSERT INTO nutrition_entries (user_id, day_date, payload) VALUES (?, ?, ?)");
+                    $ins->execute([$user_id, $entry_date, $payload]);
+                    $_SESSION['msg_success'] = 'Novo registro salvo!';
+                }
+            }
+        } elseif ($_POST['action'] === 'add_food_json') {
+            $json_input = $_POST['json_food'] ?? '';
+            $week_date = $_POST['week_date'] ?? '';
+            $parsed = json_decode($json_input, true);
             if (json_last_error() !== JSON_ERROR_NONE) {
                 $_SESSION['msg_error'] = 'JSON inválido: ' . json_last_error_msg();
+            } elseif (empty($week_date)) {
+                $_SESSION['msg_error'] = 'Informe a data da semana (segunda-feira).';
             } else {
-                if (empty($decoded['data'])) {
-                    $decoded['data'] = $entry_date;
-                }
-                $payload = json_encode($decoded, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-                $ins = $pdo->prepare("INSERT INTO nutrition_entries (user_id, day_date, payload) VALUES (?, ?, ?)");
-                $ins->execute([$user_id, $entry_date, $payload]);
-                $_SESSION['msg_success'] = 'Novo registro salvo!';
+                $food_data = array_filter($food_data, fn($item) => ($item['semana'] ?? '') !== $week_date);
+                $food_data[] = ['semana' => $week_date, 'dias' => $parsed];
+                file_put_contents($food_file, json_encode(array_values($food_data), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+                $_SESSION['msg_success'] = 'Registro de alimentação semanal salvo!';
             }
-        }
-        header('Location: alimentacao.php');
-        exit;
-    } elseif ($_POST['action'] === 'add_food_json') {
-        $json_input = $_POST['json_food'] ?? '';
-        $week_date = $_POST['week_date'] ?? '';
-        $parsed = json_decode($json_input, true);
-        if (json_last_error() !== JSON_ERROR_NONE) {
-            $_SESSION['msg_error'] = 'JSON inválido: ' . json_last_error_msg();
-        } elseif (empty($week_date)) {
-            $_SESSION['msg_error'] = 'Informe a data da semana (segunda-feira).';
-        } else {
-            $food_data = array_filter($food_data, fn($item) => ($item['semana'] ?? '') !== $week_date);
-            $food_data[] = ['semana' => $week_date, 'dias' => $parsed];
+        } elseif ($_POST['action'] === 'delete_food') {
+            $week_to_delete = $_POST['week'] ?? '';
+            $food_data = array_filter($food_data, fn($item) => ($item['semana'] ?? '') !== $week_to_delete);
             file_put_contents($food_file, json_encode(array_values($food_data), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
-            $_SESSION['msg_success'] = 'Registro de alimentação semanal salvo!';
+            $_SESSION['msg_success'] = 'Registro de alimentação removido!';
         }
-        header('Location: alimentacao.php');
-        exit;
-    } elseif ($_POST['action'] === 'delete_food') {
-        $week_to_delete = $_POST['week'] ?? '';
-        $food_data = array_filter($food_data, fn($item) => ($item['semana'] ?? '') !== $week_to_delete);
-        file_put_contents($food_file, json_encode(array_values($food_data), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
-        $_SESSION['msg_success'] = 'Registro de alimentação removido!';
-        header('Location: alimentacao.php');
-        exit;
+    } catch (Throwable $e) {
+        $_SESSION['msg_error'] = 'Erro ao processar requisição: ' . $e->getMessage();
+        error_log('[alimentacao] ' . $e->getMessage());
     }
+
+    header('Location: alimentacao.php');
+    exit;
 }
 
 function format_date($date_str) {
