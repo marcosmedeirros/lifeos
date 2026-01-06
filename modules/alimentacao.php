@@ -27,7 +27,7 @@ usort($food_data, fn($a, $b) => strtotime($b['data'] ?? '0') - strtotime($a['dat
 
 // Processar POST
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
-    if ($_POST['action'] === 'delete') {
+        if ($_POST['action'] === 'delete') {
         $date_to_delete = $_POST['date'] ?? '';
         $nutrition_data = array_filter($nutrition_data, fn($item) => $item['data'] !== $date_to_delete);
         file_put_contents($nutrition_file, json_encode(array_values($nutrition_data), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
@@ -45,7 +45,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                 if (!isset($new_entry['data'])) {
                     $_SESSION['msg_error'] = "O JSON deve conter o campo 'data'";
                 } else {
-                    $nutrition_data = array_filter($nutrition_data, fn($item) => $item['data'] !== $new_entry['data']);
+                    // Adicionar novo registro (NÃO substituir existentes do mesmo dia)
                     $nutrition_data[] = $new_entry;
                     file_put_contents($nutrition_file, json_encode(array_values($nutrition_data), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
                     usort($nutrition_data, fn($a, $b) => strtotime($b['data'] ?? '0') - strtotime($a['data'] ?? '0'));
@@ -844,6 +844,32 @@ include __DIR__ . '/../includes/header.php';
     </div>
 
     <script>
+        // Inicializar abas ANTES do DOMContentLoaded
+        document.addEventListener('DOMContentLoaded', function() {
+            // Tabs - Colocar aqui garante que funcione
+            const tabButtons = document.querySelectorAll('.tab-btn');
+            const tabs = document.querySelectorAll('.tab-content');
+            
+            tabButtons.forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    // Remove active de todos
+                    tabButtons.forEach(b => b.classList.remove('active'));
+                    tabs.forEach(t => t.classList.remove('active'));
+                    
+                    // Add active ao clicado
+                    btn.classList.add('active');
+                    const tabId = btn.getAttribute('data-tab');
+                    const tabContent = document.getElementById(tabId);
+                    if (tabContent) {
+                        tabContent.classList.add('active');
+                    }
+                });
+            });
+        });
+        
         // Modal event listeners
         document.addEventListener('DOMContentLoaded', function() {
             const modal = document.getElementById('addJsonModal');
@@ -873,19 +899,6 @@ include __DIR__ . '/../includes/header.php';
                     }
                 });
             }
-
-            // Tabs
-            const tabButtons = document.querySelectorAll('.tab-btn');
-            const tabs = document.querySelectorAll('.tab-content');
-            tabButtons.forEach(btn => {
-                btn.addEventListener('click', () => {
-                    tabButtons.forEach(b=>b.classList.remove('active'));
-                    tabs.forEach(t=>t.classList.remove('active'));
-                    btn.classList.add('active');
-                    const target = document.getElementById(btn.dataset.tab);
-                    if (target) target.classList.add('active');
-                });
-            });
         });
 
         // Food modal functions

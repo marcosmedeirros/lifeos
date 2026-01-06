@@ -396,5 +396,315 @@ async function loadStrava() {
 loadStrava();
 </script>
 
-<?php require_once __DIR__ . '/../includes/footer.php'; ?>
+<style>
+    #training-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 20px;
+        margin-top: 20px;
+    }
+    
+    .month-details {
+        max-height: 1000px;
+        overflow-y: auto;
+        transition: max-height 0.3s ease;
+    }
+    
+    .month-details.hidden {
+        max-height: 0;
+        overflow: hidden;
+    }
+</style>
+
+<!-- SEÇÃO DE TREINO SEMANAL -->
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 mt-8 border-t border-gray-700/30">
+    <div class="flex justify-between items-center mb-6">
+        <h2 class="text-2xl font-bold text-white flex items-center gap-3">
+            <i class="fas fa-dumbbell text-[#fc4c02]"></i> Treino Semanal
+        </h2>
+        <button onclick="openTrainingModal()" class="bg-[#fc4c02] hover:bg-orange-600 text-white px-4 py-2 rounded-xl font-bold shadow-lg transition flex items-center gap-2">
+            <i class="fas fa-plus"></i> Adicionar Semana
+        </button>
+    </div>
+
+    <div id="training-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- Cards serão inseridos aqui via JavaScript -->
+    </div>
+</div>
+
+<!-- Modal de Treino -->
+<div id="trainingModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden flex items-center justify-center z-50" onclick="if(event.target === this) closeTrainingModal()">
+    <div class="bg-[#12182b] rounded-2xl border border-gray-700/50 p-8 max-w-3xl w-full mx-4 shadow-2xl">
+        <div class="flex justify-between items-center mb-6">
+            <h3 class="text-2xl font-bold text-white">Cadastrar Treino da Semana</h3>
+            <button onclick="closeTrainingModal()" class="text-gray-400 hover:text-white text-2xl">&times;</button>
+        </div>
+
+        <form id="trainingForm" onsubmit="submitTraining(event)">
+            <div class="mb-6">
+                <label class="block text-sm font-bold text-white mb-2">Segunda-feira da semana:</label>
+                <input type="date" id="training_week_date" required 
+                    class="w-full bg-[#0c0f1a] border border-gray-700 rounded-xl px-4 py-3 text-white focus:border-[#fc4c02] focus:outline-none">
+            </div>
+
+            <div class="mb-6">
+                <label class="block text-sm font-bold text-white mb-2">Treinos da Semana (JSON Array de 7 dias):</label>
+                <textarea id="training_dias" required rows="16" placeholder='[
+  {
+    "dia": "Segunda-feira",
+    "foco": "Push (Peito/Ombro/Tríceps)",
+    "exercicios": [
+      {"nome": "Supino Reto", "series": 4, "reps": 10, "peso_sugerido": "18kg"},
+      {"nome": "Desenvolvimento", "series": 3, "reps": 12, "peso_sugerido": "10kg"}
+    ]
+  },
+  ...
+]'
+                    class="w-full bg-[#0c0f1a] border border-gray-700 rounded-xl px-4 py-3 text-white font-mono text-sm focus:border-[#fc4c02] focus:outline-none"></textarea>
+                <p class="text-xs text-gray-400 mt-2">Array com 7 dias: cada dia deve ter "dia", "foco" e "exercicios" (array com nome, series, reps, peso_sugerido)</p>
+            </div>
+
+            <div class="flex gap-3">
+                <button type="submit" class="flex-1 bg-[#fc4c02] hover:bg-orange-600 text-white font-bold py-3 rounded-xl transition">
+                    <i class="fas fa-save mr-2"></i> Salvar
+                </button>
+                <button type="button" onclick="closeTrainingModal()" class="flex-1 bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 rounded-xl transition">
+                    Cancelar
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+// Funções do Modal de Treino
+function openTrainingModal() {
+    document.getElementById('trainingModal').classList.remove('hidden');
+    document.getElementById('trainingForm').reset();
+}
+
+function closeTrainingModal() {
+    document.getElementById('trainingModal').classList.add('hidden');
+}
+
+function editTrainingWeek(semana, dias) {
+    openTrainingModal();
+    document.getElementById('training_week_date').value = semana;
+    document.getElementById('training_dias').value = JSON.stringify(dias, null, 2);
+    
+    // Adicionar handler para deletar a semana antiga antes de adicionar nova
+    const form = document.getElementById('trainingForm');
+    form.dataset.editing = semana;
+}
+
+async function submitTraining(e) {
+    e.preventDefault();
+    
+    const weekDate = document.getElementById('training_week_date').value;
+    const diasText = document.getElementById('training_dias').value;
+    
+    // Validar JSON
+    try {
+        const dias = JSON.parse(diasText);
+        if (!Array.isArray(dias) || dias.length !== 7) {
+            alert('O JSON deve ser um array com exatamente 7 dias!');
+            return;
+        }
+        
+        // Validar estrutura de cada dia
+        for (let i = 0; i < dias.length; i++) {
+            if (!dias[i].dia || !dias[i].foco || !dias[i].exercicios) {
+                alert(`Dia ${i + 1} está incompleto! Cada dia deve ter "dia", "foco" e "exercicios".`);
+                return;
+            }
+            if (!Array.isArray(dias[i].exercicios)) {
+                alert(`Dia ${i + 1}: "exercicios" deve ser um array!`);
+                return;
+            }
+        }
+    } catch (err) {
+        alert('JSON inválido: ' + err.message);
+        return;
+    }
+    
+    // Se estiver editando, deletar a semana antiga primeiro
+    const form = e.target;
+    if (form.dataset.editing) {
+        await fetch('?api=delete_training', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+            body: `week_date=${encodeURIComponent(form.dataset.editing)}`
+        });
+        delete form.dataset.editing;
+    }
+    
+    // Adicionar nova semana
+    const formData = new FormData();
+    formData.append('week_date', weekDate);
+    formData.append('dias_json', diasText);
+    
+    const response = await fetch('?api=add_training_json', {
+        method: 'POST',
+        body: formData
+    });
+    
+    const result = await response.json();
+    
+    if (result.success) {
+        closeTrainingModal();
+        loadTrainingData();
+    } else {
+        alert('Erro ao salvar: ' + (result.error || 'Desconhecido'));
+    }
+}
+
+async function deleteTraining(semana) {
+    if (!confirm(`Deletar treinos da semana de ${formatDate(semana)}?`)) return;
+    
+    const formData = new FormData();
+    formData.append('week_date', semana);
+    
+    await fetch('?api=delete_training', {
+        method: 'POST',
+        body: formData
+    });
+    
+    loadTrainingData();
+}
+
+function formatDate(dateStr) {
+    const [year, month, day] = dateStr.split('-');
+    return `${day}/${month}/${year}`;
+}
+
+async function loadTrainingData() {
+    try {
+        const response = await fetch('../data/strava_training.json');
+        const data = await response.json();
+        
+        const grid = document.getElementById('training-grid');
+        
+        // Filtrar apenas treinos de 2026
+        const data2026 = data.filter(item => item.semana.startsWith('2026'));
+        
+        if (!data2026 || data2026.length === 0) {
+            grid.innerHTML = `
+                <div class="col-span-full text-center py-12 text-gray-400">
+                    <i class="fas fa-dumbbell text-5xl mb-4 opacity-50"></i>
+                    <p>Nenhum treino cadastrado ainda.</p>
+                </div>
+            `;
+            return;
+        }
+        
+        // Agrupar por mês
+        const monthlyGroups = {};
+        data2026.forEach(item => {
+            const monthKey = item.semana.slice(0, 7); // YYYY-MM
+            if (!monthlyGroups[monthKey]) {
+                monthlyGroups[monthKey] = [];
+            }
+            monthlyGroups[monthKey].push(item);
+        });
+        
+        // Ordenar meses
+        const sortedMonths = Object.keys(monthlyGroups).sort().reverse();
+        
+        // Contar total de treinos
+        const totalWorkouts = data2026.reduce((sum, item) => sum + item.dias.length, 0);
+        
+        // Montar HTML
+        grid.innerHTML = sortedMonths.map(monthKey => {
+            const weeks = monthlyGroups[monthKey];
+            const [year, month] = monthKey.split('-');
+            const monthNames = ['','Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+            const monthLabel = monthNames[parseInt(month)] + ' de ' + year;
+            
+            // Contar exercícios deste mês
+            const monthWorkoutCount = weeks.reduce((sum, week) => sum + week.dias.length, 0);
+            
+            return `
+                <div class="glass-card p-6 rounded-2xl border border-gray-700/40 hover:border-[#fc4c02]/50 transition cursor-pointer" onclick="toggleMonthDetails('${monthKey}')">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <h3 class="text-xl font-bold text-white mb-1">${monthLabel}</h3>
+                            <p class="text-sm text-gray-400">${monthWorkoutCount} treinos • ${weeks.length} semana(s)</p>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-3xl font-bold text-[#fc4c02]">${monthWorkoutCount}</div>
+                            <div class="text-xs text-gray-400">treinos</div>
+                        </div>
+                    </div>
+                    
+                    <div id="month-${monthKey}" class="month-details hidden">
+                        ${weeks.map((week, idx) => {
+                            const exerciciosHtml = week.dias.map(d => {
+                                const exerciciosCount = (d.exercicios || []).length;
+                                return `
+                                    <div class="flex items-start gap-3 text-sm py-2 border-b border-gray-800/30 last:border-0">
+                                        <i class="fas fa-dumbbell text-[#fc4c02] text-xs mt-1"></i>
+                                        <div class="flex-1">
+                                            <div class="font-semibold text-gray-200">${d.dia}</div>
+                                            <div class="text-xs text-gray-400 mt-1">${d.foco}</div>
+                                            <div class="text-xs text-[#fc4c02] mt-1">${exerciciosCount} exercícios</div>
+                                        </div>
+                                    </div>
+                                `;
+                            }).join('');
+                            
+                            return `
+                                <div class="border border-gray-700/30 rounded-lg p-4 mb-4 bg-black/20">
+                                    <div class="flex items-center justify-between mb-3 pb-3 border-b border-gray-700/30">
+                                        <div class="font-bold text-white">Semana de ${formatDate(week.semana)}</div>
+                                        <div class="flex gap-2">
+                                            <button onclick='event.stopPropagation(); editTrainingWeek("${week.semana}", ${JSON.stringify(week.dias).replace(/'/g, "&apos;")})' 
+                                                class="text-blue-400 hover:text-blue-300 text-sm" title="Editar">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button onclick='event.stopPropagation(); deleteTraining("${week.semana}")' 
+                                                class="text-red-400 hover:text-red-300 text-sm" title="Deletar">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div>${exerciciosHtml}</div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+            `;
+        }).join('');
+        
+        // Adicionar informação de total na parte superior
+        const header = document.querySelector('h2') || document.getElementById('training-grid')?.previousElementSibling;
+        if (header && !document.getElementById('total-workouts-badge')) {
+            const badge = document.createElement('span');
+            badge.id = 'total-workouts-badge';
+            badge.className = 'bg-[#fc4c02] text-white px-3 py-1 rounded-full text-sm font-bold ml-3';
+            badge.innerText = `Total: ${totalWorkouts} treinos`;
+            header.appendChild(badge);
+        }
+        
+    } catch (err) {
+        console.log('Nenhum dado de treino encontrado ou erro ao carregar:', err);
+        document.getElementById('training-grid').innerHTML = `
+            <div class="col-span-full text-center py-12 text-gray-400">
+                <i class="fas fa-dumbbell text-5xl mb-4 opacity-50"></i>
+                <p>Nenhum treino cadastrado ainda.</p>
+            </div>
+        `;
+    }
+}
+
+function toggleMonthDetails(monthKey) {
+    const details = document.getElementById(`month-${monthKey}`);
+    if (details) {
+        details.classList.toggle('hidden');
+    }
+}
+
+// Carregar dados ao iniciar
+loadTrainingData();
+</script>
 

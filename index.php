@@ -243,13 +243,6 @@ if (isset($_GET['api'])) {
             exit;
         }
         
-        // Toggle de atividade (usado no dashboard)
-        if ($action === 'toggle_activity') {
-            $pdo->prepare("UPDATE activities SET status=1-status WHERE id=?")->execute([$_POST['id'] ?? $_GET['id']]);
-            echo json_encode(['success'=>true]);
-            exit;
-        }
-        
         // Salvar atividade (via dashboard)
         if ($action === 'save_activity') {
             $stmt = $pdo->prepare("INSERT INTO activities (user_id, title, category, day_date, period, status) VALUES (?, ?, ?, ?, ?, 0)");
@@ -691,11 +684,8 @@ async function loadDashboard() {
 }
 
 async function toggleActivity(id) {
-    console.log('toggleActivity chamado com ID:', id);
-    
     try {
         const result = await api('toggle_activity', {id});
-        console.log('Resultado da API:', result);
         
         if (result.success) {
             // Atualiza apenas as atividades pendentes no contador
