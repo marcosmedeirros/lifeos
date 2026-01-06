@@ -281,21 +281,6 @@ require_once __DIR__ . '/../includes/header.php';
                 </div>
             </div>
             
-            <div id="strava-stats" class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 hidden">
-                <div class="glass-card p-6 rounded-2xl border-l-4 border-[#fc4c02]">
-                    <p class="text-xs uppercase text-slate-400 font-bold mb-2">Distância Total (Recente)</p>
-                    <p class="text-4xl font-bold text-white"><span id="strava-total-km">0</span> <span class="text-lg text-slate-500">km</span></p>
-                </div>
-                <div class="glass-card p-6 rounded-2xl border-l-4 border-gray-400">
-                    <p class="text-xs uppercase text-slate-400 font-bold mb-2">Tempo em Movimento</p>
-                    <p class="text-4xl font-bold text-white" id="strava-total-time">0h 0m</p>
-                </div>
-                <div class="glass-card p-6 rounded-2xl border-l-4 border-gray-400">
-                    <p class="text-xs uppercase text-gray-400 font-bold mb-2">Total de Atividades</p>
-                    <p class="text-4xl font-bold text-white" id="strava-total-activities">0</p>
-                </div>
-            </div>
-
             <!-- Estatísticas Mensais -->
             <div id="strava-monthly" class="mb-8 hidden">
                 <h3 class="text-xl font-bold text-white mb-4 flex items-center gap-2">
@@ -367,16 +352,10 @@ async function loadStrava() {
         btnContainer.innerHTML = `<a href="${res.auth_url}" class="bg-[#fc4c02] hover:bg-orange-600 text-white px-6 py-2.5 rounded-xl font-bold shadow-lg transition flex items-center gap-2 transform hover:-translate-y-0.5"><i class="fab fa-strava"></i> Conectar com Strava</a>`;
         btnContainer.classList.remove('hidden');
         
-        document.getElementById('strava-stats').classList.add('hidden');
         document.getElementById('training-stats').classList.add('hidden');
         document.getElementById('strava-list').innerHTML = '<tr><td colspan="5" class="p-10 text-center text-gray-500 flex flex-col items-center gap-2"><i class="fab fa-strava text-4xl text-gray-700"></i><span>Conecte sua conta para ver suas atividades recentes.</span></td></tr>';
     } else {
         document.getElementById('strava-connect-btn').classList.add('hidden');
-        document.getElementById('strava-stats').classList.remove('hidden');
-        
-        document.getElementById('strava-total-km').innerText = res.summary.total_km;
-        document.getElementById('strava-total-time').innerText = res.summary.total_time;
-        document.getElementById('strava-total-activities').innerText = res.summary.total_activities;
 
         // Totais 2026 por tipo
         const trainingSection = document.getElementById('training-stats');

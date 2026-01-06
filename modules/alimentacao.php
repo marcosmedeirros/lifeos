@@ -521,8 +521,8 @@ include __DIR__ . '/../includes/header.php';
             <?php endif; ?>
 
             <div class="tab-buttons">
-                <button class="tab-btn active" data-tab="tab-daily">Registro diário</button>
-                <button class="tab-btn" data-tab="tab-food">Alimentação</button>
+                <button type="button" class="tab-btn active" data-tab="tab-daily">Registro diário</button>
+                <button type="button" class="tab-btn" data-tab="tab-food">Alimentação</button>
             </div>
 
             <div id="tab-daily" class="tab-content active">
